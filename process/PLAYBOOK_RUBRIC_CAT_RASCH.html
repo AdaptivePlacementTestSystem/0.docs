@@ -1,0 +1,682 @@
+<title>Playbook Rubric CAT-Rasch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F2F5F2; --surface:#FFFFFF; --surface-2:#E7EEE9;
+    --ink:#16201C; --ink-soft:#4A5850; --ink-faint:#7C8B82;
+    --line:#D7E0DA; --line-strong:#B9C7BF;
+    --accent:#0B5D4A; --accent-strong:#073E32; --accent-soft:#DCEEE6;
+    --gold:#8A6414; --gold-soft:#F5EAD2;
+    --danger:#A3241C; --danger-soft:#F8E0DD; --danger-line:#E7B6B0;
+    --warn:#8A5A00; --warn-soft:#F6E9CE; --warn-line:#E8CE94;
+    --shadow: 0 1px 2px rgba(15,30,22,.06), 0 8px 24px -12px rgba(15,30,22,.18);
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1512; --surface:#141D19; --surface-2:#1B2620;
+      --ink:#E7F0EA; --ink-soft:#AFC0B6; --ink-faint:#7E9186;
+      --line:#28362F; --line-strong:#35473E;
+      --accent:#57CDA1; --accent-strong:#8FE4C1; --accent-soft:#17322A;
+      --gold:#E0B94D; --gold-soft:#2E2712;
+      --danger:#FF8A76; --danger-soft:#3A1613; --danger-line:#5B2A22;
+      --warn:#F0C05E; --warn-soft:#362508; --warn-line:#544019;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1512; --surface:#141D19; --surface-2:#1B2620;
+    --ink:#E7F0EA; --ink-soft:#AFC0B6; --ink-faint:#7E9186;
+    --line:#28362F; --line-strong:#35473E;
+    --accent:#57CDA1; --accent-strong:#8FE4C1; --accent-soft:#17322A;
+    --gold:#E0B94D; --gold-soft:#2E2712;
+    --danger:#FF8A76; --danger-soft:#3A1613; --danger-line:#5B2A22;
+    --warn:#F0C05E; --warn-soft:#362508; --warn-line:#544019;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans", system-ui, sans-serif;
+    font-size:16px; line-height:1.55;
+    padding-inline: clamp(16px, 4vw, 32px);
+  }
+  h1,h2,h3{ font-family:"IBM Plex Serif", Georgia, serif; text-wrap:balance; color:var(--ink); margin:0; }
+  code, .mono, .stat-num, table{ font-variant-numeric: tabular-nums; }
+  code, .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; }
+  code{
+    background:var(--surface-2); border:1px solid var(--line);
+    padding:.05em .4em; border-radius:4px; font-size:.86em; color:var(--accent-strong);
+  }
+  a{ color:var(--accent-strong); }
+  p{ max-width:70ch; }
+
+  .wrap{ max-width:1240px; margin-inline:auto; padding-block:2.5rem 5rem; }
+
+  /* ---------- Header ---------- */
+  header.hero{ margin-bottom:2.75rem; }
+  .kicker{
+    display:inline-flex; align-items:center; gap:.5em;
+    font-family:"IBM Plex Mono"; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent-strong); background:var(--accent-soft); border:1px solid var(--line);
+    padding:.3em .7em; border-radius:999px; margin-bottom:1rem;
+  }
+  .kicker .dot{ width:.5em; height:.5em; border-radius:50%; background:var(--accent); }
+  h1.title{ font-size:clamp(1.9rem, 3.4vw, 2.7rem); font-weight:700; letter-spacing:-.01em; }
+  .subtitle{ color:var(--ink-soft); font-size:1.05rem; max-width:62ch; margin-top:.6rem; }
+  .source-note{ font-size:.86rem; color:var(--ink-faint); margin-top:.9rem; max-width:70ch; }
+  .source-note code{ font-size:.82em; }
+
+  .stat-row{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
+    gap:1px; background:var(--line); border:1px solid var(--line);
+    border-radius:12px; overflow:hidden; margin-top:1.75rem;
+  }
+  .stat{ background:var(--surface); padding:.9rem 1.1rem; }
+  .stat-num{ font-family:"IBM Plex Mono"; font-size:1.55rem; font-weight:600; color:var(--accent-strong); display:block; }
+  .stat-label{ font-size:.78rem; color:var(--ink-soft); margin-top:.15rem; }
+
+  /* ---------- Layout: nav + content ---------- */
+  .page{ display:grid; grid-template-columns:236px minmax(0,1fr); gap:2.5rem; align-items:start; }
+  @media (max-width:900px){ .page{ grid-template-columns:1fr; } }
+
+  nav.toc{
+    position:sticky; top:1.25rem; display:flex; flex-direction:column; gap:.15rem;
+    border-left:2px solid var(--line); padding-left:1rem;
+  }
+  nav.toc a{
+    text-decoration:none; color:var(--ink-soft); font-size:.86rem; padding:.35rem 0;
+    border-left:2px solid transparent; margin-left:-1.15rem; padding-left:1rem;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  nav.toc a:hover{ color:var(--ink); }
+  nav.toc a.active{ color:var(--accent-strong); border-left-color:var(--accent); font-weight:600; }
+  @media (max-width:900px){
+    nav.toc{
+      position:static; flex-direction:row; overflow-x:auto; gap:.4rem; border-left:none;
+      padding:.4rem 0 .8rem; border-bottom:1px solid var(--line);
+    }
+    nav.toc a{
+      white-space:nowrap; border-left:none; margin-left:0; padding:.4rem .8rem;
+      background:var(--surface); border:1px solid var(--line); border-radius:999px;
+    }
+    nav.toc a.active{ background:var(--accent-soft); border-color:var(--accent); }
+  }
+
+  main{ display:flex; flex-direction:column; gap:3.2rem; min-width:0; }
+  section{ scroll-margin-top:1.25rem; }
+  .eyebrow{
+    font-family:"IBM Plex Mono"; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-faint); margin-bottom:.5rem; display:flex; align-items:center; gap:.6em;
+  }
+  .eyebrow .num{ color:var(--accent-strong); font-weight:600; }
+  section > h2{ font-size:clamp(1.35rem,2.2vw,1.7rem); margin-bottom:.6rem; }
+  section > .lede{ color:var(--ink-soft); margin-bottom:1.4rem; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:1.25rem 1.4rem; box-shadow:var(--shadow);
+  }
+  .callout{
+    border:1px solid var(--line); border-left:4px solid var(--accent);
+    background:var(--accent-soft); border-radius:10px; padding:.9rem 1.1rem; font-size:.94rem;
+  }
+  .callout.danger{ border-left-color:var(--danger); background:var(--danger-soft); }
+  .callout.warn{ border-left-color:var(--warn); background:var(--warn-soft); }
+  .callout p{ max-width:none; }
+  .callout strong{ color:var(--ink); }
+
+  /* ---------- Principles ---------- */
+  .principles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1rem; }
+  .principle{ display:flex; flex-direction:column; gap:.4rem; }
+  .principle .n{ font-family:"IBM Plex Mono"; color:var(--accent); font-weight:600; font-size:1.4rem; }
+  .principle h3{ font-size:1.02rem; font-family:"IBM Plex Sans"; font-weight:700; }
+  .principle p{ font-size:.9rem; color:var(--ink-soft); margin:0; }
+
+  /* ---------- Score table ---------- */
+  .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:12px; }
+  table{ width:100%; border-collapse:collapse; font-size:.92rem; background:var(--surface); min-width:560px; }
+  th, td{ text-align:left; padding:.6rem .85rem; border-bottom:1px solid var(--line); vertical-align:top; }
+  thead th{
+    background:var(--surface-2); font-family:"IBM Plex Mono"; font-weight:600; font-size:.76rem;
+    letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); white-space:nowrap;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--surface-2); }
+  td.num, th.num{ text-align:right; font-family:"IBM Plex Mono"; }
+  .pill{
+    display:inline-block; font-family:"IBM Plex Mono"; font-size:.72rem; padding:.15em .55em;
+    border-radius:999px; border:1px solid var(--line-strong); color:var(--ink-soft); white-space:nowrap;
+  }
+
+  /* ---------- Gates ---------- */
+  .gate-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:.9rem; }
+  .gate{
+    border:1px solid var(--line); border-radius:12px; background:var(--surface); overflow:hidden; box-shadow:var(--shadow);
+  }
+  .gate .stripe{ height:5px; }
+  .gate.critical .stripe{ background:var(--danger); }
+  .gate.cap .stripe{ background:var(--warn); }
+  .gate-body{ padding:.9rem 1rem 1.05rem; display:flex; flex-direction:column; gap:.5rem; }
+  .gate-top{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+  .gate-code{ font-family:"IBM Plex Mono"; font-weight:700; font-size:1.1rem; }
+  .gate.critical .gate-code{ color:var(--danger); }
+  .gate.cap .gate-code{ color:var(--warn); }
+  .badge{ font-family:"IBM Plex Mono"; font-size:.66rem; letter-spacing:.03em; text-transform:uppercase; padding:.2em .55em; border-radius:6px; white-space:nowrap; }
+  .gate.critical .badge{ background:var(--danger-soft); color:var(--danger); border:1px solid var(--danger-line); }
+  .gate.cap .badge{ background:var(--warn-soft); color:var(--warn); border:1px solid var(--warn-line); }
+  .gate-trigger{ font-size:.87rem; color:var(--ink); }
+  .gate-consequence{ font-size:.83rem; color:var(--ink-soft); border-top:1px dashed var(--line); padding-top:.5rem; }
+
+  /* ---------- Timeline ---------- */
+  .timeline{ position:relative; padding-left:1.9rem; display:flex; flex-direction:column; gap:1.5rem; }
+  .timeline::before{ content:""; position:absolute; left:.42rem; top:.4rem; bottom:.4rem; width:2px; background:var(--line-strong); }
+  .tl-item{ position:relative; }
+  .tl-item::before{
+    content:""; position:absolute; left:-1.9rem; top:.25rem; width:.9rem; height:.9rem; border-radius:50%;
+    background:var(--surface); border:2px solid var(--accent);
+  }
+  .tl-item.critical::before{ border-color:var(--danger); background:var(--danger-soft); }
+  .tl-when{ font-family:"IBM Plex Mono"; font-size:.78rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em; }
+  .tl-title{ font-weight:700; margin-top:.15rem; }
+  .tl-item.critical .tl-title{ color:var(--danger); }
+  .tl-desc{ font-size:.9rem; color:var(--ink-soft); margin-top:.2rem; max-width:64ch; }
+
+  /* ---------- Weekly workflow ---------- */
+  .steps{ display:flex; flex-direction:column; gap:.9rem; counter-reset:step; }
+  .step{ display:grid; grid-template-columns:2.2rem 1fr; gap:.9rem; align-items:start; }
+  .step .idx{
+    counter-increment:step; font-family:"IBM Plex Mono"; font-weight:700; color:var(--accent-strong);
+    background:var(--accent-soft); border:1px solid var(--line); border-radius:8px;
+    width:2.2rem; height:2.2rem; display:flex; align-items:center; justify-content:center; font-size:.95rem;
+  }
+  .step .idx::before{ content: counter(step); }
+  .step h3{ font-family:"IBM Plex Sans"; font-size:.98rem; font-weight:700; }
+  .step p{ font-size:.9rem; color:var(--ink-soft); margin:.2rem 0 0; }
+
+  /* ---------- Violation table reuse ---------- */
+  .v-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:.9rem; }
+
+  /* ---------- File tree ---------- */
+  .tree{ font-family:"IBM Plex Mono"; font-size:.86rem; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:1rem 1.2rem; overflow-x:auto; }
+  .tree ul{ list-style:none; margin:0; padding-left:1.1rem; border-left:1px dashed var(--line-strong); }
+  .tree > ul{ padding-left:0; border-left:none; }
+  .tree li{ margin:.15rem 0; white-space:nowrap; }
+  .tree .path{ color:var(--accent-strong); }
+  .tree .purpose{ font-family:"IBM Plex Sans"; color:var(--ink-soft); white-space:normal; }
+  .tree li > .row{ display:flex; gap:.8rem; align-items:baseline; }
+
+  /* ---------- Checklist ---------- */
+  .check-list{ display:flex; flex-direction:column; gap:.55rem; }
+  .check-item{ display:flex; gap:.65rem; align-items:flex-start; font-size:.94rem; }
+  .check-item input{ margin-top:.28rem; width:1.05rem; height:1.05rem; accent-color:var(--accent); flex:none; }
+  .check-item label{ cursor:pointer; }
+  .check-item.checked label{ color:var(--ink-faint); text-decoration:line-through; }
+
+  details{ border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+  details + details{ margin-top:.6rem; }
+  summary{ cursor:pointer; padding:.7rem 1rem; font-weight:600; font-size:.92rem; }
+  summary::marker{ color:var(--accent); }
+  .details-body{ padding:0 1rem 1rem; font-size:.88rem; color:var(--ink-soft); }
+  .details-body ul{ margin:.3rem 0; padding-left:1.1rem; }
+
+  footer{ margin-top:3.5rem; padding-top:1.5rem; border-top:1px solid var(--line); font-size:.82rem; color:var(--ink-faint); }
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker"><span class="dot"></span>Nội bộ nhóm · không phải hồ sơ nộp</span>
+    <h1 class="title">Playbook Rubric CAT-Rasch</h1>
+    <p class="subtitle">Bảng hướng dẫn thực hiện đồ án <strong>Adaptive Placement Test (CAT–Rasch)</strong> — nhóm 2 người, 12 tuần Tiểu luận — bám sát đúng rubric chấm điểm của Khoa. Đọc một lần, dùng lại mỗi tuần.</p>
+    <p class="source-note">Tổng hợp từ <code>Rubric_Do_An_Mon_Hoc_CNPM_sinhvien.docx</code>, <code>SRS_TLCN (3).md</code>, <code>Mo_ta_So_do_Lop_ClassDiagram.md</code> và hệ thống <code>tracking/</code> đã khởi tạo trong <code>0.docs/</code>. Trang này là bản đồ để dùng nhanh — khi cần chi tiết đầy đủ, quay lại <code>docs/HUONG_DAN_RUBRIC_VA_TRACKING.md</code> và các file gốc trong <code>tracking/</code>.</p>
+
+    <div class="stat-row">
+      <div class="stat"><span class="stat-num">100</span><span class="stat-label">điểm tổng, 6 nhóm tiêu chí</span></div>
+      <div class="stat"><span class="stat-num">12</span><span class="stat-label">tuần thực hiện</span></div>
+      <div class="stat"><span class="stat-num">10</span><span class="stat-label">gate chặn điểm (G1–G10)</span></div>
+      <div class="stat"><span class="stat-num">Tuần 6</span><span class="stat-label">hạn chốt cam kết (gate G1)</span></div>
+      <div class="stat"><span class="stat-num">5</span><span class="stat-label">vị trí bốc thăm giải trình khi bảo vệ</span></div>
+    </div>
+  </header>
+
+  <div class="page">
+    <nav class="toc" id="toc">
+      <a href="#nguyen-tac">00 · Cách chấm &amp; nguyên tắc</a>
+      <a href="#bang-diem">01 · Bảng điểm tổng hợp</a>
+      <a href="#gate">02 · Gate chặn điểm</a>
+      <a href="#timeline">03 · Timeline 12 tuần</a>
+      <a href="#ma-tran">04 · Việc phải làm theo tiêu chí</a>
+      <a href="#quy-trinh">05 · Quy trình làm việc</a>
+      <a href="#ai-dao-van">06 · AI &amp; chống đạo văn</a>
+      <a href="#ho-so">07 · Bản đồ hồ sơ</a>
+      <a href="#checklist">08 · Checklist báo cáo tuần</a>
+    </nav>
+
+    <main>
+
+      <section id="nguyen-tac">
+        <p class="eyebrow"><span class="num">00</span> Trước khi làm bất cứ gì khác</p>
+        <h2>Rubric chấm theo minh chứng, không chấm theo cảm nhận</h2>
+        <p class="lede">Ba nguyên tắc dưới đây quyết định điểm số nhiều hơn chất lượng code thực tế. Đọc kỹ trước khi bắt đầu Tuần 1.</p>
+
+        <div class="principles">
+          <div class="principle">
+            <span class="n">01</span>
+            <h3>Làm chủ sản phẩm</h3>
+            <p>Dùng AI thoải mái, không bị trừ điểm vì điều đó. Nhưng mọi dòng đưa vào đồ án phải <strong>tự giải thích được</strong> — không giải thích được sẽ bị tính là đạo văn (Mục 6), bất kể do AI hay ai viết ra.</p>
+          </div>
+          <div class="principle">
+            <span class="n">02</span>
+            <h3>Hợp lý, không phải đúng/sai</h3>
+            <p>Không có lựa chọn kỹ thuật "chuẩn tuyệt đối". Hội đồng chấm theo mức độ <em>hợp lý so với mục tiêu đã đăng ký</em>, không áp đặt gu công nghệ cá nhân.</p>
+          </div>
+          <div class="principle">
+            <span class="n">03</span>
+            <h3>Chấm theo minh chứng</h3>
+            <p>Thiếu hồ sơ minh chứng cho một tiêu chí → tiêu chí đó <strong>không thể vượt quá Mức 3</strong>, dù sản phẩm thực tế tốt đến đâu. "Đã làm" không tính — chỉ "chứng minh được là đã làm" mới tính.</p>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top:1.4rem;">
+          <p><strong>Thang quy đổi dùng chung cho mọi tiêu chí:</strong> Mức 5 = 90–100% điểm tối đa · Mức 4 = 75–89% · Mức 3 = 60–74% · Mức 2 = 40–59% · Mức 1 = 0–39%. Khi hồ sơ nằm giữa hai mức, hội đồng chọn <strong>mức thấp hơn</strong> nếu thiếu minh chứng — nên luôn dư minh chứng, không nên vừa đủ.</p>
+        </div>
+      </section>
+
+      <section id="bang-diem">
+        <p class="eyebrow"><span class="num">01</span> Nhìn toàn cảnh</p>
+        <h2>Bảng điểm tổng hợp — 100 điểm</h2>
+        <p class="lede">TC2 chiếm nửa tổng điểm (50/100) và tách thành 7 tiêu chí thành phần — đây là nơi tập trung nỗ lực kỹ thuật nhiều nhất trong suốt 12 tuần.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Tiêu chí</th><th>Nội dung</th><th class="num">Điểm</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">TC1</td><td>Tính thực tiễn của đề tài &amp; hiểu biết vấn đề nghiên cứu</td><td class="num">10</td></tr>
+              <tr><td class="mono">TC2.1</td><td>Phân tích nghiệp vụ, đặc tả yêu cầu &amp; thiết kế – giải pháp</td><td class="num">10</td></tr>
+              <tr><td class="mono">TC2.2</td><td>Mức độ hoàn thiện sản phẩm &amp; khối lượng công việc</td><td class="num">10</td></tr>
+              <tr><td class="mono">TC2.3</td><td>Làm chủ &amp; kiểm soát việc sử dụng LLM / Agentic AI</td><td class="num">5</td></tr>
+              <tr><td class="mono">TC2.4</td><td>Chất lượng mã nguồn &amp; quản lý chất lượng phần mềm</td><td class="num">10</td></tr>
+              <tr><td class="mono">TC2.5</td><td>Kiểm thử phần mềm</td><td class="num">5</td></tr>
+              <tr><td class="mono">TC2.6</td><td>Triển khai CI/CD &amp; vận hành</td><td class="num">5</td></tr>
+              <tr><td class="mono">TC2.7</td><td>Thực nghiệm người dùng thực tế &amp; cải tiến theo phản hồi</td><td class="num">5</td></tr>
+              <tr><td class="mono">TC3</td><td>Chất lượng bài thuyết trình</td><td class="num">10</td></tr>
+              <tr><td class="mono">TC4</td><td>Tổng hợp kiến thức, luận văn, tài liệu tham khảo, hình thức</td><td class="num">10</td></tr>
+              <tr><td class="mono">TC5</td><td>Chất lượng trả lời câu hỏi hội đồng</td><td class="num">15</td></tr>
+              <tr><td class="mono">TC6</td><td>Kết quả nổi bật (điểm thưởng, không chia mức)</td><td class="num">5</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="gate">
+        <p class="eyebrow"><span class="num">02</span> Vùng nguy hiểm</p>
+        <h2>10 gate chặn điểm — đứng trên mọi mô tả mức</h2>
+        <p class="lede">Gate áp dụng <strong>trước khi</strong> tính điểm theo mức, không thể thương lượng bằng cách làm tốt phần khác. Ba gate viền đỏ có thể xoá cả đồ án; các gate viền vàng chỉ áp trần đúng tiêu chí liên quan.</p>
+
+        <div class="gate-grid">
+          <div class="gate critical"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G1</span><span class="badge">Chặn toàn đồ án</span></div>
+            <p class="gate-trigger">Không chốt <strong>bản cam kết sản phẩm cuối + bộ metric</strong> trước mốc 50% thời gian (~cuối Tuần 6), hoặc bộ môn kết luận đề tài chưa rõ ràng.</p>
+            <p class="gate-consequence">→ Không đủ điều kiện bảo vệ. Toàn đồ án bị đánh giá <strong>Không đạt</strong> — không có cơ chế bổ sung sau đó.</p>
+          </div></div>
+
+          <div class="gate cap"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G2</span><span class="badge">Áp trần tiêu chí</span></div>
+            <p class="gate-trigger">Tần suất báo cáo tiến độ dưới <strong>0,5 lần/tuần</strong> theo sổ theo dõi của GVHD.</p>
+            <p class="gate-consequence">→ TC2.2 và TC2.4 mỗi tiêu chí bị giảm 1 mức ngay lập tức.</p>
+          </div></div>
+
+          <div class="gate cap"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G3</span><span class="badge">Áp trần tiêu chí</span></div>
+            <p class="gate-trigger">Không nộp AI Usage Log <em>và</em> cũng không nộp bản cam kết không sử dụng AI.</p>
+            <p class="gate-consequence">→ TC2.3 tối đa Mức 2 (≤ 2,75đ / 5).</p>
+          </div></div>
+
+          <div class="gate critical"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G4</span><span class="badge">Chặn toàn đồ án</span></div>
+            <p class="gate-trigger">Nội dung kê khai trong AI Usage Log <strong>mâu thuẫn</strong> với lịch sử Git hoặc với phần trả lời vấn đáp.</p>
+            <p class="gate-consequence">→ TC2.3 = 0 điểm và kích hoạt quy trình xác định đạo văn (Mục 6).</p>
+          </div></div>
+
+          <div class="gate cap"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G5</span><span class="badge">Áp trần tiêu chí</span></div>
+            <p class="gate-trigger">Không có kiểm thử tự động nào <em>và</em> không có tài liệu kiểm thử thủ công.</p>
+            <p class="gate-consequence">→ TC2.5 tối đa Mức 1 (≤ 1,75đ / 5).</p>
+          </div></div>
+
+          <div class="gate cap"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G6</span><span class="badge">Áp trần tiêu chí</span></div>
+            <p class="gate-trigger">Không có pipeline CI/CD chạy được tại thời điểm bảo vệ.</p>
+            <p class="gate-consequence">→ TC2.6 tối đa Mức 2 (≤ 2,75đ / 5).</p>
+          </div></div>
+
+          <div class="gate cap"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G7</span><span class="badge">Áp trần tiêu chí</span></div>
+            <p class="gate-trigger">Không có thực nghiệm với người dùng thực tế nào.</p>
+            <p class="gate-consequence">→ TC2.7 tối đa Mức 1 (≤ 1,75đ / 5).</p>
+          </div></div>
+
+          <div class="gate cap"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G8</span><span class="badge">Áp trần tiêu chí</span></div>
+            <p class="gate-trigger">Repository không cấp quyền cho hội đồng, hoặc không build được từ mã nguồn đã nộp.</p>
+            <p class="gate-consequence">→ TC2.2 và TC2.4 mỗi tiêu chí giảm 1 mức.</p>
+          </div></div>
+
+          <div class="gate cap"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G9</span><span class="badge">Áp trần tiêu chí</span></div>
+            <p class="gate-trigger">Sản phẩm không tương xứng với khối lượng, thời gian, số lượng SV đã đăng ký ở Bước 1–2.</p>
+            <p class="gate-consequence">→ TC2.2 tối đa Mức 2.</p>
+          </div></div>
+
+          <div class="gate critical"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">G10</span><span class="badge">Chặn toàn đồ án</span></div>
+            <p class="gate-trigger">Hội đồng kết luận vi phạm từ <strong>V2 trở lên</strong> ở quy trình chống đạo văn (xem Mục 06 bên dưới).</p>
+            <p class="gate-consequence">→ Áp dụng hệ quả tương ứng (có thể là 0 điểm TC2 hoặc 0 điểm toàn đồ án) trước khi tính tổng.</p>
+          </div></div>
+        </div>
+      </section>
+
+      <section id="timeline">
+        <p class="eyebrow"><span class="num">03</span> Đường găng 12 tuần</p>
+        <h2>Timeline &amp; mốc bắt buộc</h2>
+        <p class="lede">Giả định Tuần 1 bắt đầu từ hiện tại. Mốc Tuần 6 là điểm không thể lùi — mọi kế hoạch khác đều phải xoay quanh nó.</p>
+
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-when">Tuần 01</div>
+            <div class="tl-title">Chốt đề tài · phân công thành viên · git init</div>
+            <div class="tl-desc">Phiếu đăng ký + bảng phân công theo <code>COMMITMENT_BASELINE.md</code> §1, §5. Thiết lập ESLint/Prettier/Husky ngay từ tuần này (TC2.4).</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-when">Tuần 01 → hết kỳ</div>
+            <div class="tl-title">Báo cáo tiến độ ≥ 1 lần/tuần, liên tục</div>
+            <div class="tl-desc">Ghi <code>weekly-log/Tuan-XX.md</code>, có xác nhận GVHD. Dưới 0,5 lần/tuần tại bất kỳ thời điểm nào → gate G2 kích hoạt ngay.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-when">Tuần 03–04</div>
+            <div class="tl-title">Dựng pipeline CI/CD</div>
+            <div class="tl-desc">Bắt đầu sớm để có "≥10 lần triển khai tự động trải đều theo tiến độ" (Mức 5 TC2.6) — dồn cuối kỳ sẽ bị đánh giá thấp hơn dù đủ số lần.</div>
+          </div>
+          <div class="tl-item critical">
+            <div class="tl-when">Trước cuối Tuần 06</div>
+            <div class="tl-title">Ký COMMITMENT_BASELINE.md — gate G1</div>
+            <div class="tl-desc">Chốt sản phẩm cuối + ≥5 KPI định lượng, có chữ ký/xác nhận SV + GVHD. Đây là mốc nghiêm trọng nhất trong toàn bộ đồ án.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-when">Tuần 07–08</div>
+            <div class="tl-title">Linear Pre-test ≥ 60 SV</div>
+            <div class="tl-desc">Gộp luôn khảo sát SUS/task success (TC2.7) vào đợt này để không phải tuyển người dùng thật thêm lần nữa.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-when">Tuần 09–10</div>
+            <div class="tl-title">IRT Calibration (py-irt / MMLE)</div>
+            <div class="tl-desc">Báo cáo calibration + item fit (MNSQ). Đầu vào có thể làm thay đổi ngưỡng θ₀ — nếu đổi, ghi lý do vào weekly-log (TC2.1 Mức 5).</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-when">Tuần 11</div>
+            <div class="tl-title">Activate CAT · đo lại vòng 2 nếu kịp</div>
+            <div class="tl-desc">So sánh trước–sau (linear test vs CAT) — vừa phục vụ TC2.7 Mức 5 vừa phục vụ câu hỏi nghiên cứu chính trong SRS.</div>
+          </div>
+          <div class="tl-item critical">
+            <div class="tl-when">Trước bảo vệ</div>
+            <div class="tl-title">CI/CD phải đang chạy được — gate G6</div>
+            <div class="tl-desc">Cùng lúc: staging/production công khai đã có người dùng thật truy cập, demo chạy trực tiếp trên môi trường thật (không video) cho TC2.2 và TC3 Mức 5.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="ma-tran">
+        <p class="eyebrow"><span class="num">04</span> Bảng hướng dẫn thực hiện chính</p>
+        <h2>Từng tiêu chí → việc cụ thể → minh chứng lưu ở đâu</h2>
+        <p class="lede">Đây là bảng cả nhóm dùng trong suốt 12 tuần. Mỗi hàng map thẳng tới một tiêu chí — đủ minh chứng đúng cột 3 là đủ điều kiện xét từ Mức 4 trở lên.</p>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th style="width:9%">Tiêu chí</th><th style="width:34%">Việc phải làm cụ thể</th><th style="width:32%">Minh chứng / file lưu</th><th style="width:25%">Mốc gợi ý</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">TC1<br><span class="pill">10đ</span></td>
+                <td>Phỏng vấn/khảo sát ≥3 nhóm liên quan (SV năm nhất, GV chấm, phụ trách CT ngoại ngữ) hoặc ≥30 phiếu; so sánh ≥3 giải pháp hiện có (bộ đề cố định, CAT thương mại, chấm tay/Form); chốt 5 KPI định lượng.</td>
+                <td><code>tracking/COMMITMENT_BASELINE.md</code> §4</td>
+                <td>Trước Tuần 6 (gate G1)</td>
+              </tr>
+              <tr>
+                <td class="mono">TC2.1<br><span class="pill">10đ</span></td>
+                <td>Hoàn thiện ≥4 loại sơ đồ (đã có class + module, còn thiếu <strong>sequence</strong> và <strong>deployment</strong>); thêm bảng user story/acceptance criteria; ghi lý do mỗi lần đổi thiết kế.</td>
+                <td><code>SRS_TLCN (3).md</code>, <code>Mo_ta_So_do_Lop_ClassDiagram.md</code>, <code>tracking/DECISIONS_LOG.md</code>, <code>weekly-log/</code></td>
+                <td>Liên tục — trước khi nộp</td>
+              </tr>
+              <tr>
+                <td class="mono">TC2.2<br><span class="pill">10đ</span></td>
+                <td>Deploy lên staging công khai <strong>ngay khi có bản chạy đầu tiên</strong>, không chờ tuần cuối; theo dõi % khối lượng so với cam kết; test đủ edge case (outlier early-stop, Redis mất session, double-submit, MLE fallback).</td>
+                <td><code>tracking/TRACKING.md</code>, log deploy, URL staging</td>
+                <td>Có staging trước ~Tuần 8–9</td>
+              </tr>
+              <tr>
+                <td class="mono">TC2.3<br><span class="pill">5đ</span></td>
+                <td>Ghi AI Usage Log <strong>ngay trong phiên</strong> có AI hỗ trợ; mọi thành viên đều phải tự giải thích được, không chỉ người prompt; chạy checklist review trước khi merge PR có phần AI sinh.</td>
+                <td><code>tracking/AI_USAGE_LOG.md</code>, <code>GIT_CONVENTIONS.md</code></td>
+                <td>Mỗi phiên làm việc có AI</td>
+              </tr>
+              <tr>
+                <td class="mono">TC2.4<br><span class="pill">10đ</span></td>
+                <td>ESLint + Prettier + Husky pre-commit từ Tuần 1; không commit thẳng <code>main</code>; PR review chéo bắt buộc giữa 2 thành viên; SonarCloud/CodeQL + gitleaks trong CI; duy trì <code>TECH_DEBT.md</code>.</td>
+                <td><code>tracking/GIT_CONVENTIONS.md</code>, báo cáo CI (Sonar/CodeQL/gitleaks)</td>
+                <td>Từ Tuần 1</td>
+              </tr>
+              <tr>
+                <td class="mono">TC2.5<br><span class="pill">5đ</span></td>
+                <td>Unit test <code>CATEngine</code> theo đúng 3 case SRS Mục 4.3 (5 đúng liên tiếp / 5 sai liên tiếp / xen kẽ) + case toàn đúng-toàn sai cho MLE fallback; ≥4 tầng test; coverage core ≥70%.</td>
+                <td><code>test/</code>, coverage report trong CI</td>
+                <td>Xuyên suốt — bắt buộc trước bảo vệ (gate G5)</td>
+              </tr>
+              <tr>
+                <td class="mono">TC2.6<br><span class="pill">5đ</span></td>
+                <td>Pipeline GitHub Actions ≥6 chặng: build → lint → test → quét bảo mật/dependency → đóng gói Docker → deploy tự động. Dựng từ sớm, triển khai trải đều, không dồn cuối kỳ.</td>
+                <td><code>.github/workflows/</code>, lịch sử run/deploy</td>
+                <td>Từ Tuần 3–4 (gate G6)</td>
+              </tr>
+              <tr>
+                <td class="mono">TC2.7<br><span class="pill">5đ</span></td>
+                <td>Gộp khảo sát SUS + task success vào đợt Linear Pre-test ≥60 SV; sau khi Activate CAT, đo lại vòng 2 để có số liệu so sánh trước–sau.</td>
+                <td><code>tracking/user-testing/</code> (tạo khi tới Tuần 7–8), biên bản ẩn danh</td>
+                <td>Tuần 7–8 và Tuần 11 (gate G7)</td>
+              </tr>
+              <tr>
+                <td class="mono">TC3<br><span class="pill">10đ</span></td>
+                <td>Demo trực tiếp trên môi trường đã deploy thật, tuyệt đối không dùng video; số liệu coverage/CI/thực nghiệm trình bày trực quan trong slide.</td>
+                <td>Slide + URL staging/production</td>
+                <td>Trước buổi bảo vệ</td>
+              </tr>
+              <tr>
+                <td class="mono">TC4<br><span class="pill">10đ</span></td>
+                <td>Vận dụng ≥5 tài liệu ngoại ngữ chất lượng (paper gốc IRT/Rasch/EAP — vd. Lord, Bock &amp; Mislevy 1982); giữ tỉ lệ trùng lặp ≤20%.</td>
+                <td>Danh mục tài liệu tham khảo trong luận văn</td>
+                <td>Trước khi nộp luận văn</td>
+              </tr>
+              <tr>
+                <td class="mono">TC5<br><span class="pill">15đ</span></td>
+                <td>Chuẩn bị riêng phần giải thích các đoạn có AI hỗ trợ: vì sao chấp nhận, kiểm chứng thế nào, phương án thay thế là gì — tái dùng log, không nhớ lại từ đầu.</td>
+                <td><code>tracking/AI_USAGE_LOG.md</code></td>
+                <td>Trước buổi bảo vệ</td>
+              </tr>
+              <tr>
+                <td class="mono">TC6<br><span class="pill">5đ</span></td>
+                <td>Nếu Language Profile JSON hoặc CAT Engine có tiềm năng thành bài báo/report ngắn cho hội nghị SV — cân nhắc sớm, đây là điểm cộng gần như miễn phí nếu TC2 đã tốt.</td>
+                <td>Tuỳ phát sinh — không bắt buộc</td>
+                <td>Khi có cơ hội</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details style="margin-top:1rem;">
+          <summary>Xem thêm: ngưỡng metric chi tiết Mức 3 / 4 / 5 cho từng tiêu chí</summary>
+          <div class="details-body">
+            <p>Bảng đầy đủ (số bên liên quan, số loại sơ đồ, % coverage, số chặng pipeline, SUS score...) đã được số hoá tại <code>tracking/TRACKING.md</code> — cập nhật cột "Hiện tại" mỗi tuần khi có số liệu mới. Ngưỡng gốc lấy từ Mục 5 của rubric và có thể điều chỉnh cùng GVHD tại Bước 3 (Tuần 6) cho phù hợp đặc thù đề tài.</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="quy-trinh">
+        <p class="eyebrow"><span class="num">05</span> Vòng lặp hằng tuần</p>
+        <h2>Quy trình làm việc — không có ngoại lệ "AI tự chọn cho nhanh"</h2>
+        <p class="lede">Áp dụng cho mọi chức năng/vấn đề mới, từ chức năng đầu tiên trở đi.</p>
+
+        <div class="steps">
+          <div class="step">
+            <span class="idx"></span>
+            <div><h3>Soạn prompt giao việc theo mẫu chuẩn</h3><p>Dùng <code>tracking/PROMPT_TEMPLATE_FEATURE.md</code> (hoặc <code>PROMPT_TEMPLATE_SIMPLE.md</code> cho việc nhỏ) khi giao một chức năng/vấn đề cho Claude Code.</p></div>
+          </div>
+          <div class="step">
+            <span class="idx"></span>
+            <div><h3>AI tạo file kế hoạch trước khi code</h3><p>Từ <code>tracking/feature-plans/_template.md</code> → <code>feature-plans/&lt;slug&gt;.md</code>, tham chiếu đúng SRS/Class Diagram liên quan.</p></div>
+          </div>
+          <div class="step">
+            <span class="idx"></span>
+            <div><h3>Dừng lại &amp; hỏi khi gặp lựa chọn ảnh hưởng khả năng mở rộng</h3><p>Bất kỳ quyết định thiết kế nào SRS/Class Diagram chưa quyết định rõ đều phải hỏi lại người dùng, không được AI tự chọn — ghi vào Mục 3 của file kế hoạch, đối chiếu <code>DECISIONS_LOG.md</code>.</p></div>
+          </div>
+          <div class="step">
+            <span class="idx"></span>
+            <div><h3>Code, review chéo, merge</h3><p>PR → thành viên còn lại review (checklist tại <code>GIT_CONVENTIONS.md</code>) → merge. Không commit thẳng <code>main</code>.</p></div>
+          </div>
+          <div class="step">
+            <span class="idx"></span>
+            <div><h3>Ghi log ngay trong phiên</h3><p>Cập nhật <code>AI_USAGE_LOG.md</code> nếu có AI hỗ trợ có ý nghĩa — không dồn cuối tuần.</p></div>
+          </div>
+          <div class="step">
+            <span class="idx"></span>
+            <div><h3>Nhắc lại trong báo cáo tuần</h3><p>Mọi thay đổi thiết kế trong tuần phải xuất hiện lại ở <code>weekly-log/Tuan-XX.md</code>, mục "Thay đổi thiết kế &amp; lý do" — đây là điều kiện Mức 5 của TC2.1.</p></div>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top:1.4rem;">
+          <p>Skill Claude Code <code>.claude/skills/rubric-tracker</code> đã được thiết lập để tự nhắc các bước trên khi làm việc trong thư mục dự án — không cần nhớ thủ công toàn bộ quy trình.</p>
+        </div>
+      </section>
+
+      <section id="ai-dao-van">
+        <p class="eyebrow"><span class="num">06</span> Rủi ro lớn nhất với cách nhóm làm việc</p>
+        <h2>Dùng AI đúng cách &amp; quy trình chống đạo văn</h2>
+        <p class="lede">Nhóm dùng Claude Code xuyên suốt — nghĩa là <strong>TC2.3 và Mục 6</strong> là hai chỗ rủi ro nhất nếu lơ là, vì hội đồng vấn đáp ngẫu nhiên bất kỳ ai trong nhóm, không chỉ người ngồi prompt.</p>
+
+        <div class="callout warn">
+          <p><strong>Hai văn bản dễ nhầm — không thay thế nhau:</strong> <code>COMMITMENT_BASELINE.md</code> là cam kết <em>sản phẩm + KPI</em> (Bước 3), bắt buộc với <em>mọi</em> đồ án dù có dùng AI hay không. <code>AI_USAGE_LOG.md</code> là nhật ký <em>sử dụng AI</em>, chỉ áp dụng vì nhóm có dùng LLM/Agentic AI. Ký một cái không thay cho việc duy trì cái kia.</p>
+        </div>
+
+        <h3 style="font-family:'IBM Plex Sans'; font-size:1rem; margin-top:1.6rem;">Quy trình vấn đáp tại buổi bảo vệ (Mục 6.1)</h3>
+        <p style="font-size:.92rem; color:var(--ink-soft); max-width:68ch;">Hội đồng chọn ngẫu nhiên <strong>≥5 vị trí</strong> (≥2 trong luận văn, ≥3 trong mã nguồn/minh chứng), sinh viên không biết trước. Mỗi vị trí có <strong>tối đa 3 phút</strong> để trả lời 4 câu: nội dung này làm gì · vì sao nó có mặt · dữ liệu/tham số/thư viện đến từ đâu · bỏ đi thì ảnh hưởng gì.</p>
+
+        <h3 style="font-family:'IBM Plex Sans'; font-size:1rem; margin-top:1.4rem;">Mức vi phạm &amp; hệ quả (Mục 6.2)</h3>
+        <div class="v-grid" style="margin-top:.6rem;">
+          <div class="gate"><div class="stripe" style="background:var(--accent);"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code" style="color:var(--accent-strong);">V0</span></div>
+            <p class="gate-trigger">Giải thích được toàn bộ nội dung được chọn.</p>
+            <p class="gate-consequence">Chấm bình thường theo rubric.</p>
+          </div></div>
+          <div class="gate cap"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">V1</span></div>
+            <p class="gate-trigger">1 nội dung phụ trợ không giải thích được/không phù hợp phạm vi.</p>
+            <p class="gate-consequence">Nội dung đó bị loại; tiêu chí chứa nó = 0 điểm.</p>
+          </div></div>
+          <div class="gate critical"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">V2</span></div>
+            <p class="gate-trigger">Nội dung thuộc mô-đun/chương <strong>chính</strong> không giải thích được.</p>
+            <p class="gate-consequence">Toàn bộ TC2 (50 điểm) = 0.</p>
+          </div></div>
+          <div class="gate critical"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">V3</span></div>
+            <p class="gate-trigger">≥2 vị trí không giải thích được/không phù hợp phạm vi.</p>
+            <p class="gate-consequence">Toàn đồ án = 0 điểm; chuyển xử lý theo quy chế đào tạo.</p>
+          </div></div>
+          <div class="gate critical"><div class="stripe"></div><div class="gate-body">
+            <div class="gate-top"><span class="gate-code">V4</span></div>
+            <p class="gate-trigger">Sao chép có bằng chứng: trùng lặp vượt ngưỡng, mã nguồn trùng dự án khác không khai nguồn, hoặc số liệu bị làm giả.</p>
+            <p class="gate-consequence">Toàn đồ án = 0 điểm; chuyển xử lý theo quy chế đào tạo.</p>
+          </div></div>
+        </div>
+      </section>
+
+      <section id="ho-so">
+        <p class="eyebrow"><span class="num">07</span> Mọi thứ nằm ở đâu</p>
+        <h2>Bản đồ hồ sơ &amp; thư mục tracking</h2>
+        <p class="lede">Không có file nào ở đây là "giấy tờ hình thức" — mỗi file map thẳng tới một tiêu chí hoặc một gate. Bỏ trống bất kỳ file nào cũng khoá trần điểm tiêu chí tương ứng ở Mức ≤3.</p>
+
+        <div class="tree">
+          <ul>
+            <li><span class="row"><span class="path">tracking/</span></span>
+              <ul>
+                <li><span class="row"><span class="path">TRACKING.md</span><span class="purpose">— dashboard metric hiện tại so với ngưỡng Mức 3/4/5</span></span></li>
+                <li><span class="row"><span class="path">AI_USAGE_LOG.md</span><span class="purpose">— nhật ký dùng AI, cập nhật mỗi phiên (TC2.3)</span></span></li>
+                <li><span class="row"><span class="path">COMMITMENT_BASELINE.md</span><span class="purpose">— cam kết Bước 3, ký trước Tuần 6 (gate G1)</span></span></li>
+                <li><span class="row"><span class="path">DECISIONS_LOG.md</span><span class="purpose">— quyết định thiết kế không có trong SRS, phải hỏi trước khi chọn</span></span></li>
+                <li><span class="row"><span class="path">GIT_CONVENTIONS.md</span><span class="purpose">— quy ước Git/PR/review (TC2.4)</span></span></li>
+                <li><span class="row"><span class="path">evidence-checklist.md</span><span class="purpose">— checklist toàn bộ hồ sơ minh chứng (Mục 8 rubric)</span></span></li>
+                <li><span class="row"><span class="path">HUONG_DAN_BAO_CAO_TUAN.md</span><span class="purpose">— cách viết/xác nhận báo cáo tuần hợp lệ</span></span></li>
+                <li><span class="row"><span class="path">PROMPT_TEMPLATE_FEATURE.md</span><span class="purpose">— mẫu prompt khi triển khai 1 chức năng</span></span></li>
+                <li><span class="row"><span class="path">PROMPT_TEMPLATE_SIMPLE.md</span><span class="purpose">— mẫu prompt cho việc nhỏ/sửa nhanh</span></span></li>
+                <li><span class="row"><span class="path">feature-plans/</span><span class="purpose">— 1 file kế hoạch / chức năng, tạo trước khi code</span></span></li>
+                <li><span class="row"><span class="path">weekly-log/</span><span class="purpose">— nhật ký tuần, phục vụ Bước 3 + gate G2 + TC2.1 Mức 5</span></span></li>
+              </ul>
+            </li>
+            <li style="margin-top:.4rem;"><span class="row"><span class="path">.claude/skills/rubric-tracker/</span><span class="purpose">— skill tự nhắc log/tracking khi làm việc với Claude Code</span></span></li>
+            <li><span class="row"><span class="path">docs/HUONG_DAN_RUBRIC_VA_TRACKING.md</span><span class="purpose">— bản phân tích đầy đủ, chi tiết nhất (nguồn của trang này)</span></span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="checklist">
+        <p class="eyebrow"><span class="num">08</span> Trước mỗi buổi báo cáo GVHD</p>
+        <h2>Checklist nhanh — 60 giây</h2>
+        <p class="lede">Đánh dấu trong trình duyệt của bạn để tự nhắc (chỉ lưu trên máy này, không thay cho việc tick thật trong file).</p>
+        <div class="card">
+          <div class="check-list" id="checklist-list">
+            <div class="check-item"><input type="checkbox" id="c1"><label for="c1"><code>weekly-log/Tuan-XX.md</code> đã điền đủ: việc đã làm, vướng mắc, thay đổi thiết kế kèm lý do (nếu có), kế hoạch tuần sau.</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"><label for="c2">Đã có xác nhận/chữ ký hoặc email của GVHD cho tuần đó.</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"><label for="c3"><code>AI_USAGE_LOG.md</code> không có khoảng trống nào &gt;3 ngày so với lịch sử commit thật.</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"><label for="c4"><code>TRACKING.md</code> đã cập nhật số liệu mới nhất (coverage, lint, số commit/tuần...) nếu có thay đổi.</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"><label for="c5">Nếu đã qua 50% thời gian mà <code>COMMITMENT_BASELINE.md</code> chưa có chữ ký → dừng mọi việc khác, xử lý ngay (gate G1).</label></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    Playbook nội bộ — không nộp kèm hồ sơ đồ án. Cập nhật khi rubric, SRS hoặc phạm vi cam kết Bước 3 thay đổi.
+  </footer>
+</div>
+
+<script>
+(function(){
+  try{
+    document.querySelectorAll('#checklist-list input[type="checkbox"]').forEach(function(box){
+      var key = 'rubric-playbook-' + box.id;
+      var saved = localStorage.getItem(key);
+      if(saved === '1'){ box.checked = true; box.closest('.check-item').classList.add('checked'); }
+      box.addEventListener('change', function(){
+        try{ localStorage.setItem(key, box.checked ? '1' : '0'); }catch(e){}
+        box.closest('.check-item').classList.toggle('checked', box.checked);
+      });
+    });
+  }catch(e){}
+
+  try{
+    var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+    var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var link = links.find(function(a){ return a.getAttribute('href') === '#' + entry.target.id; });
+        if(!link) return;
+        if(entry.isIntersecting){ links.forEach(function(a){ a.classList.remove('active'); }); link.classList.add('active'); }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function(s){ io.observe(s); });
+  }catch(e){}
+})();
+</script>
