@@ -1,0 +1,57 @@
+# --- Secrets (KHÔNG BAO GIỜ commit; chỉ commit *.example) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.keystore
+credentials*.json
+secrets.*
+
+# --- Tài liệu nội bộ của Khoa / không được phép công khai ---
+# Rubric gốc: giữ bản local, chỉ trỏ đường dẫn trong README
+Rubric_Do_An_Mon_Hoc_CNPM_sinhvien.docx
+
+# --- Log thật và file làm việc: CHỈ LƯU MÁY, không đưa lên repo (Quyết định #37) ---
+# Repo chỉ giữ mẫu (_template.md, *_TEMPLATE.md) và hướng dẫn. Log thật nộp riêng khi hội đồng cần.
+tracking/DECISIONS_LOG.md
+tracking/COMMITMENT_BASELINE.md
+tracking/TRACKING.md
+tracking/weekly-log/*
+!tracking/weekly-log/_template.md
+tracking/feature-plans/*
+!tracking/feature-plans/_template.md
+work/
+workspace-setup/
+
+# --- File nhị phân nặng, mỗi lần sửa phình lịch sử git ---
+# Báo cáo tuần (.docx) nộp qua kênh của Khoa; không commit
+tracking/status-reports/*.docx
+tracking/status-reports/*.pdf
+# Mẫu báo cáo 6 MB của plugin (lấy từ nguồn gốc khi cần)
+workspace-setup/**/assets/*.docx
+*.zip
+*.7z
+*.rar
+
+# --- Bản sao lưu và file tạm sinh ra khi AI/EA sửa file ---
+_BACKUP_*
+*.backup.*
+*.bak
+*.tmp
+out.txt
+~$*
+.~lock.*
+
+# --- Cài đặt local của công cụ ---
+.claude/settings.local.json
+.serena/
+.playwright-mcp/
+
+# --- Rác hệ điều hành / editor ---
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/
