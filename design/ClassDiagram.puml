@@ -1,0 +1,605 @@
+@startuml PlacementTestClassModel
+' Sinh tu dong tu TLCN.drawio.xml (Trang-1) - phien 25. KHONG sua tay: sua drawio roi sinh lai.
+hide circle
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam class {
+  BackgroundColor White
+  ArrowColor #33459C
+  BorderColor #33459C
+}
+skinparam package {
+  BorderColor #7A3FA0
+}
+
+package "Tieu_luan_Core" {
+  ' ===== Người dùng & truy cập =====
+  abstract class User {
+    +id: UUID
+    +email: String
+    +passwordHash: String
+    +fullName: String
+    +role: UserRole
+    +authProvider: AuthProviderType
+    +createdAt: DateTime
+    +mustChangePassword: boolean
+    +passwordChangedAt: DateTime
+    +isActive: boolean
+    +changePassword(currentPassword: String, newPassword: String): void
+  }
+  class Student {
+    -studentCode: String
+    +getLatestProfile(): LanguageProfile
+    +getTestHistory(): TestSession[]
+  }
+  class Teacher {
+    -teacherCode: String
+    +editItem(itemId: UUID, content: String): void
+    +reviewItem(itemId: UUID, approve: boolean): void
+    +sendPackage(batchId: UUID): ItemPackage
+    +confirmItem(itemId: UUID, confirm: boolean): void
+  }
+  class Admin {
+    +createAIBatch(skill: Skill, cefr: CEFRLevel, topicTag: String, count: int): ItemBatch
+    +assignBatch(batchId: UUID, reviewerIds: UUID[], confirmerId: UUID, reviewDays: int, confirmDays: int): void
+    +runFinalCheck(batchId: UUID): void
+    +decideSoftFlag(itemId: UUID, accept: boolean): void
+    +importBatch(batchId: UUID): void
+  }
+  interface AuthProvider {
+    +authenticate(credentials): User
+  }
+  class JwtAuthProvider {
+    +issueToken(user: User): String
+    +refresh(token: String): String
+  }
+  ' ===== Kỳ thi (ExamRound, DC-07..DC-10, DC-20) =====
+  class ExamRound {
+    -id: UUID
+    -name: String
+    -createdBy: UUID
+    -opensAt: DateTime
+    -closesAt: DateTime
+    -durationMinutes: int
+    -status: ExamRoundStatus
+    -createdAt: DateTime
+    -updatedAt: DateTime
+    +isOpen(now: DateTime): boolean
+    +effectiveStatus(now: DateTime): ExamRoundStatus
+    +includes(student: Student): boolean
+  }
+  class ExamRoundParticipant <<association class>> {
+    -roundId: UUID
+    -studentId: UUID
+    -note: String
+    -addedAt: DateTime
+  }
+  ' ===== Import lưới tạm (DC-22), quản lý tài khoản (DC-19/DC-23), mail & quên mật khẩu (DC-21) =====
+  class UserImportService <<service>> {
+    +upload(kind: UserRole, file: File, adminId: UUID): ImportReport
+    +getGrid(kind: UserRole, adminId: UUID): ImportRowResult[]
+    +removeRow(kind: UserRole, adminId: UUID, rowKey: String): void
+    +clearGrid(kind: UserRole, adminId: UUID): void
+    +save(kind: UserRole, adminId: UUID): int
+  }
+  class RosterImportService <<service>> {
+    +upload(roundId: UUID, file: File, adminId: UUID): ImportReport
+    +getGrid(roundId: UUID, adminId: UUID): ImportRowResult[]
+    +removeRow(roundId: UUID, rowKey: String): void
+    +clearGrid(roundId: UUID): void
+    +save(roundId: UUID): int
+  }
+  class AccountAdminService <<service>> {
+    +createStudent(studentCode: String, fullName: String, email: String): User
+    +createTeacher(teacherCode: String, fullName: String, email: String): User
+    +list(role: UserRole, query: String): User[]
+    +update(userId: UUID, fullName: String, email: String): void
+    +lock(userId: UUID): void
+    +unlock(userId: UUID): void
+    +resendTemporaryPassword(studentId: UUID): void
+    +grantAdmin(teacherId: UUID): void
+    +revokeAdmin(adminId: UUID): void
+  }
+  class ImportReport {
+    -totalRows: int
+    -added: int
+    -rejected: int
+    -ignoredDuplicates: int
+    -rows: ImportRowResult[]
+  }
+  class ImportRowResult {
+    -rowNumber: int
+    -rowKey: String
+    -status: ImportRowStatus
+    -message: String
+  }
+  class PasswordResetService <<service>> {
+    +requestReset(email: String): void
+    +reset(email: String, otp: String, newPassword: String): void
+  }
+  interface MailPort {
+    +send(to: String, subject: String, body: String): void
+  }
+  class SmtpMailAdapter <<Adapter>> {
+    +send(to: String, subject: String, body: String): void
+  }
+  ' ===== Ngân hàng câu hỏi =====
+  class Item {
+    -id: UUID
+    -content: String
+    -options: Map<char, String>
+    -correctAnswer: char
+    -skill: Skill
+    -topicTag: String
+    -cefrTarget: CEFRLevel
+    -irtB: float
+    -irtA: float
+    -irtC: float  (reserved)
+    -status: ItemStatus
+    -contentHash: String
+    -batchId: UUID
+    -packageId: UUID?
+    +transitionTo(next: ItemStatus): void
+    +probability(theta: float): float
+    +findForCAT(skill, usedIds, theta): Item[]
+  }
+  ' ===== Sinh và duyệt đề AI (DC-27..DC-45, đề xuất — KE_HOACH_SINH_VA_DUYET_DE_AI.md) =====
+  class ItemBatch {
+    -id: UUID
+    -source: ItemBatchSource
+    -name: String?
+    -createdBy: UUID
+    -skill: Skill?
+    -cefrTarget: CEFRLevel?
+    -topicTag: String?
+    -requestedCount: int?
+    -status: ItemBatchStatus
+    -createdAt: DateTime
+    +canAssign(): boolean
+    +canFinalize(): boolean
+  }
+  class ItemBatchAssignment {
+    -batchId: UUID
+    -confirmerId: UUID
+    -assignedBy: UUID
+    -reviewDays: int
+    -confirmDays: int
+    -assignedAt: DateTime
+  }
+  class ItemPackage {
+    -id: UUID
+    -batchId: UUID
+    -reviewerId: UUID
+    -confirmerId: UUID
+    -status: PackageStatus
+    -sentAt: DateTime?
+    -dueAt: DateTime?
+    -reminderSent: boolean
+    +send(): void
+    +confirmAll(): void
+    +isComplete(): boolean
+  }
+  class ItemReviewAssignment {
+    -id: UUID
+    -itemId: UUID
+    -assigneeId: UUID
+    -assignedAt: DateTime
+    -dueAt: DateTime
+    -reminderSent: boolean
+    +isOverdue(now: DateTime): boolean
+  }
+  class ItemReviewEvent {
+    -id: UUID
+    -batchId: UUID
+    -itemId: UUID?
+    -packageId: UUID?
+    -actorId: UUID
+    -action: ReviewAction
+    -createdAt: DateTime
+  }
+  class ItemEmbedding {
+    -itemId: UUID
+    -vector: float[]
+    -model: String
+    -contentHash: String
+    -createdAt: DateTime
+  }
+  class ItemCheckResult {
+    -id: UUID
+    -itemId: UUID
+    -checkpoint: CheckPoint
+    -contentHash: String
+    -level: CheckLevel
+    -reasonCodes: String[]
+    -suspectedDuplicateId: UUID?
+    -checkedAt: DateTime
+  }
+  class ItemGenerationService <<service>> {
+    +createBatch(skill: Skill, cefr: CEFRLevel, topicTag: String, count: int, adminId: UUID): ItemBatch
+    +generate(batchId: UUID): void
+    -supplementMissing(batchId: UUID, missing: int): void
+  }
+  class ItemImportService <<service>> {
+    +upload(file: File, adminId: UUID): ImportReport
+    +getGrid(adminId: UUID): ImportRowResult[]
+    +removeRow(adminId: UUID, rowKey: String): void
+    +clearGrid(adminId: UUID): void
+    +save(adminId: UUID): ItemBatch
+  }
+  class ItemCheckService <<service>> {
+    +checkC1(batchId: UUID): void
+    +checkC2(batchId: UUID): void
+    +checkC3(batchId: UUID): ItemCheckResult[]
+    +recheckAfterEdit(itemId: UUID): ItemCheckResult
+  }
+  class ItemDuplicateChecker {
+    -strategies: DuplicateStrategy[]
+    +check(candidate: Item, pool: Item[]): ItemCheckResult
+  }
+  interface DuplicateStrategy {
+    +detect(candidate: Item, pool: Item[]): ItemCheckResult
+  }
+  class HashStrategy {
+    +detect(candidate: Item, pool: Item[]): ItemCheckResult
+  }
+  class TrigramStrategy {
+    -hardThreshold: float
+    -softThreshold: float
+    +detect(candidate: Item, pool: Item[]): ItemCheckResult
+  }
+  class EmbeddingStrategy {
+    -model: String
+    -softThreshold: float
+    +detect(candidate: Item, pool: Item[]): ItemCheckResult
+  }
+  class ReviewDistributionService <<service>> {
+    +preview(batchId: UUID, reviewerIds: UUID[]): Map<UUID, int>
+    +assign(batchId: UUID, reviewerIds: UUID[], confirmerId: UUID, reviewDays: int, confirmDays: int): void
+    +reassign(batchId: UUID, fromId: UUID, toId: UUID): void
+    +extendDeadline(batchId: UUID, reviewDays: int, confirmDays: int): void
+  }
+  class DeadlineReminderService <<service>> {
+    +schedule(batchId: UUID): void
+    +remindDue(now: DateTime): void
+    +markOverdue(now: DateTime): void
+  }
+  ' ===== Phiên thi & CAT Engine =====
+  class TestSession {
+    -id: UUID
+    -studentId: UUID
+    -examRoundId: UUID
+    -responses: List<SessionResponse>
+    -status: SessionStatus
+    -thetaFinal: float
+    -seFinal: float
+    -startedAt: DateTime
+    -completedAt: DateTime
+    -expiresAt: DateTime
+    -stoppingReason: StoppingReason
+    +start(): void
+    +submitResponse(itemId, answer): void
+    +getNextItem(): Item
+    +computeResult(): LanguageProfile
+    +reconstructFromResponses(): void
+  }
+  class SessionResponse {
+    -id: UUID
+    -sessionId: UUID
+    -itemId: UUID
+    -response: char
+    -isCorrect: boolean
+    -thetaAfter: float
+    -seAfter: float
+    -responseTimeMs: int
+    -answeredAt: DateTime
+  }
+  class SessionCacheState <<Redis>> {
+    -state: SessionState
+    -currentItemId: UUID
+    -eapState: EAPComputationState
+    -lastSkillPicked: Skill
+    -itemsAdministered: UUID[]
+    -lastUpdated: DateTime
+    -ttlSeconds: int  (= 7200)
+    +reconstructFromDB(): void
+  }
+  class EAPComputationState {
+    -posteriorWeights: float[41]
+    -theta: float
+    -standardError: float
+  }
+  class CATEngine <<service>> {
+    -thetaInit: float = -0.5
+    -priorMean: float = 0.0
+    -priorVariance: float = 1.0
+    -quadraturePoints: int = 41
+    +pickNextSkill(session: SessionCacheState): Skill
+    +selectNextItem(session, pool): Item
+    +computeEAP(responses[]): AbilityEstimate
+    +checkStoppingCriterion(session): StoppingReason
+  }
+  class AbilityEstimate <<value object>> {
+    -theta: float
+    -standardError: float
+    -confidenceInterval95: float[]
+  }
+  ' ===== AI giải thích =====
+  class Explanation {
+    -id: UUID
+    -itemId: UUID
+    -content: String
+    -generatedAt: DateTime
+  }
+  class AIExplainerService <<service>> {
+    -modelName: String
+    -systemPrompt: String
+    +explain(item: Item): Explanation
+    -buildPrompt(item: Item, context: String): String
+    -callGeminiAPI(prompt: String): String
+  }
+  ' ===== Hồ sơ năng lực & báo cáo =====
+  class LanguageProfile <<aggregate root>> {
+    -id: UUID
+    -schemaVersion: String
+    -studentId: UUID
+    -testSessionId: UUID
+    -abilityEstimate: AbilityEstimate
+    -completedAt: DateTime
+    -cefrLevel: CEFRLevel
+    -cefrConfidence: CEFRConfidence
+    -boundaryEffect: boolean
+    -errorPatterns: List<ErrorPattern>
+    -skillProfiles: List<SkillProfile>
+    -aiRecommendations: String[]
+    -testMetadata: TestMetadata
+    +generateFromSession(s: TestSession): void
+    +toJSON(): String
+    +exportForEduZ(): String
+  }
+  class SkillProfile <<value object>> {
+    -skill: Skill
+    -scorePercent: float
+    -cefrEstimate: CEFRLevel
+    -itemsAdministered: int
+    -correctCount: int
+  }
+  class ErrorPattern <<value object>> {
+    -topicTag: String
+    -skill: Skill
+    -itemsAttempted: int
+    -correctCount: int
+    -accuracyRate: float
+    -severity: ErrorSeverity
+  }
+  class TestMetadata <<value object>> {
+    -itemsAdministered: int
+    -testDurationSeconds: int
+    -algorithm: String
+    -thetaInit: float
+    -quadraturePoints: int
+    -prior: String
+    -itemBankVersion: String
+    -stoppingReason: StoppingReason
+  }
+  class ClassReport <<service>> {
+    -examRoundId: UUID?
+    +generateClassDistribution(): Map<CEFRLevel, int>
+    +exportCSV(): File
+  }
+}
+
+' ===== Quan he =====
+User <|-- Student
+User <|-- Teacher
+User <|-- Admin
+User ..> UserRole
+Student "1" -- "0..*" TestSession : has
+TestSession ..> SessionStatus
+TestSession ..> StoppingReason
+TestSession "1" -- "1" SessionCacheState : has
+SessionCacheState ..> SessionState
+Item ..> Skill
+Item ..> CEFRLevel
+Item ..> ItemStatus
+ItemBatch ..> ItemBatchSource
+SessionResponse "0..*" -- "1" Item
+TestSession "1" -- "1" LanguageProfile
+TestSession "1" *-- "0..*" SessionResponse
+LanguageProfile ..> CEFRConfidence
+LanguageProfile "1" *-- "1..*" SkillProfile
+LanguageProfile "1" *-- "0..*" ErrorPattern
+LanguageProfile "1" *-- "1" TestMetadata
+LanguageProfile "1" *-- "1" AbilityEstimate
+ErrorPattern ..> ErrorSeverity
+Item "1" *-- "0..1" Explanation
+AIExplainerService ..> Item
+AIExplainerService ..> Explanation
+CATEngine ..> Item
+CATEngine ..> TestSession
+TestSession ..> CATEngine
+CATEngine ..> SessionResponse
+CATEngine ..> SessionCacheState
+SessionCacheState *-- "1" EAPComputationState
+Admin "1" --> "0..*" ExamRound : creates
+ExamRound "1" *-- "0..*" ExamRoundParticipant
+Student "1" --> "0..*" ExamRoundParticipant : participates
+ExamRound "1" --> "0..*" TestSession : has
+ExamRound ..> ExamRoundStatus
+ClassReport ..> ExamRound
+ClassReport ..> LanguageProfile
+Admin ..> UserImportService
+Admin ..> RosterImportService
+Admin ..> AccountAdminService
+UserImportService ..> ImportReport
+RosterImportService ..> ImportReport
+ImportReport "1" *-- "0..*" ImportRowResult
+ImportRowResult ..> ImportRowStatus
+UserImportService ..> MailPort
+PasswordResetService ..> MailPort
+MailPort <|.. SmtpMailAdapter
+AuthProvider <|.. JwtAuthProvider
+AuthProvider ..> User
+User ..> AuthProviderType
+CATEngine ..> AbilityEstimate
+Admin "1" --> "0..*" ItemBatch : creates
+Admin ..> ItemGenerationService
+Admin ..> ItemImportService
+Admin ..> ReviewDistributionService
+Admin ..> ItemCheckService
+Teacher "1" --> "0..*" ItemReviewAssignment : reviews (A)
+Teacher "1" --> "0..*" ItemPackage : sends / confirms (B)
+Item "0..*" --> "1" ItemBatch : belongs to
+Item "0..*" --> "0..1" ItemPackage : groups
+Item "1" *-- "0..1" ItemReviewAssignment
+Item "1" *-- "0..*" ItemCheckResult
+Item "1" *-- "0..1" ItemEmbedding
+ItemBatch "1" *-- "0..1" ItemBatchAssignment
+ItemBatch "1" *-- "0..*" ItemPackage
+ItemBatch "1" *-- "0..*" ItemReviewEvent
+ItemBatch ..> ItemBatchStatus
+ItemPackage ..> PackageStatus
+ItemReviewEvent ..> ReviewAction
+ItemCheckResult ..> CheckPoint
+ItemCheckResult ..> CheckLevel
+ItemGenerationService ..> ItemBatch
+ItemImportService ..> ItemBatch
+ItemGenerationService ..> ItemCheckService
+ItemImportService ..> ItemCheckService
+ItemImportService ..> ImportReport
+ReviewDistributionService ..> ItemReviewAssignment
+ReviewDistributionService ..> ItemBatchAssignment
+DeadlineReminderService ..> ItemReviewAssignment
+DeadlineReminderService ..> ItemPackage
+DeadlineReminderService ..> MailPort
+ItemCheckService ..> ItemDuplicateChecker
+ItemCheckService ..> ItemCheckResult
+ItemDuplicateChecker "1" --> "1..*" DuplicateStrategy : uses
+DuplicateStrategy <|.. HashStrategy
+DuplicateStrategy <|.. TrigramStrategy
+DuplicateStrategy <|.. EmbeddingStrategy
+EmbeddingStrategy ..> ItemEmbedding
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+  EDUZ_SERVICE
+}
+enum CEFRLevel {
+  PRE_A1
+  A1
+  A2
+  B1
+  B2
+  C1_PLUS
+}
+enum Skill {
+  VOCABULARY
+  GRAMMAR
+}
+enum ItemStatus {
+  DRAFT
+  FIRST_APPROVED
+  SECOND_APPROVED
+  FINAL_APPROVED
+  REJECTED
+  AI_REJECTED
+}
+enum ItemBatchSource {
+  AI_GENERATED
+  IMPORTED
+}
+enum CEFRConfidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+enum ErrorSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+enum SessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+enum SessionState {
+  WAITING_FOR_ANSWER
+  READY_FOR_NEXT
+}
+enum StoppingReason {
+  MAX_ITEMS_REACHED
+  SE_THRESHOLD
+  ITEM_BANK_BOUNDARY
+  TIMEOUT
+}
+enum ExamRoundStatus {
+  DRAFT
+  SCHEDULED
+  OPEN
+  CLOSED
+}
+enum ImportRowStatus {
+  VALID
+  REJECTED
+  IGNORED_DUPLICATE
+}
+enum AuthProviderType {
+  LOCAL
+  GOOGLE
+  MICROSOFT
+}
+enum ItemBatchStatus {
+  GENERATING
+  IMPORTING
+  CHECKING
+  READY_TO_ASSIGN
+  IN_REVIEW
+  READY_TO_FINALIZE
+  FINAL_CHECKED
+  DONE
+  FAILED
+  PARTIAL
+}
+enum PackageStatus {
+  OPEN
+  SENT
+  DONE
+}
+enum CheckPoint {
+  C1
+  C2
+  C3
+}
+enum CheckLevel {
+  PASS
+  SOFT
+  HARD
+}
+enum ReviewAction {
+  APPROVE
+  REJECT
+  CONFIRM
+  REMOVE
+  CONFIRM_ALL
+  IMPORT
+  REASSIGN
+  EXTEND
+  FORCE_SEND
+  ACCEPT_FLAG
+}
+
+' ===== Khoa luan (KL) - NGOAI pham vi Tieu luan, khong co trong drawio, KHONG tinh vao dem class/enum =====
+' (Giu lai o ban cu: Tuan5/_BACKUP_20261014_ClassDiagram_ORIGINAL.puml)
+'   - CalibrationJob
+'   - EduZWebhookJob
+'   - WritingSubmission
+'   - RubricScore
+'   - TabSwitchEvent
+'   - ExposureControlPolicy
+'   - EduZSSOAdapter
+'   - EduZSSOClient
+'   - EduZServiceAccount (M2M, bo khoi TL)
+@enduml
