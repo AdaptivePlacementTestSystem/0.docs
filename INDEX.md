@@ -21,5 +21,5 @@
 | requirements | `SRS_TLCN_v3.0.md` | Bản văn bản của SRS v3.0 (nguồn chỉnh sửa) |
 | design | `ClassDiagram.puml`, `ClassDiagram.mmd` | Class Diagram dạng text (đã khớp `schema.prisma` ngày 16/10/2026) |
 | design | `schema.prisma` | Bản tham chiếu schema; nguồn thật ở repo `backend` (`prisma/schema.prisma`) |
-| design | `TLCN.drawio.xml`, `TLCN-Trang-1.drawio.png` | `Trang-1` của XML đã sửa theo schema 16/10/2026; **PNG chưa xuất lại** (xem `tracking/weekly-log/Tuan-05.md`) |
+| design | `TLCN.drawio.xml`, `TLCN-Trang-1.drawio.png` | `Trang-1` của XML đã sửa theo schema 16/10/2026; bản gọn ~41 lớp, PNG đã xuất lại (xem `tracking/weekly-log/Tuan-05.md`) |
 | work (chỉ lưu máy) | `week-04/`, `week-05/` | Kế hoạch, bản chốt quyết định và phân tích Tuần 4–5 (`work/week-05/20261016_BAN_CHOT_...md` là quyết định chính thức) |
