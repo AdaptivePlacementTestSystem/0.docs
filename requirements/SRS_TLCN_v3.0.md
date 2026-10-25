@@ -1061,7 +1061,7 @@ Sau khi giao: tạo item_review_assignments (mỗi câu một dòng: người nh
 
 **Hạn và nhắc.** A: due_at = cuối ngày (ngày giao + reviewDays); B: mỗi gói due_at = cuối ngày (ngày gửi gói + confirmDays); giờ chốt 23:59:59 giờ Việt Nam (cấu hình). Admin chỉnh hạn (reviewDays, confirmDays; chỉ áp dụng cho việc chưa xử lý) ⇒ tính lại due_at, hủy và tạo lại lịch nhắc. Nhắc: job trễ BullMQ chạy lúc due_at trừ 24 giờ, nếu nhóm (lô, bước, GV, gói) còn việc chưa xong thì gửi một email nhắc gộp qua MailPort (việc vẫn hiện trong Hộp việc); hạn còn dưới 24 giờ lúc giao/chỉnh ⇒ nhắc ngay một lần; kèm đối chiếu lazy khi mở hộp việc phòng mất job. Quá hạn: chỉ hiển thị "quá hạn" cho Admin và GV (tính lazy), không tự đổi trạng thái hay tự giao lại; Admin chọn chỉnh hạn, giao lại, hoặc ép gửi gói hiện có thay A (FORCE_SEND: gói OPEN chuyển SENT chỉ với các câu A đã FIRST_APPROVED; câu A chưa quyết không vào gói và nằm lại trong lô; ghi item_review_events FORCE_SEND; Admin không sửa nội dung câu).
 
-**Sau khi B confirm.** Câu SECOND_APPROVED nằm chờ trong lô, chưa vào ngân hàng. Khi mọi gói DONE hoặc mọi hạn đã qua ⇒ lô READY_TO_FINALIZE; Admin thấy thống kê (SECOND_APPROVED, REJECTED bởi A/B, AI_REJECTED, chưa xử lý). Admin bấm Kiểm tra (C3), đọc báo cáo, xử lý lỗi mềm, rồi bấm Import ⇒ câu qua (và lỗi mềm Admin chấp nhận) thành FINAL_APPROVED, ghi approved_by, approved_at, có hiệu lực cho CAT, calibrated = false. Câu chưa xử lý khi quá hạn (còn DRAFT hoặc FIRST_APPROVED chưa tới B) không được import; nằm lại trong lô để Admin giao lại với hạn mới hoặc loại thành REJECTED (không cần lý do, không sửa nội dung). Lô chỉ chuyển DONE khi mọi câu đã ở trạng thái cuối; nếu sau Import còn câu chưa xử lý, lô giữ FINAL_CHECKED và việc giao lại đưa lô về IN_REVIEW (đề xuất, chờ chốt — bổ sung nghiệp vụ 16/10/2026).
+**Sau khi B confirm.** Câu SECOND_APPROVED nằm chờ trong lô, chưa vào ngân hàng. Khi mọi gói DONE hoặc mọi hạn đã qua ⇒ lô READY_TO_FINALIZE; Admin thấy thống kê (SECOND_APPROVED, REJECTED bởi A/B, AI_REJECTED, chưa xử lý). Admin bấm Kiểm tra (C3), đọc báo cáo, xử lý lỗi mềm, rồi bấm Import ⇒ câu qua (và lỗi mềm Admin chấp nhận) thành FINAL_APPROVED, ghi approved_by, approved_at, có hiệu lực cho CAT, calibrated = false. Câu chưa quyết định (còn DRAFT hoặc FIRST_APPROVED chưa tới B) không được import. Quy tắc nghiệp vụ (chốt 18/10/2026): đến hạn mọi GV phải hoàn thành việc được giao, nên không có "câu tồn đọng" cần xử lý riêng sau Import; chỉnh hạn, giao lại và ép gửi gói chỉ là biện pháp dự phòng của Admin trước khi chạy C3. Lô chuyển DONE khi mọi câu đã ở trạng thái cuối.
 
 ### 9b.15. Câu bị loại
 
@@ -1210,6 +1210,7 @@ KỲ THI  [đề xuất]
   POST   /api/v1/exam-rounds/:id/participants/import/save
   GET    /api/v1/exam-rounds/:id/participants                           # theo dõi dự thi (UCADM17)
   DELETE /api/v1/exam-rounds/:id/participants/:studentId                # gỡ SV khi kỳ chưa CLOSED
+  GET    /api/v1/exam-rounds/:id/participants/export                    # ?format=csv|xlsx&status=&q=&studentIds=  xuất kết quả dự thi (ADMIN, đề xuất 18/10/2026)
   GET    /api/v1/exam-rounds/mine                                       # STUDENT: kỳ tôi thuộc + trạng thái hiệu lực
 ```
 
@@ -1341,7 +1342,7 @@ Ghi chú v3.0: GET /sessions/active trả thêm expiresAt và thông tin kỳ. C
 | API latency — Submit response + lấy câu tiếp | < 300ms p95 | 1 user |
 | API latency — EAP computation | < 50ms | In-process TypeScript |
 | API latency — Lấy kết quả Profile | < 500ms p95 | Bao gồm AI recommendation |
-| Throughput | 100 concurrent users | Nginx + 2 NestJS instances |
+| Throughput | 100 concurrent users | Nginx + 2 NestJS instances (mục tiêu production; **staging chạy 1 instance** vì server 2 GB RAM dùng chung, #123) |
 | Item Bank query | < 20ms | Nhờ Partial Index (status='FINAL_APPROVED') |
 
 ### 15.2. Độ tin cậy (Reliability)

@@ -1,0 +1,16 @@
+{
+  "name": "@apt/shared-types",
+  "version": "3.0.0",
+  "description": "Enum, mã lỗi và kiểu nền dùng chung BE/FE (mô hình C, quyết định #122). DTO API sinh từ OpenAPI, không đặt ở đây.",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
