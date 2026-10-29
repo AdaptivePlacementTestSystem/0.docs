@@ -305,6 +305,7 @@ model ItemPackage {
   reviewer  User      @relation("PackageReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
   confirmer User      @relation("PackageConfirmer", fields: [confirmerId], references: [id], onDelete: Restrict)
   items     Item[]
+  events    ItemReviewEvent[]
 
   @@unique([batchId, reviewerId], map: "uq_package_batch_reviewer")
   @@index([confirmerId, status])
@@ -357,9 +358,11 @@ model ItemReviewEvent {
 
   batch ItemBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
   item  Item?     @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  package ItemPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
   actor User      @relation("ReviewEventActor", fields: [actorId], references: [id], onDelete: Restrict)
 
   @@index([batchId, createdAt])
+  @@index([packageId])
   @@map("item_review_events")
 }
 
