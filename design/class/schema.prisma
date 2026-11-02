@@ -198,6 +198,8 @@ model Item {
   contentHash   String?    @map("content_hash") @db.VarChar(64)
   batchId       String     @map("batch_id") @db.Uuid
   packageId     String?    @map("package_id") @db.Uuid
+  // original_snapshot: bản gốc (content, options, correctAnswer, giải thích) trước khi GV A sửa lần đầu; null nếu chưa sửa. Dùng dựng diff cho GV B/Admin.
+  originalSnapshot Json?   @map("original_snapshot")
   createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
 

@@ -51,11 +51,12 @@ class TestSession {
   - student: Student
   - examRound: ExamRound
   - status: SessionStatus
-  - thetaFinal: float?
-  - seFinal: float?
-  - stoppingReason: StoppingReason?
+  - responses: List<SessionResponse>
+  - thetaFinal: float
+  - seFinal: float
+  - stoppingReason: StoppingReason
   - startedAt: DateTime
-  - completedAt: DateTime?
+  - completedAt: DateTime
   - expiresAt: DateTime
   + submitAnswer(itemId, ans): SessionResponse
   + computeResult(): LanguageProfile
@@ -140,11 +141,12 @@ class Item {
   - options: Json
   - correctAnswer: char
   - skill: Skill
-  - topicTag: String?
+  - topicTag: String
   - cefrTarget: CEFRLevel
   - irtB: float
   - irtA: float = 1.0 {Rasch}
   - status: ItemStatus
+  - originalSnapshot: Json {nullable}
   + probability(theta: float): float
   + fisherInformation(theta): float
   + transitionTo(next: ItemStatus): void
@@ -176,14 +178,14 @@ class ItemPackage {
   - reviewerId: UUID
   - confirmerId: UUID
   - status: PackageStatus
-  - dueAt: DateTime?
-  - sentAt: DateTime?
+  - dueAt: DateTime {nullable}
+  - sentAt: DateTime {nullable}
   + canSend(): boolean
   + isOverdue(at): boolean
 }
 class ItemReviewEvent {
   - id: UUID
-  - itemId: UUID?
+  - itemId: UUID
   - batchId: UUID
   - actorId: UUID
   - action: ReviewAction

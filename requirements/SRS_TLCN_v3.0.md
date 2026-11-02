@@ -412,6 +412,7 @@ CREATE TABLE items (
     content_hash    VARCHAR(64),                  -- v3.0 vòng 3: SHA-256 (hex) của nội dung + đáp án + giải thích đã chuẩn hóa (T1)
     batch_id        UUID NOT NULL REFERENCES item_batches(id),   -- lô sinh/import; bắt buộc (quyết định 16/10/2026), câu seed thuộc lô seed
     package_id      UUID REFERENCES item_packages(id),  -- gói A→B; NULL tới khi A gửi gói (đề xuất)
+    original_snapshot JSONB,                      -- bản gốc (content, options, correct_answer, giải thích) trước khi GV A sửa lần đầu; NULL nếu chưa sửa; để GV B/Admin xem diff (UCGV15, C3)
     -- Audit: chỉ item có status='FINAL_APPROVED' được CAT engine dùng (xem Mục 4.4)
 
     calibrated      BOOLEAN DEFAULT FALSE,   -- Đã calibrate thực tế chưa?
@@ -1535,5 +1536,6 @@ Hiện tại (TL): 1 trường duy nhất. Muốn đa trường ⇒ Khóa luận
 | XIV | R6 ghi chú; R12 viết lại; thêm R15 (phạm vi), R16 (chi phí API), R17 (Admin/B tập trung), R18 (xác nhận tất cả), R19 (khoảng irt_b), R20 (lọc trùng), R21 (bản quyền); bảng Must-have thêm F-23 đến F-28 | DC-27, DC-33, DC-34, DC-35 |
 | XV | 15.1 Partial Index; 15.3 thêm hàng gọi LLM và khóa API; 15.4 RBAC TEACHER/ADMIN thêm vai A/B | DC-29, DC-40 |
 | XVII | Thêm dòng v3.0 (vòng 3); chỉnh chú thích dòng v2.2 | — |
+| VI (6.2) | DDL items: thêm cột original_snapshot JSONB nullable (bản gốc trước khi GV A sửa lần đầu), phương án (2) của khoảng trống thiết kế ghi nhận 01/11/2026 | Tuần 7 (chờ ghi DECISIONS_LOG) |
 
 Chưa thực hiện trong bản này: Mục XII (lộ trình) chưa cập nhật tuần cho khối lượng mới (tạo tài khoản GV, kỳ thi, lưới tạm); sơ đồ thành phần/triển khai; hấp thụ các đề xuất v2.7 ngoài phạm vi trên. Các mục đó được ghi nợ đồng bộ tài liệu ở tracking. Vòng 3 chưa thực hiện thêm: cập nhật COMMITMENT_BASELINE.md cho phạm vi tăng (Q-11); sửa CLAUDE.md theo khoảng irt_b (Q-12); đổi tên trạng thái đã duyệt cũ trong mã backend và seed; Mục XII (lộ trình) chưa cập nhật tuần cho khối lượng sinh/duyệt đề; Class Diagram, Sequence, đặc tả Use Case và màn hình từ S26 do các tài liệu khác đảm nhiệm; Q-7 đến Q-10 còn chờ chốt.

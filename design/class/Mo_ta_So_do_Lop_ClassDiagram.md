@@ -14,13 +14,14 @@
 | 2026-09 → 2026-10-24 | Bản mô tả 47 lớp theo `Trang-1` (lưu ở `_ARCHIVE_20261026/design/class/`) |
 | 2026-10-26 | Thay bằng bản gọn 3 trang và bảng mô tả theo từng lược đồ |
 | 2026-10-27 | Thêm lại `irtA`, `TestMetadata`, method Admin/Teacher; bỏ `ItemBatch.createdAt`; thêm Mục 8–12 (quy tắc nghiệp vụ, đối chiếu `schema.prisma`, dữ liệu minh họa, module, tệp sinh tự động); sinh lại `ClassDiagram.puml/.mmd`; `schema.prisma` thêm khóa ngoại `ItemReviewEvent.packageId` |
+| 2026-11-02 | Đăng xếp lại vị trí và đường nối trên draw.io, bỏ ký hiệu `?` (dùng `{nullable}`); thêm `Item.originalSnapshot` và `TestSession.responses`; `schema.prisma` thêm `Item.originalSnapshot`; sinh lại `ClassDiagram.puml/.mmd`; ảnh PNG dựng lại bằng script |
 
 ---
 # BẢNG MÔ TẢ 3 CLASS DIAGRAM (bản đề xuất đã rút gọn — Tuần 7)
 
 > Mô tả bản `TLCN_ClassDiagram_Gon_Chuan_DeXuat.drawio.xml` (ảnh `TLCN_ClassDiagram_DeXuat_trang1/2/3.png`). **Chưa chốt** nên nằm ở `Tuan7/`, chưa thay bản chuẩn trong `docs-repo/`.
 > Nguồn nghĩa: SRS v3.0, `schema.prisma`, `Mo_ta_So_do_Lop_ClassDiagram.md`, CLAUDE.md. Chỗ nào **tôi suy ra từ tên/ngữ cảnh** mà chưa đối chiếu được văn bản gốc thì ghi *(suy ra)*.
-> Cách đọc: `-` thuộc tính, `+` phương thức, `/x` thuộc tính **suy ra** (tính khi cần, không lưu), `?` có thể rỗng (null), `◆` composition (bộ phận chết theo toàn thể), `▷` kế thừa, `→` association/phụ thuộc.
+> Cách đọc: `-` thuộc tính, `+` phương thức, `/x` thuộc tính **suy ra** (tính khi cần, không lưu), `{nullable}` có thể rỗng (null; UML không có ký hiệu `?`, nên chỉ đánh dấu `{nullable}` ở một số thuộc tính, các chỗ còn lại ghi trong cột Ý nghĩa), `◆` composition (bộ phận chết theo toàn thể), `▷` kế thừa, `→` association/phụ thuộc.
 
 ---
 
@@ -119,9 +120,10 @@ Một lần làm bài của một sinh viên trong một kỳ thi. Dữ liệu b
 | `student: Student` | Sinh viên làm bài |
 | `examRound: ExamRound` | Kỳ thi chứa phiên (bắt buộc từ v3.0) |
 | `status: SessionStatus` | `IN_PROGRESS` / `COMPLETED` / `ABANDONED` |
-| `thetaFinal: float?`, `seFinal: float?` | Năng lực θ và sai số chuẩn SE **cuối cùng**; rỗng khi đang thi (θ đang chạy nằm ở cache) |
-| `stoppingReason: StoppingReason?` | Vì sao dừng; rỗng khi chưa dừng |
-| `startedAt`, `completedAt?` | Bắt đầu / kết thúc |
+| `thetaFinal: float`, `seFinal: float` | Năng lực θ và sai số chuẩn SE **cuối cùng**; rỗng khi đang thi (θ đang chạy nằm ở cache) |
+| `stoppingReason: StoppingReason` | Vì sao dừng; rỗng khi chưa dừng |
+| `responses: List<SessionResponse>` | Các câu trả lời của phiên (trùng với đường composition tới `SessionResponse`; ở DB là quan hệ ngược, không phải cột) |
+| `startedAt`, `completedAt` | Bắt đầu / kết thúc |
 | `expiresAt: DateTime` | Hạn phiên = min(`startedAt` + `durationMinutes`, `closesAt`), tính một lần lúc bắt đầu |
 
 | Phương thức | Làm gì |
@@ -170,7 +172,7 @@ Không lưu trạng thái; mọi tham số (θ₀ = −0,5; ngưỡng SE 0,35; t
 | `+ pickNextSkill(cache): Skill` | Chọn kỹ năng kế tiếp theo round-robin cố định |
 | `+ selectNextItem(cache, pool): Item` | Lấy 5 câu `FINAL_APPROVED` có độ khó b gần θ nhất, chọn ngẫu nhiên đều 1 câu (chống lộ đề) |
 | `+ computeEAP(responses[]): AbilityEstimate` | Ước lượng θ theo EAP (lưới 41 điểm, prior N(0,1)); trả θ, SE, khoảng tin cậy 95% |
-| `+ checkStoppingCriterion(cache): StoppingReason?` | Kiểm tra điều kiện dừng; trả lý do hoặc rỗng nếu tiếp tục |
+| `+ checkStoppingCriterion(cache): StoppingReason` | Kiểm tra điều kiện dừng; trả lý do hoặc rỗng nếu tiếp tục |
 
 ### 2.6 `AbilityEstimate` `<<value object>>` — ước lượng năng lực
 `theta` (năng lực θ), `standardError` (SE; càng nhỏ càng chắc), `confidenceInterval95: float[]` (khoảng tin cậy 95%). Do `CATEngine.computeEAP` sinh ra và được `LanguageProfile` chứa.
@@ -221,10 +223,11 @@ Kết quả cuối của một phiên, là dữ liệu xuất cho EduZ (JSON Pro
 | Thuộc tính | Ý nghĩa |
 |---|---|
 | `content`, `options: Json`, `correctAnswer: char` | Nội dung, các lựa chọn, đáp án đúng |
-| `skill`, `topicTag?`, `cefrTarget` | Kỹ năng, chủ đề, mức CEFR hướng tới |
+| `skill`, `topicTag`, `cefrTarget` | Kỹ năng, chủ đề, mức CEFR hướng tới |
 | `irtB: float` | Độ khó b theo mô hình Rasch (khoảng hợp lệ −4…+4, cấu hình được) |
 | `irtA: float = 1.0 {Rasch}` | Độ phân biệt a, **cố định 1,0 cho mọi câu**: đây là điều kiện để mô hình là Rasch (1PL); nếu a thay đổi theo câu thì thành 2PL. `irtC` (đoán mò) không vẽ, thuộc Khóa luận |
 | `status: ItemStatus` | Vòng đời một chiều (xem 3.8); **chỉ `FINAL_APPROVED` được CAT chọn** |
+| `originalSnapshot: Json {nullable}` | Bản gốc của câu (nội dung, lựa chọn, đáp án, giải thích) chụp trước khi GV A sửa lần đầu; rỗng nếu chưa sửa. Dùng dựng "bản gốc so với bản A đã sửa" cho GV B và Admin (UCGV15, C3). Ở DB là cột `original_snapshot` |
 
 | Phương thức | Làm gì |
 |---|---|
@@ -242,11 +245,11 @@ Gom câu hỏi theo nguồn để kiểm và duyệt cùng nhau. Nguồn của c
 
 | Thuộc tính | Ý nghĩa |
 |---|---|
-| `name?` | Nhãn hiển thị (dùng cho lô seed theo bộ nguồn) |
+| `name` (có thể rỗng) | Nhãn hiển thị (dùng cho lô seed theo bộ nguồn) |
 | `source: ItemBatchSource` | `AI_GENERATED` hoặc `IMPORTED` |
 | `status: ItemBatchStatus` | Vị trí của lô trong quy trình (xem 3.8) |
 
-> Ba cột `skill?`, `cefrTarget?`, `requestedCount?` (đích và số lượng yêu cầu của lô AI sinh) **không vẽ trên lược đồ**; chúng chỉ nằm ở DB, tạo sau. Chủ đề của từng câu được biểu diễn bằng `Item.topicTag?`.
+> Ba cột `skill`, `cefrTarget`, `requestedCount` (đều có thể rỗng) (đích và số lượng yêu cầu của lô AI sinh) **không vẽ trên lược đồ**; chúng chỉ nằm ở DB, tạo sau. Chủ đề của từng câu được biểu diễn bằng `Item.topicTag?`.
 
 | Phương thức | Làm gì |
 |---|---|
@@ -262,7 +265,7 @@ Mỗi GV A có **một gói** trong một lô, tạo lúc Admin giao việc. A d
 | `reviewerId` | GV A (người duyệt/sửa) |
 | `confirmerId` | GV B (người xác nhận) |
 | `status: PackageStatus` | `OPEN` → `SENT` → `DONE` |
-| `sentAt?`, `dueAt?` | Ngày gửi và hạn xác nhận; rỗng khi gói còn `OPEN` |
+| `sentAt: DateTime {nullable}`, `dueAt: DateTime {nullable}` | Ngày gửi và hạn xác nhận; rỗng khi gói còn `OPEN` |
 
 | Phương thức | Làm gì |
 |---|---|
@@ -277,7 +280,7 @@ Một dòng cho mỗi lần kiểm một câu ở một điểm kiểm.
 | `checkpoint: CheckPoint` | Điểm kiểm: `C1` (sau khi AI sinh), `C2` (khi import file), `C3` (trước import cuối) |
 | `level: CheckLevel` | `PASS` / `SOFT` (cảnh báo) / `HARD` (lỗi nặng) |
 | `reasonCodes: String[]` | Mã lý do (sai đáp án, nghi trùng…) |
-| `suspectedDuplicateId?` | Câu nghi bị trùng (nếu lý do là trùng) |
+| `suspectedDuplicateId` | Câu nghi bị trùng (nếu lý do là trùng) |
 | `checkedAt` | Lúc kiểm |
 
 | Phương thức | Làm gì |
@@ -290,7 +293,7 @@ Mỗi thao tác duyệt/giao việc để lại một dòng (truy vết, phục 
 | Thuộc tính | Ý nghĩa |
 |---|---|
 | `batchId` | Lô liên quan |
-| `itemId?` | Câu liên quan; rỗng với thao tác tác động nhiều câu/gói (`CONFIRM_ALL`, `REASSIGN`, `EXTEND`, `FORCE_SEND`) |
+| `itemId` | Câu liên quan (có thể rỗng); rỗng với thao tác tác động nhiều câu/gói (`CONFIRM_ALL`, `REASSIGN`, `EXTEND`, `FORCE_SEND`) |
 | `actorId` | Người thực hiện |
 | `action: ReviewAction` | Hành động |
 | `createdAt` | Lúc xảy ra |
