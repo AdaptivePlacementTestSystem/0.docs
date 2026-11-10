@@ -1,6 +1,6 @@
 @startuml PlacementTestClassModel
 ' Sinh tu dong tu TLCN.drawio.xml (3 trang, ban gon 26-27/10/2026) bang Tuan7/scripts/gen_uml.py. KHONG sua tay: sua drawio roi sinh lai.
-' Khong ve: ExamRoundParticipant, ItemBatchAssignment, ItemReviewAssignment, ItemEmbedding (bang luu tru, xem schema.prisma).
+' Khong ve: ExamRoundParticipant, ItemEmbedding (bang luu tru, xem schema.prisma).
 hide circle
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
@@ -25,8 +25,8 @@ class Student {
 }
 class Teacher {
   - teacherCode: String
-  + reviewItem(item, action): void
-  + submitPackage(pkg): void
+  + reviewItem(item, action, comment): void
+  + confirmItem(item, action, comment): void
 }
 class Admin {
   + createItemBatch(src): ItemBatch
@@ -146,10 +146,14 @@ class Item {
   - irtB: float
   - irtA: float = 1.0 {Rasch}
   - status: ItemStatus
-  - originalSnapshot: Json {nullable}
+  - reviewerId: UUID {nullable}
+  - confirmerId: UUID {nullable}
+  - firstReview: FirstReviewDetail {nullable}
+  - secondReview: SecondReviewDetail {nullable}
   + probability(theta: float): float
   + fisherInformation(theta): float
   + transitionTo(next: ItemStatus): void
+  + isOverdue(round: int, at: DateTime): boolean
 }
 class Explanation {
   - id: UUID
@@ -173,15 +177,18 @@ class ItemBatch {
   + canAssign(): boolean
   + canFinalize(): boolean
 }
-class ItemPackage {
-  - id: UUID
-  - reviewerId: UUID
-  - confirmerId: UUID
-  - status: PackageStatus
-  - dueAt: DateTime {nullable}
-  - sentAt: DateTime {nullable}
-  + canSend(): boolean
-  + isOverdue(at): boolean
+class FirstReviewDetail <<DataType>> {
+  - dueAt: DateTime
+  - action: ReviewAction {nullable}
+  - reviewedAt: DateTime {nullable}
+  - comment: String {nullable}
+  - originalSnapshot: Json {nullable}
+}
+class SecondReviewDetail <<DataType>> {
+  - dueAt: DateTime
+  - action: ReviewAction {nullable}
+  - confirmedAt: DateTime {nullable}
+  - comment: String {nullable}
 }
 class ItemReviewEvent {
   - id: UUID
@@ -246,11 +253,6 @@ enum ItemStatus {
   REJECTED
   AI_REJECTED
 }
-enum PackageStatus {
-  OPEN
-  SENT
-  DONE
-}
 enum ReviewAction {
   APPROVE
   REJECT
@@ -258,9 +260,8 @@ enum ReviewAction {
   REMOVE
   CONFIRM_ALL
   IMPORT
+  ASSIGN
   REASSIGN
-  EXTEND
-  FORCE_SEND
   ACCEPT_FLAG
 }
 enum SessionState {
@@ -293,7 +294,7 @@ User <|-- Student
 User <|-- Teacher
 User <|-- Admin
 ExamRound "0..*" -- "0..*" Student : registered
-ExamRound "1" --> "0..*" TestSession
+ExamRound "1" *-- "0..*" TestSession
 Student "1" --> "0..*" TestSession
 Admin --> ExamRound : creates
 TestSession "1" *-- "1..*" SessionResponse
@@ -312,10 +313,9 @@ LanguageProfile "1" *-- "1" TestMetadata
 Item "1" *-- "0..1" Explanation
 Item "1" *-- "0..*" ItemCheckResult
 ItemBatch "1" *-- "1..*" Item
-ItemBatch "1" *-- "1..*" ItemPackage
-ItemPackage "0..1" --> "0..*" Item
-ItemPackage "0..1" --> "0..*" ItemReviewEvent
+Item "1" *-- "0..1" FirstReviewDetail
+Item "1" *-- "0..1" SecondReviewDetail
 Item "0..1" --> "0..*" ItemReviewEvent
 Admin --> ItemBatch : creates
-Teacher --> ItemPackage : reviews
+Teacher --> Item : reviews / confirms
 @enduml

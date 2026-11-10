@@ -11,7 +11,7 @@ Chú thích trạng thái: ✅ đã có mã · 🟡 có nhưng còn theo mô hì
 
 | Đường dẫn | Vai trò |
 |---|---|
-| `prisma/schema.prisma` | Nguồn chân lý DB (v3.0: lô/gói duyệt đề, kỳ thi, 6 trạng thái Item) |
+| `prisma/schema.prisma` | Nguồn chân lý DB (v3.0: lô và duyệt đề theo từng câu (không còn gói), kỳ thi, 6 trạng thái Item) |
 | `prisma/custom_migrations.sql` | Partial index, CHECK (FINAL_APPROVED, kỳ thi 5–180 phút, giao việc ≥ 1 ngày, `content_hash`) |
 | `prisma/seed.ts` | Dữ liệu giả: Admin/GV/SV, kỳ thi mẫu, lô seed, 30 câu (mật khẩu từ env, argon2) |
 | `src/main.ts`, `src/app.module.ts` | Khởi động, prefix `api/v1`, ValidationPipe, filter, nối module |
@@ -38,7 +38,7 @@ Chú thích trạng thái: ✅ đã có mã · 🟡 có nhưng còn theo mô hì
 | `user-import` | — | — | — | — | ⬜ rỗng |
 | `user-admin` | — | — | — | — | ⬜ rỗng |
 | `mail` | — | — | — | — | ⬜ rỗng |
-| `item-generation` | — | — | — | — | ⬜ rỗng (lô, gói, duyệt A/B, C1–C3) |
+| `item-generation` | — | — | — | — | ⬜ rỗng (lô, duyệt A/B theo từng câu, C1–C3) |
 | `llm-gateway` | — | — | — | — | ⬜ rỗng |
 
 ### 1.3 Cây rút gọn

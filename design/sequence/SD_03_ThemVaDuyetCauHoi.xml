@@ -10,7 +10,7 @@
 		<UML:Model name="EA Model" xmi.id="MX_6572E673_62AA_47CD_8FA5_58943633C209">
 			<UML:Namespace.ownedElement>
 				<UML:Class name="EARootClass" xmi.id="EAID_11111111_5487_4080_A7F4_41526CB0AA00" isRoot="true" isLeaf="false" isAbstract="false"/>
-				<UML:Package name="sd 03 GV A duyet va gui goi, GV B confirm" xmi.id="EAPK_9A52682F_E7FB_4B8E_9B36_B896B537D230" isRoot="false" isLeaf="false" isAbstract="false" visibility="public">
+				<UML:Package name="sd 03 GV A duyet, GV B confirm" xmi.id="EAPK_9A52682F_E7FB_4B8E_9B36_B896B537D230" isRoot="false" isLeaf="false" isAbstract="false" visibility="public">
 					<UML:ModelElement.taggedValue>
 						<UML:TaggedValue tag="parent" value="EAPK_C6E96C5F_81FC_4ac1_AE5F_D5001EA62203"/>
 						<UML:TaggedValue tag="created" value="2026-10-13 00:00:00"/>
@@ -47,7 +47,7 @@
 										<UML:TaggedValue tag="date_modified" value="2026-10-13 00:00:00"/>
 										<UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
 										<UML:TaggedValue tag="tagged" value="0"/>
-										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet va gui goi, GV B confirm"/>
+										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet, GV B confirm"/>
 										<UML:TaggedValue tag="phase" value="1.0"/>
 										<UML:TaggedValue tag="author" value="THIEN DANG"/>
 										<UML:TaggedValue tag="complexity" value="1"/>
@@ -76,7 +76,7 @@
 										<UML:TaggedValue tag="date_modified" value="2026-10-13 00:00:00"/>
 										<UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
 										<UML:TaggedValue tag="tagged" value="0"/>
-										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet va gui goi, GV B confirm"/>
+										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet, GV B confirm"/>
 										<UML:TaggedValue tag="phase" value="1.0"/>
 										<UML:TaggedValue tag="author" value="THIEN DANG"/>
 										<UML:TaggedValue tag="complexity" value="1"/>
@@ -105,7 +105,7 @@
 										<UML:TaggedValue tag="date_modified" value="2026-10-13 00:00:00"/>
 										<UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
 										<UML:TaggedValue tag="tagged" value="0"/>
-										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet va gui goi, GV B confirm"/>
+										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet, GV B confirm"/>
 										<UML:TaggedValue tag="phase" value="1.0"/>
 										<UML:TaggedValue tag="author" value="THIEN DANG"/>
 										<UML:TaggedValue tag="complexity" value="1"/>
@@ -118,7 +118,7 @@
 										<UML:TaggedValue tag="$ea_xref_property" value="$XREFPROP=$XID={F9DB3BEC-E094-4376-A004-8A981DA458BB}$XID;$NAM=Stereotypes$NAM;$TYP=element property$TYP;$VIS=Public$VIS;$PAR=0$PAR;$DES=@STEREO;Name=control;FQName=EAUML::control;@ENDSTEREO;$DES;$CLT={10849100-E946-41E6-8494-0B8A3E14F52F}$CLT;$SUP=&lt;none&gt;$SUP;$ENDXREF;"/>
 									</UML:ModelElement.taggedValue>
 								</UML:ClassifierRole>
-								<UML:ClassifierRole name="ItemReviewAssignment" xmi.id="EAID_700FCFA8_7E11_4552_AFCD_F32E590236EC" visibility="public" base="EAID_11111111_5487_4080_A7F4_41526CB0AA00">
+								<UML:ClassifierRole name="Item (reviewer_id, first_review)" xmi.id="EAID_700FCFA8_7E11_4552_AFCD_F32E590236EC" visibility="public" base="EAID_11111111_5487_4080_A7F4_41526CB0AA00">
 									<UML:ModelElement.stereotype>
 										<UML:Stereotype name="entity"/>
 									</UML:ModelElement.stereotype>
@@ -134,7 +134,7 @@
 										<UML:TaggedValue tag="date_modified" value="2026-10-13 00:00:00"/>
 										<UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
 										<UML:TaggedValue tag="tagged" value="0"/>
-										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet va gui goi, GV B confirm"/>
+										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet, GV B confirm"/>
 										<UML:TaggedValue tag="phase" value="1.0"/>
 										<UML:TaggedValue tag="author" value="THIEN DANG"/>
 										<UML:TaggedValue tag="complexity" value="1"/>
@@ -147,7 +147,7 @@
 										<UML:TaggedValue tag="$ea_xref_property" value="$XREFPROP=$XID={FBF01E5F-0B2C-45B2-9BC5-3BEAC073F043}$XID;$NAM=Stereotypes$NAM;$TYP=element property$TYP;$VIS=Public$VIS;$PAR=0$PAR;$DES=@STEREO;Name=entity;FQName=EAUML::entity;@ENDSTEREO;$DES;$CLT={700FCFA8-7E11-4552-AFCD-F32E590236EC}$CLT;$SUP=&lt;none&gt;$SUP;$ENDXREF;"/>
 									</UML:ModelElement.taggedValue>
 								</UML:ClassifierRole>
-								<UML:ClassifierRole name="ItemPackage" xmi.id="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" visibility="public" base="EAID_11111111_5487_4080_A7F4_41526CB0AA00">
+								<UML:ClassifierRole name="Item (confirmer_id, second_review)" xmi.id="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" visibility="public" base="EAID_11111111_5487_4080_A7F4_41526CB0AA00">
 									<UML:ModelElement.stereotype>
 										<UML:Stereotype name="entity"/>
 									</UML:ModelElement.stereotype>
@@ -163,7 +163,7 @@
 										<UML:TaggedValue tag="date_modified" value="2026-10-13 00:00:00"/>
 										<UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
 										<UML:TaggedValue tag="tagged" value="0"/>
-										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet va gui goi, GV B confirm"/>
+										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet, GV B confirm"/>
 										<UML:TaggedValue tag="phase" value="1.0"/>
 										<UML:TaggedValue tag="author" value="THIEN DANG"/>
 										<UML:TaggedValue tag="complexity" value="1"/>
@@ -192,7 +192,7 @@
 										<UML:TaggedValue tag="date_modified" value="2026-10-13 00:00:00"/>
 										<UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
 										<UML:TaggedValue tag="tagged" value="0"/>
-										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet va gui goi, GV B confirm"/>
+										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet, GV B confirm"/>
 										<UML:TaggedValue tag="phase" value="1.0"/>
 										<UML:TaggedValue tag="author" value="THIEN DANG"/>
 										<UML:TaggedValue tag="complexity" value="1"/>
@@ -221,7 +221,7 @@
 										<UML:TaggedValue tag="date_modified" value="2026-10-13 00:00:00"/>
 										<UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
 										<UML:TaggedValue tag="tagged" value="0"/>
-										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet va gui goi, GV B confirm"/>
+										<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet, GV B confirm"/>
 										<UML:TaggedValue tag="phase" value="1.0"/>
 										<UML:TaggedValue tag="author" value="THIEN DANG"/>
 										<UML:TaggedValue tag="complexity" value="1"/>
@@ -370,7 +370,7 @@
 												<UML:TaggedValue tag="mt" value="Guard RBAC: role TEACHER; chi tra ve cau duoc giao cho minh (NOT_ASSIGNED 403)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="findByAssignee(assigneeId, status=DRAFT)" xmi.id="EAID_F47D1FAB_DB67_4AE4_AD23_1FDB902C41CC" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_700FCFA8_7E11_4552_AFCD_F32E590236EC">
+										<UML:Message name="findByReviewer(reviewerId, status=DRAFT) - items.reviewer_id" xmi.id="EAID_F47D1FAB_DB67_4AE4_AD23_1FDB902C41CC" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_700FCFA8_7E11_4552_AFCD_F32E590236EC">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -387,7 +387,7 @@
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="4"/>
 												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_targetName" value="Item (reviewer_id, first_review)"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_sourceID" value="6"/>
@@ -411,7 +411,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-250;PtEndX=0;PtEndY=-250;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="findByAssignee(assigneeId, status=DRAFT)"/>
+												<UML:TaggedValue tag="mt" value="findByReviewer(reviewerId, status=DRAFT) - items.reviewer_id"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Tra ve danh sach cau + co mem + due_at()" xmi.id="EAID_CA8E0F6D_EE99_4EF4_BEA0_95E79F3C3B26" visibility="public" sender="EAID_700FCFA8_7E11_4552_AFCD_F32E590236EC" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
@@ -430,7 +430,7 @@
 												<UML:TaggedValue tag="privatedata3" value="Call"/>
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="5"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_sourceName" value="Item (reviewer_id, first_review)"/>
 												<UML:TaggedValue tag="ea_targetName" value="ItemReviewService"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
@@ -1162,7 +1162,7 @@
 												<UML:TaggedValue tag="mt" value="Xac nhan cap nhat()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="markDecided(itemId) va ghi item_review_events APPROVE" xmi.id="EAID_C5203FF6_E22B_4F44_A952_0F98C6455330" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_700FCFA8_7E11_4552_AFCD_F32E590236EC">
+										<UML:Message name="ghi first_review (action=APPROVE, reviewedAt, comment) va item_review_events APPROVE" xmi.id="EAID_C5203FF6_E22B_4F44_A952_0F98C6455330" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_700FCFA8_7E11_4552_AFCD_F32E590236EC">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1179,7 +1179,7 @@
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="22"/>
 												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_targetName" value="Item (reviewer_id, first_review)"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_sourceID" value="6"/>
@@ -1203,7 +1203,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1150;PtEndX=0;PtEndY=-1150;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="markDecided(itemId) va ghi item_review_events APPROVE"/>
+												<UML:TaggedValue tag="mt" value="ghi first_review (action=APPROVE, reviewedAt, comment) va item_review_events APPROVE"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Voi cau khong dat: Click Tu choi (khong luu ly do)" xmi.id="EAID_ABED5E15_917B_42E1_9206_C9C6B3A47DF8" visibility="public" sender="EAID_C1C56E6E_5EF8_46ED_8C50_4A72903D3ABF" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
@@ -1294,7 +1294,7 @@
 												<UML:TaggedValue tag="mt" value="rejectItem(itemId) - POST /items/:id/reject"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="updateStatus(REJECTED) - cau bi loai khong vao goi" xmi.id="EAID_FE85447A_1CE2_491F_935A_2CBE050F12B9" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
+										<UML:Message name="updateStatus(REJECTED); ghi first_review (action=REJECT, reviewedAt, comment) va item_review_events REJECT" xmi.id="EAID_FE85447A_1CE2_491F_935A_2CBE050F12B9" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1335,7 +1335,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1300;PtEndX=0;PtEndY=-1300;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="updateStatus(REJECTED) - cau bi loai khong vao goi"/>
+												<UML:TaggedValue tag="mt" value="updateStatus(REJECTED); ghi first_review (action=REJECT, reviewedAt, comment) va item_review_events REJECT"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_FD5D238B_1436_4EF6_AA1E_549D7E0B7516" visibility="public" sender="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
@@ -1426,7 +1426,7 @@
 												<UML:TaggedValue tag="mt" value="Tra ve tien do: da quyet x tren y cau()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Hien thi tien do; nut Gui cho B chi bat khi moi cau da co quyet dinh()" xmi.id="EAID_CFB29DE0_4C54_4264_90F7_3A1AA1697517" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C1C56E6E_5EF8_46ED_8C50_4A72903D3ABF">
+										<UML:Message name="Hien thi tien do duyet()" xmi.id="EAID_CFB29DE0_4C54_4264_90F7_3A1AA1697517" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C1C56E6E_5EF8_46ED_8C50_4A72903D3ABF">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1467,491 +1467,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1450;PtEndX=0;PtEndY=-1450;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Hien thi tien do; nut Gui cho B chi bat khi moi cau da co quyet dinh()"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Click Gui cho B" xmi.id="EAID_5879B4AD_7A1A_4E70_AAF5_4D13C5253AF9" visibility="public" sender="EAID_C1C56E6E_5EF8_46ED_8C50_4A72903D3ABF" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="29"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="29"/>
-												<UML:TaggedValue tag="ea_sourceName" value="Giang vien A"/>
-												<UML:TaggedValue tag="ea_targetName" value="Trang Hop viec"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Actor"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="3"/>
-												<UML:TaggedValue tag="ea_targetID" value="5"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1500;PtEndX=0;PtEndY=-1500;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Click Gui cho B"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="sendPackage(reviewerId) - POST /item-packages/mine/send" xmi.id="EAID_E71C9207_0CF4_4EDE_B82E_FCEFFD9EBEA3" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="30"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="30"/>
-												<UML:TaggedValue tag="ea_sourceName" value="Trang Hop viec"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="5"/>
-												<UML:TaggedValue tag="ea_targetID" value="6"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1550;PtEndX=0;PtEndY=-1550;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="sendPackage(reviewerId) - POST /item-packages/mine/send"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="countUndecided(reviewerId, batchId) - con cau chua quyet thi loi PACKAGE_INCOMPLETE (409)" xmi.id="EAID_4894AE45_227D_4BDD_BDB2_6FA7154406CC" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_700FCFA8_7E11_4552_AFCD_F32E590236EC">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="31"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="31"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewAssignment"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="6"/>
-												<UML:TaggedValue tag="ea_targetID" value="8"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1600;PtEndX=0;PtEndY=-1600;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="countUndecided(reviewerId, batchId) - con cau chua quyet thi loi PACKAGE_INCOMPLETE (409)"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Tra ve 0 cau chua quyet()" xmi.id="EAID_545E1A73_168A_4092_8F27_6E0ABE7FA5A0" visibility="public" sender="EAID_700FCFA8_7E11_4552_AFCD_F32E590236EC" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="32"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="32"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewAssignment"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="8"/>
-												<UML:TaggedValue tag="ea_targetID" value="6"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1650;PtEndX=0;PtEndY=-1650;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Tra ve 0 cau chua quyet()"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="create(batchId, reviewerId, confirmerId, status=SENT, due_at = cuoi ngay (ngay gui + confirmDays))" xmi.id="EAID_AD7F11D0_56E0_412E_A3D4_B5E73C380072" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="33"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="33"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemPackage"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="6"/>
-												<UML:TaggedValue tag="ea_targetID" value="9"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1700;PtEndX=0;PtEndY=-1700;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="create(batchId, reviewerId, confirmerId, status=SENT, due_at = cuoi ngay (ngay gui + confirmDays))"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Tra ve goi da tao()" xmi.id="EAID_94AD0034_311A_4825_A438_FE0436A602DC" visibility="public" sender="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="34"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="34"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemPackage"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="9"/>
-												<UML:TaggedValue tag="ea_targetID" value="6"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1750;PtEndX=0;PtEndY=-1750;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Tra ve goi da tao()"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="attachToPackage(cac cau FIRST_APPROVED cua A, packageId)" xmi.id="EAID_421220B2_AC50_4074_B47A_DAEB01D0FBAF" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="35"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="35"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="Item"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="6"/>
-												<UML:TaggedValue tag="ea_targetID" value="10"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1800;PtEndX=0;PtEndY=-1800;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="attachToPackage(cac cau FIRST_APPROVED cua A, packageId)"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_C368A4E6_971B_4111_B364_353B7BD98EC5" visibility="public" sender="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="36"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="36"/>
-												<UML:TaggedValue tag="ea_sourceName" value="Item"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="10"/>
-												<UML:TaggedValue tag="ea_targetID" value="6"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1850;PtEndX=0;PtEndY=-1850;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Xac nhan cap nhat()"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="scheduleReminder(packageId, due_at - 24 gio) va thong bao cho GV B" xmi.id="EAID_0DAB4859_564C_49E0_98BF_B8278A30904D" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_6A32E14C_F447_47B9_9DA9_C52BA2648464">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="37"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="37"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="BullMQ"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="6"/>
-												<UML:TaggedValue tag="ea_targetID" value="11"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1900;PtEndX=0;PtEndY=-1900;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="scheduleReminder(packageId, due_at - 24 gio) va thong bao cho GV B"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Tra ve goi da gui (A khong sua lai cac cau trong goi)()" xmi.id="EAID_34CA529F_B853_426D_A511_76AEF980F0E6" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="38"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="38"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="Trang Hop viec"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="6"/>
-												<UML:TaggedValue tag="ea_targetID" value="5"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1950;PtEndX=0;PtEndY=-1950;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Tra ve goi da gui (A khong sua lai cac cau trong goi)()"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Hien thi Da gui goi cho B()" xmi.id="EAID_834590CF_6344_4769_8713_A92B55BC2D71" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C1C56E6E_5EF8_46ED_8C50_4A72903D3ABF">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="39"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="39"/>
-												<UML:TaggedValue tag="ea_sourceName" value="Trang Hop viec"/>
-												<UML:TaggedValue tag="ea_targetName" value="Giang vien A"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Actor"/>
-												<UML:TaggedValue tag="ea_sourceID" value="5"/>
-												<UML:TaggedValue tag="ea_targetID" value="3"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2000;PtEndX=0;PtEndY=-2000;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Hien thi Da gui goi cho B()"/>
+												<UML:TaggedValue tag="mt" value="Hien thi tien do duyet()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Mo Hop viec - Can confirm()" xmi.id="EAID_05293D27_156A_4C8D_BD53_16E0C9A9DE44" visibility="public" sender="EAID_F286F0BF_8671_436A_A0D4_608434BA761C" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
@@ -1998,7 +1514,7 @@
 												<UML:TaggedValue tag="mt" value="Mo Hop viec - Can confirm()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="listConfirmPackages(confirmerId) - GET /me/confirm-packages" xmi.id="EAID_FA6EA7B3_7A0B_48D0_8DE2_6F6420FB0681" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="listConfirmTasks(confirmerId) - GET /me/confirm-tasks [cho xac nhan: ten route]" xmi.id="EAID_FA6EA7B3_7A0B_48D0_8DE2_6F6420FB0681" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2039,10 +1555,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2100;PtEndX=0;PtEndY=-2100;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="listConfirmPackages(confirmerId) - GET /me/confirm-packages"/>
+												<UML:TaggedValue tag="mt" value="listConfirmTasks(confirmerId) - GET /me/confirm-tasks [cho xac nhan: ten route]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Guard RBAC: role TEACHER; chi tra ve goi gui cho minh, chi doc (NOT_ASSIGNED 403)()" xmi.id="EAID_C13395AD_C7A3_48CA_828F_EB0664F21F23" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="Guard RBAC: role TEACHER; chi tra ve cau duoc giao cho minh (confirmer_id), chi doc (NOT_ASSIGNED 403)()" xmi.id="EAID_C13395AD_C7A3_48CA_828F_EB0664F21F23" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2083,10 +1599,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2150;PtEndX=0;PtEndY=-2150;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Guard RBAC: role TEACHER; chi tra ve goi gui cho minh, chi doc (NOT_ASSIGNED 403)()"/>
+												<UML:TaggedValue tag="mt" value="Guard RBAC: role TEACHER; chi tra ve cau duoc giao cho minh (confirmer_id), chi doc (NOT_ASSIGNED 403)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="findByConfirmer(confirmerId)" xmi.id="EAID_3218E14E_8ABA_4ABF_8E0A_68A838C2B27B" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC">
+										<UML:Message name="findByConfirmer(confirmerId) - items.confirmer_id [cho xac nhan: dieu kien B thay cau, vd A da duyet cau do?]" xmi.id="EAID_3218E14E_8ABA_4ABF_8E0A_68A838C2B27B" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2103,7 +1619,7 @@
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="43"/>
 												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemPackage"/>
+												<UML:TaggedValue tag="ea_targetName" value="Item (confirmer_id, second_review)"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_sourceID" value="6"/>
@@ -2127,10 +1643,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2200;PtEndX=0;PtEndY=-2200;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="findByConfirmer(confirmerId)"/>
+												<UML:TaggedValue tag="mt" value="findByConfirmer(confirmerId) - items.confirmer_id [cho xac nhan: dieu kien B thay cau, vd A da duyet cau do?]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Tra ve cac goi va cau trong goi()" xmi.id="EAID_138FEBFB_DC1B_4079_8C36_C5D8B6D698FD" visibility="public" sender="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="Tra ve cac cau duoc giao cho B()" xmi.id="EAID_138FEBFB_DC1B_4079_8C36_C5D8B6D698FD" visibility="public" sender="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2146,7 +1662,7 @@
 												<UML:TaggedValue tag="privatedata3" value="Call"/>
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="44"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemPackage"/>
+												<UML:TaggedValue tag="ea_sourceName" value="Item (confirmer_id, second_review)"/>
 												<UML:TaggedValue tag="ea_targetName" value="ItemReviewService"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
@@ -2171,10 +1687,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2250;PtEndX=0;PtEndY=-2250;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Tra ve cac goi va cau trong goi()"/>
+												<UML:TaggedValue tag="mt" value="Tra ve cac cau duoc giao cho B()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Tra ve tung goi (moi A mot goi)()" xmi.id="EAID_2B5A6390_346B_4CD0_809C_7335483628EC" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
+										<UML:Message name="Tra ve danh sach cau + han (second_review.dueAt)()" xmi.id="EAID_2B5A6390_346B_4CD0_809C_7335483628EC" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2215,10 +1731,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2300;PtEndX=0;PtEndY=-2300;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Tra ve tung goi (moi A mot goi)()"/>
+												<UML:TaggedValue tag="mt" value="Tra ve danh sach cau + han (second_review.dueAt)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Hien thi cau, co mem, dau A da sua va ban goc so ban sua()" xmi.id="EAID_3FAAD746_52FA_463A_86F8_72294AFD5489" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_F286F0BF_8671_436A_A0D4_608434BA761C">
+										<UML:Message name="Hien thi cau, co mem, dau A da sua va ban goc (first_review.originalSnapshot) so ban sua()" xmi.id="EAID_3FAAD746_52FA_463A_86F8_72294AFD5489" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_F286F0BF_8671_436A_A0D4_608434BA761C">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2259,7 +1775,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2350;PtEndX=0;PtEndY=-2350;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Hien thi cau, co mem, dau A da sua va ban goc so ban sua()"/>
+												<UML:TaggedValue tag="mt" value="Hien thi cau, co mem, dau A da sua va ban goc (first_review.originalSnapshot) so ban sua()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Voi tung cau: Click Xac nhan" xmi.id="EAID_D619D637_FA32_412A_A5A2_48278AC0CD9E" visibility="public" sender="EAID_F286F0BF_8671_436A_A0D4_608434BA761C" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
@@ -2350,7 +1866,7 @@
 												<UML:TaggedValue tag="mt" value="confirmItem(itemId) - POST /items/:id/confirm"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="updateStatus(SECOND_APPROVED)" xmi.id="EAID_AE954B4D_F084_40DF_88FC_A36AA8183C6D" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
+										<UML:Message name="updateStatus(SECOND_APPROVED); ghi second_review (action=CONFIRM, confirmedAt, comment) va item_review_events CONFIRM" xmi.id="EAID_AE954B4D_F084_40DF_88FC_A36AA8183C6D" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2391,7 +1907,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2500;PtEndX=0;PtEndY=-2500;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="updateStatus(SECOND_APPROVED)"/>
+												<UML:TaggedValue tag="mt" value="updateStatus(SECOND_APPROVED); ghi second_review (action=CONFIRM, confirmedAt, comment) va item_review_events CONFIRM"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_E4ECB90A_8423_408F_80C2_CBFA5AA1B4B4" visibility="public" sender="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
@@ -2526,7 +2042,7 @@
 												<UML:TaggedValue tag="mt" value="removeItem(itemId) - POST /items/:id/remove"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="updateStatus(REJECTED)" xmi.id="EAID_CF51B71C_B96A_46DA_AAB9_0043C5C9C90F" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
+										<UML:Message name="updateStatus(REJECTED); ghi second_review (action=REMOVE, confirmedAt, comment) va item_review_events REMOVE" xmi.id="EAID_CF51B71C_B96A_46DA_AAB9_0043C5C9C90F" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2567,7 +2083,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2700;PtEndX=0;PtEndY=-2700;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="updateStatus(REJECTED)"/>
+												<UML:TaggedValue tag="mt" value="updateStatus(REJECTED); ghi second_review (action=REMOVE, confirmedAt, comment) va item_review_events REMOVE"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_C63B36B7_B5D7_4200_B2A5_4E4C24EF2336" visibility="public" sender="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
@@ -2658,7 +2174,7 @@
 												<UML:TaggedValue tag="mt" value="Click Xac nhan tat ca cau con lai"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="confirmAll(packageId) - POST /item-packages/:id/confirm-all" xmi.id="EAID_D1CC6F54_858A_4D92_A1FF_4D38A2538340" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="confirmAll(confirmerId) - POST /items/confirm-all [cho xac nhan: route va pham vi]" xmi.id="EAID_D1CC6F54_858A_4D92_A1FF_4D38A2538340" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2699,10 +2215,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2850;PtEndX=0;PtEndY=-2850;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="confirmAll(packageId) - POST /item-packages/:id/confirm-all"/>
+												<UML:TaggedValue tag="mt" value="confirmAll(confirmerId) - POST /items/confirm-all [cho xac nhan: route va pham vi]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="updateStatus(SECOND_APPROVED) cho cac cau chua quyet trong goi; ghi item_review_events CONFIRM_ALL" xmi.id="EAID_01FD839B_94D9_409D_8F65_2823B9374378" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
+										<UML:Message name="updateStatus(SECOND_APPROVED) cho cac cau chua quyet cua B; ghi second_review va item_review_events CONFIRM_ALL" xmi.id="EAID_01FD839B_94D9_409D_8F65_2823B9374378" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2743,7 +2259,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2900;PtEndX=0;PtEndY=-2900;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="updateStatus(SECOND_APPROVED) cho cac cau chua quyet trong goi; ghi item_review_events CONFIRM_ALL"/>
+												<UML:TaggedValue tag="mt" value="updateStatus(SECOND_APPROVED) cho cac cau chua quyet cua B; ghi second_review va item_review_events CONFIRM_ALL"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_D82709EC_EBA4_49F3_9C10_FE5018A1EFA3" visibility="public" sender="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
@@ -2790,95 +2306,7 @@
 												<UML:TaggedValue tag="mt" value="Xac nhan cap nhat()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="updateStatus(DONE) khi moi cau trong goi da co quyet dinh" xmi.id="EAID_A904CFDF_0B2B_4EEC_A5FE_4544C305582B" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="59"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="59"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemPackage"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="6"/>
-												<UML:TaggedValue tag="ea_targetID" value="9"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-3000;PtEndX=0;PtEndY=-3000;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="updateStatus(DONE) khi moi cau trong goi da co quyet dinh"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_2CF2EF35_FC4C_4941_BAC1_370145EA29EA" visibility="public" sender="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="60"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="60"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemPackage"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="9"/>
-												<UML:TaggedValue tag="ea_targetID" value="6"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-3050;PtEndX=0;PtEndY=-3050;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Xac nhan cap nhat()"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Tra ve goi hoan tat()" xmi.id="EAID_52E4C4F5_2D5D_46BD_B9BC_D6B6B00AD08B" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
+										<UML:Message name="Tra ve ket qua xac nhan()" xmi.id="EAID_52E4C4F5_2D5D_46BD_B9BC_D6B6B00AD08B" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2919,10 +2347,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-3100;PtEndX=0;PtEndY=-3100;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Tra ve goi hoan tat()"/>
+												<UML:TaggedValue tag="mt" value="Tra ve ket qua xac nhan()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Hien thi Goi hoan tat - cau SECOND_APPROVED cho Admin kiem tra va import()" xmi.id="EAID_F63B31C9_D8C7_4658_9047_FF167484365A" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_F286F0BF_8671_436A_A0D4_608434BA761C">
+										<UML:Message name="Hien thi cau SECOND_APPROVED cho Admin kiem tra va import()" xmi.id="EAID_F63B31C9_D8C7_4658_9047_FF167484365A" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_F286F0BF_8671_436A_A0D4_608434BA761C">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2963,7 +2391,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-3150;PtEndX=0;PtEndY=-3150;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Hien thi Goi hoan tat - cau SECOND_APPROVED cho Admin kiem tra va import()"/>
+												<UML:TaggedValue tag="mt" value="Hien thi cau SECOND_APPROVED cho Admin kiem tra va import()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 									</UML:Interaction.message>
@@ -2982,7 +2410,7 @@
 								<UML:TaggedValue tag="date_modified" value="2026-10-13 00:00:00"/>
 								<UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
 								<UML:TaggedValue tag="tagged" value="0"/>
-								<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet va gui goi, GV B confirm"/>
+								<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet, GV B confirm"/>
 								<UML:TaggedValue tag="phase" value="1.0"/>
 								<UML:TaggedValue tag="author" value="THIEN DANG"/>
 								<UML:TaggedValue tag="complexity" value="1"/>
@@ -3005,7 +2433,7 @@
 								<UML:TaggedValue tag="date_modified" value="2026-10-13 00:00:00"/>
 								<UML:TaggedValue tag="gentype" value="&lt;none&gt;"/>
 								<UML:TaggedValue tag="tagged" value="0"/>
-								<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet va gui goi, GV B confirm"/>
+								<UML:TaggedValue tag="package_name" value="sd 03 GV A duyet, GV B confirm"/>
 								<UML:TaggedValue tag="phase" value="1.0"/>
 								<UML:TaggedValue tag="author" value="THIEN DANG"/>
 								<UML:TaggedValue tag="complexity" value="1"/>
@@ -3020,7 +2448,7 @@
 				</UML:Package>
 			</UML:Namespace.ownedElement>
 		</UML:Model>
-		<UML:Diagram name="sd 03 GV A duyet va gui goi, GV B confirm" xmi.id="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49" diagramType="SequenceDiagram" owner="EAPK_9A52682F_E7FB_4B8E_9B36_B896B537D230" toolName="Enterprise Architect 2.5">
+		<UML:Diagram name="sd 03 GV A duyet, GV B confirm" xmi.id="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49" diagramType="SequenceDiagram" owner="EAPK_9A52682F_E7FB_4B8E_9B36_B896B537D230" toolName="Enterprise Architect 2.5">
 			<UML:ModelElement.taggedValue>
 				<UML:TaggedValue tag="version" value="1.0"/>
 				<UML:TaggedValue tag="author" value="THIEN DANG"/>

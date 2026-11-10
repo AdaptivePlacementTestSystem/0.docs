@@ -7,9 +7,10 @@
 > 1. `Update/20261016_BAN_CHOT_QUYET_DINH_DONG_BO_TOAN_DIEN_GUI_TEAMMATE.md` (+ Phụ lục của Phương) — quyết định chính thức 16/10/2026.
 > 2. `Update/SRS_TLCN_v3.0.md` (Mục IXb: BR-01…BR-30, mã lỗi; Mục X: API) và `Update/20261016_MoHinhHoaYeuCau.docx` (UC).
 > 3. `Update/KE_HOACH_CAU_TRUC_DU_AN.md` (cấu trúc FE đích, ma trận UC ↔ F-ID ↔ route).
-> 4. `Tuan5/KE_HOACH_SINH_VA_DUYET_DE_AI.md` (luồng lô/gói/duyệt), `Tuan5/DANH_SACH_MAN_HINH_THEO_ROLE.md` (S01–S35), `Tuan4/20261010_MO_TA_MAN_HINH_TOI_GIAN_THEO_ROLE.md` (bố cục, copy, ID kiểm thử).
+> 4. `Tuan5/KE_HOACH_SINH_VA_DUYET_DE_AI.md` (luồng lô/duyệt; từ 03/11/2026 không còn gói), `Tuan5/DANH_SACH_MAN_HINH_THEO_ROLE.md` (S01–S35), `Tuan4/20261010_MO_TA_MAN_HINH_TOI_GIAN_THEO_ROLE.md` (bố cục, copy, ID kiểm thử).
 > **Cập nhật 2026-10-18 (đồng bộ #119–#121):** S22 (Gỡ SV chỉ "Chưa thi", lọc, tick, xuất CSV/Excel), S24 (bỏ cột trạng thái email), S32 và Mục 4.5-F (bỏ luồng "câu tồn đọng"), S34/S35 (hiện tên GV A), P25-1 và P25-4 đã chốt. Backup: `Update/_BACKUP_20261018/`.
 > **Cập nhật 2026-10-19 (v1.1, đồng bộ lại với SRS v3.0, đặc tả UC 30 bảng, `schema.prisma`, #115–#121):** sửa 6 chỗ lệch (Mục 4.1-b, 4.2, 4.5-A/B/D, menu GV đã chốt, S10); thêm bổ sung chi tiết cho S05, S06, S07, S12; **thêm Mục 4.7** (quy tắc BR-01…BR-30 → hành vi giao diện), **Mục 4.8** (tình huống ngoại lệ và biên theo role), **Phụ lục E** (30 UC ↔ màn ↔ API ↔ BR), **Phụ lục F** (trường hiển thị ↔ cột schema). Điểm mới cần chốt: BR-05 (Mục 9). Backup: `Update/_BACKUP_20261019/`.
+> **Cập nhật 2026-11-03 (họp GVHD, bỏ gói):** không còn `ItemPackage`/`PackageStatus`/nút "Gửi cho B"/"Ép gửi gói"/`PACKAGE_INCOMPLETE`. Admin giao **từng câu** cho GV A và GV B; Hộp việc của GV là **danh sách câu được giao** (gom theo lô chỉ để hiển thị). Kết quả hai vòng ghi vào `Item.firstReview`/`secondReview`. `ReviewAction` bỏ `EXTEND`, `FORCE_SEND`, thêm `ASSIGN`. Nguồn: `D:\TLCN\20261103_QUYET_DINH_THAY_DOI_THIET_KE_CLASS_DIAGRAM.md`. Chỗ ghi **⚠ chờ xác nhận** là điểm quyết định chưa nói rõ (route mới, thời điểm B thấy câu, mốc hạn vòng 2, sửa lại sau khi Duyệt...), AI chỉ viết tạm. **Chưa cập nhật mã FE** (`tasks/reviews/[packageId]`, `tasks/confirms/[packageId]` còn theo mô hình cũ).
 > **Giới hạn trung thực:** chưa chạy FE; chưa sinh thử UI từ file này; mọi số liệu trong ví dụ là **dữ liệu mẫu (mock)**; tên màn/route/nhãn tiếng Việt mới là đề xuất cho tới khi nhóm duyệt W0.1.
 
 ---
@@ -48,8 +49,8 @@ Mỗi màn có cùng khuôn: **(a) Thông tin chung** (route, file Next.js, guar
 | Role | Là ai | Làm được gì (tóm tắt) | Điều hướng |
 |---|---|---|---|
 | **STUDENT** | Sinh viên | Chỉ dữ liệu của chính mình; chỉ thi trong kỳ mình thuộc; xem kết quả, đáp án, lịch sử; đổi/quên mật khẩu | Thanh trên (ẩn khi đang làm bài) |
-| **TEACHER** (GV) | Giảng viên | **Luôn:** xem báo cáo lớp (lọc kỳ), tra cứu hồ sơ SV (nhập MSSV chính xác). **Khi Admin giao việc:** làm **GV A** (sửa, duyệt/từ chối câu được giao, gửi gói cho B) và/hoặc **GV B** (xác nhận/loại bỏ câu trong gói; không sửa; không trả về A). Xem ngân hàng câu hỏi **chỉ đọc** (câu được giao) | Thanh bên trái |
-| **ADMIN** | Quản trị của trường (siêu tập của Teacher) | Tạo lô câu hỏi (AI sinh hoặc import file), giao việc/giao lại/chỉnh hạn/ép gửi gói, Kiểm tra (C3) + Import cuối, xem câu `AI_REJECTED` và thống kê; tạo/công bố/đóng kỳ thi, import danh sách thi, theo dõi dự thi; tạo + import + quản lý tài khoản SV và GV, nâng/thu hồi Admin; xem báo cáo, hồ sơ SV, ngân hàng (chỉ đọc). **Không sửa nội dung câu, không gõ câu bằng form, không duyệt nội dung.** | Thanh bên trái |
+| **TEACHER** (GV) | Giảng viên | **Luôn:** xem báo cáo lớp (lọc kỳ), tra cứu hồ sơ SV (nhập MSSV chính xác). **Khi Admin giao việc:** làm **GV A** (sửa, duyệt/từ chối câu được giao) và/hoặc **GV B** (xác nhận/loại bỏ câu được giao; không sửa; không trả về A). Xem ngân hàng câu hỏi **chỉ đọc** (câu được giao) | Thanh bên trái |
+| **ADMIN** | Quản trị của trường (siêu tập của Teacher) | Tạo lô câu hỏi (AI sinh hoặc import file), giao việc từng câu/giao lại/chỉnh hạn, Kiểm tra (C3) + Import cuối, xem câu `AI_REJECTED` và thống kê; tạo/công bố/đóng kỳ thi, import danh sách thi, theo dõi dự thi; tạo + import + quản lý tài khoản SV và GV, nâng/thu hồi Admin; xem báo cáo, hồ sơ SV, ngân hàng (chỉ đọc). **Không sửa nội dung câu, không gõ câu bằng form, không duyệt nội dung.** | Thanh bên trái |
 | EduZ (M2M) | Hệ thống ngoài | Chỉ gọi API bằng API Key — **không có giao diện**. Không phải dòng trong bảng `users` | — |
 
 **Vai A / B không phải role**: là *phân công theo lô* do Admin chọn lúc "Giao việc". GV B của lô **không được nằm** trong nhóm A của cùng lô. Một GV có thể là A ở lô này và B ở lô khác. Một GV có thể chưa được giao gì (Hộp việc rỗng).
@@ -61,9 +62,9 @@ Mỗi màn có cùng khuôn: **(a) Thông tin chung** (route, file Next.js, guar
 | Kỳ thi của tôi, làm bài, kết quả, đáp án, lịch sử (S02–S07) | ✅ (của mình) | ❌ 403 | ❌ | ❌ | ❌ 403 |
 | Báo cáo lớp, tra cứu/hồ sơ SV (S12–S14) | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Ngân hàng câu hỏi chỉ đọc (S08, S10) | ❌ | ✅ chỉ câu **được giao** (có thể rỗng) | ✅ | ✅ | ✅ mọi câu (kể cả `AI_REJECTED` ở tab của lô) |
-| Hộp việc "Cần duyệt" + duyệt từng câu + Gửi gói (S33, S11) | ❌ | ❌ | ✅ **đúng người** | ❌ | ❌ |
-| Hộp việc "Cần xác nhận" + màn gói (S34, S35) | ❌ | ❌ | ❌ | ✅ **gói gửi cho mình** | ❌ |
-| Tạo lô AI/import, danh sách & chi tiết lô, giao việc, giao lại, chỉnh hạn, ép gửi gói, Kiểm tra C3, Import (S26–S32) | ❌ 403 | ❌ 403 | ❌ | ❌ | ✅ |
+| Hộp việc "Cần duyệt" + duyệt từng câu (S33, S11) | ❌ | ❌ | ✅ **đúng người** | ❌ | ❌ |
+| Hộp việc "Cần xác nhận" + màn xác nhận câu (S34, S35) | ❌ | ❌ | ❌ | ✅ **câu giao cho mình** | ❌ |
+| Tạo lô AI/import, danh sách & chi tiết lô, giao việc, giao lại, chỉnh hạn, Kiểm tra C3, Import (S26–S32) | ❌ 403 | ❌ 403 | ❌ | ❌ | ✅ |
 | Kỳ thi: danh sách/tạo/sửa/chi tiết/import danh sách thi (S20–S23) | ❌ | ❌ 403 | ❌ | ❌ | ✅ |
 | Tài khoản: danh sách, tạo lẻ, import, khóa, đổi role (S19, S24) | ❌ | ❌ 403 | ❌ | ❌ | ✅ |
 | Tổng quan hệ thống (S36) | ❌ | ❌ | ❌ | ❌ | ✅ |
@@ -94,21 +95,21 @@ Mỗi màn có cùng khuôn: **(a) Thông tin chung** (route, file Next.js, guar
 | Giá trị | Nhãn | Màu | Ai thấy |
 |---|---|---|---|
 | `DRAFT` | Chờ duyệt vòng 1 | `#94A3B8` | Admin, GV A (câu mình) |
-| `FIRST_APPROVED` | Đã duyệt vòng 1 | `#F59E0B` | Admin, GV A, GV B (trong gói) |
+| `FIRST_APPROVED` | Đã duyệt vòng 1 | `#F59E0B` | Admin, GV A, GV B (câu giao cho mình) |
 | `SECOND_APPROVED` | Đã xác nhận vòng 2 | `#14B8A6` | Admin, GV B |
 | `FINAL_APPROVED` | Đã vào ngân hàng | `#16A34A` | Mọi người có quyền xem ngân hàng |
-| `REJECTED` | Đã loại | `#DC2626` | Admin (kèm thống kê theo GV); GV thấy câu mình/gói mình loại |
+| `REJECTED` | Đã loại | `#DC2626` | Admin (kèm thống kê theo GV); GV thấy câu mình loại |
 | `AI_REJECTED` | AI đã loại | `#7C3AED` | **Chỉ Admin** (tab "AI đã loại" của lô). Không bao giờ hiện cho GV/SV, không có trong bộ lọc ngân hàng |
 
 **Trạng thái lô `ItemBatchStatus`:** `GENERATING` Đang sinh · `IMPORTING` Đang nhập · `CHECKING` AI đang kiểm tra · `READY_TO_ASSIGN` Chờ giao việc · `IN_REVIEW` Đang duyệt · `READY_TO_FINALIZE` Chờ kiểm tra cuối · `FINAL_CHECKED` Đã kiểm tra, chờ import · `DONE` Hoàn tất · `FAILED` Lỗi · `PARTIAL` Thiếu câu. **Nguồn lô `ItemBatchSource`:** `AI_GENERATED` "AI sinh" · `IMPORTED` "Import file" (câu seed cũ thuộc các lô seed `IMPORTED`/`DONE`, tên lô phân biệt bộ nguồn qua `ItemBatch.name`). **`Item` không có trường `source`**: cột "Nguồn" ở mọi bảng câu hỏi lấy từ lô.
 
-**Trạng thái gói `PackageStatus` (đúng 3 giá trị):** `OPEN` "Chưa gửi" (tạo ngay lúc Admin giao việc) → `SENT` "Đã gửi" → `DONE` "Đã xong". GV B chỉ thấy gói `SENT`/`DONE` gửi cho mình.
+**Không còn trạng thái gói** (`PackageStatus` đã bỏ 03/11/2026). Tiến độ của GV tính theo từng câu: câu có `firstReview.action` / `secondReview.action` hay chưa. ⚠ chờ xác nhận: nhãn hiển thị "Chưa quyết / Đã quyết" cho từng vòng dùng chữ nào thì giữ như S11, S35.
 
 **Trạng thái kỳ thi hiệu lực `effectiveStatus`:** `DRAFT` Nháp · `SCHEDULED` Đã lên lịch · `OPEN` Đang mở · `CLOSED` Đã đóng. Ở góc nhìn SV thêm: "Chưa mở" (SCHEDULED), "Đang mở" (OPEN), "Đã đóng" (CLOSED), "Đã thi" (SV đã `COMPLETED` trong kỳ). **Trạng thái dự thi của SV trong kỳ (Admin xem):** Chưa thi · Đang thi · Hoàn thành · Bỏ dở.
 
 **Mức kiểm AI `CheckLevel`:** `PASS` Qua · `SOFT` Cờ mềm · `HARD` Lỗi cứng. **Điểm kiểm `CheckPoint`:** C1 (sau khi AI sinh), C2 (sau import file), C3 (Kiểm tra cuối trước Import).
 
-**Hành động kiểm toán `ReviewAction`** (hiển thị ở "Lịch sử" câu): `APPROVE` Duyệt · `REJECT` Từ chối · `CONFIRM` Xác nhận · `REMOVE` Loại bỏ · `CONFIRM_ALL` Xác nhận hàng loạt · `IMPORT` Import · `REASSIGN` Giao lại · `EXTEND` Chỉnh hạn · `FORCE_SEND` Ép gửi gói · `ACCEPT_FLAG` Admin chấp nhận cờ.
+**Hành động kiểm toán `ReviewAction`** (hiển thị ở "Lịch sử" câu): `APPROVE` Duyệt · `REJECT` Từ chối · `CONFIRM` Xác nhận · `REMOVE` Loại bỏ · `CONFIRM_ALL` Xác nhận hàng loạt · `IMPORT` Import · `ASSIGN` Giao việc · `REASSIGN` Giao lại · `ACCEPT_FLAG` Admin chấp nhận cờ. (Đã bỏ `EXTEND`, `FORCE_SEND` ngày 03/11/2026; ⚠ chờ xác nhận: chưa quy định thao tác chỉnh hạn ghi nhật ký bằng giá trị nào.)
 
 **Mức nghiêm trọng chủ đề sai:** Nhẹ · Trung bình · Nghiêm trọng. **Kỹ năng:** Từ vựng · Ngữ pháp. **Lý do dừng bài:** `MAX_ITEMS_REACHED` "Đã làm đủ số câu tối đa" · `SE_THRESHOLD` "Hệ thống đã đủ tin cậy về năng lực của bạn" · `ITEM_BANK_BOUNDARY` "Năng lực của bạn ở vùng biên của thang đánh giá" · `TIMEOUT` "Đã hết thời gian làm bài".
 
@@ -137,7 +138,6 @@ Mỗi màn có cùng khuôn: **(a) Thông tin chung** (route, file Next.js, guar
 | 409 trùng email/MSSV/Mã GV (tạo lẻ) | Email / MSSV / Mã GV đã tồn tại. (hiện ngay dưới ô trùng) | Form S24 |
 | `NOT_ASSIGNED` 403 | Bạn không được giao việc này. | S15 (403) |
 | `CONFIRMER_IN_REVIEW_GROUP` 409 | GV xác nhận không được nằm trong nhóm GV duyệt. | S30 |
-| `PACKAGE_INCOMPLETE` 409 | Còn câu chưa quyết định, chưa thể gửi gói. | S33, S11 |
 | `DUPLICATE_AFTER_EDIT` 422 | Bản sửa trùng một câu khác. | S11 |
 | `INVALID_AFTER_EDIT` 422 | Bản sửa không hợp lệ (xem chi tiết bên dưới). | S11 |
 | `BATCH_BUDGET_EXCEEDED` 409 | Lô vượt giới hạn gọi AI cho phép. | S26 |
@@ -163,7 +163,7 @@ Mỗi màn có cùng khuôn: **(a) Thông tin chung** (route, file Next.js, guar
 
 | Role | Mục menu (thứ tự) → route |
 |---|---|
-| **TEACHER** | **Hộp việc** (huy hiệu số việc chưa xong = câu chưa quyết của vai A + câu chưa quyết trong gói vai B) → `/teacher/tasks/reviews` · **Báo cáo lớp học** → `/teacher/reports` · **Hồ sơ sinh viên** → `/teacher/students` · **Ngân hàng câu hỏi** (chỉ xem; chốt 16/10, #116) → `/teacher/item-bank` |
+| **TEACHER** | **Hộp việc** (huy hiệu số việc chưa xong = câu chưa quyết của vai A + câu chưa quyết của vai B) → `/teacher/tasks/reviews` · **Báo cáo lớp học** → `/teacher/reports` · **Hồ sơ sinh viên** → `/teacher/students` · **Ngân hàng câu hỏi** (chỉ xem; chốt 16/10, #116) → `/teacher/item-bank` |
 | **ADMIN** | **Tổng quan** → `/admin/dashboard` · **Ngân hàng câu hỏi** → `/admin/item-bank` · **Lô câu hỏi** (chấm vàng = số lô cần xử lý) → `/admin/item-batches` · **Kỳ thi** → `/admin/exam-rounds` · **Tài khoản** → `/admin/users/students` · **Báo cáo lớp học** → `/teacher/reports` `🔶 R-2` · **Hồ sơ sinh viên** → `/teacher/students` `🔶 R-2`. **Không có "Hộp việc"** (Admin không làm A/B; `🔶 P25-1`) |
 
 - **Hộp việc có hai tab** hiển thị trên cả S33 và S34 (cùng khung tab ở đầu trang, mỗi tab là một route): "**Cần duyệt**" (`/teacher/tasks/reviews`) và "**Cần xác nhận**" (`/teacher/tasks/confirms`), kèm huy hiệu số. Tab không có việc: trạng thái rỗng "Bạn chưa có việc nào được giao." Mục "Hộp việc" ở menu mở tab "Cần duyệt" `⚠️ ĐX`.
@@ -248,10 +248,10 @@ Trang chủ theo role sau đăng nhập: STUDENT → `/student/dashboard`; TEACH
 ### 3.3. Giảng viên (`app/(teacher)/teacher/…`)
 | ID | URL | File Next.js | API chính | UC |
 |---|---|---|---|---|
-| S33 | `/teacher/tasks/reviews` | `tasks/reviews/page.tsx` | `GET /me/review-tasks`, `POST /item-packages/mine/send` | UCGV14 |
-| S11 | `/teacher/tasks/reviews/[packageId]` | `tasks/reviews/[packageId]/page.tsx` | `PATCH /items/:id`, `POST /items/:id/approve\|reject`, `POST /item-packages/mine/send` | UCGV14 (gồm UCGV04 sửa câu) |
-| S34 | `/teacher/tasks/confirms` | `tasks/confirms/page.tsx` | `GET /me/confirm-packages` | UCGV15 |
-| S35 | `/teacher/tasks/confirms/[packageId]` | `tasks/confirms/[packageId]/page.tsx` | `POST /items/:id/confirm\|remove`, `POST /item-packages/:id/confirm-all` | UCGV15 |
+| S33 | `/teacher/tasks/reviews` | `tasks/reviews/page.tsx` | `GET /me/review-tasks` | UCGV14 |
+| S11 | `/teacher/tasks/reviews/[batchId]` ⚠ chờ xác nhận (route mới, thay `[packageId]`) | `tasks/reviews/[batchId]/page.tsx` | `PATCH /items/:id`, `POST /items/:id/approve\|reject` | UCGV14 (gồm UCGV04 sửa câu) |
+| S34 | `/teacher/tasks/confirms` | `tasks/confirms/page.tsx` | `GET /me/confirm-tasks` ⚠ chờ xác nhận (tên mới, thay `confirm-packages`) | UCGV15 |
+| S35 | `/teacher/tasks/confirms/[batchId]` ⚠ chờ xác nhận | `tasks/confirms/[batchId]/page.tsx` | `POST /items/:id/confirm\|remove`, `POST /item-batches/:id/confirm-all` ⚠ chờ xác nhận | UCGV15 |
 | S12 | `/teacher/reports` | `reports/page.tsx` | `GET /reports/class-distribution`, `…/error-patterns` (`?examRoundId=`) | UCGV07, UCGV08, UCADM05 |
 | S13 | `/teacher/students` | `students/page.tsx` | (tra cứu theo MSSV) | UCGV09, UCADM04 |
 | S14 | `/teacher/students/[studentId]` (giá trị tham số = **MSSV** `🔶 R-6`) | `students/[studentId]/page.tsx` | `GET /placement-profiles/:id`, `…/history` | UCGV09, UCADM04 |
@@ -268,7 +268,7 @@ Trang chủ theo role sau đăng nhập: STUDENT → `/student/dashboard`; TEACH
 | S28 | `/admin/item-batches` | `item-batches/page.tsx` | `GET /item-batches` | UCADM13 |
 | S26 | `/admin/item-batches/generate` | `item-batches/generate/page.tsx` | `POST /item-batches` | UCADM11 |
 | S27 | `/admin/item-batches/import` | `item-batches/import/page.tsx` | `POST /item-imports/upload`, `GET\|DELETE /item-imports/grid[/:rowKey]`, `POST /item-imports/save` | UCADM12 |
-| S29 (+ S31 là ngăn phải) | `/admin/item-batches/[batchId]` | `item-batches/[batchId]/page.tsx` | `GET /item-batches/:id`, `GET …/ai-rejected`, `PATCH …/deadlines`, `POST /item-packages/:id/force-send` | UCADM13 |
+| S29 (+ S31 là ngăn phải) | `/admin/item-batches/[batchId]` | `item-batches/[batchId]/page.tsx` | `GET /item-batches/:id`, `GET …/ai-rejected`, `PATCH …/deadlines` | UCADM13 |
 | S30 | `/admin/item-batches/[batchId]/assign` | `…/assign/page.tsx` | `GET …/assign-preview`, `POST …/assign`, `POST …/reassign` | UCADM13 |
 | S32 | `/admin/item-batches/[batchId]/final-check` | `…/final-check/page.tsx` | `POST\|GET …/final-check`, `POST /items/:id/decision`, `POST …/import` | UCADM14 |
 | S20 | `/admin/exam-rounds` | `exam-rounds/page.tsx` | `GET /exam-rounds` | UCADM15 |
@@ -286,7 +286,7 @@ Trang chủ theo role sau đăng nhập: STUDENT → `/student/dashboard`; TEACH
 - Chưa đăng nhập → `/login` (giữ `?next=` đường dẫn cũ).
 - `mustChangePassword=true` → mọi route (trừ `/change-password`, đăng xuất) chuyển về `/change-password`.
 - Sai role → 403. TEACHER mở route Admin (`/admin/**`) → 403. STUDENT mở `/teacher/**`, `/admin/**` → 403. ADMIN mở `/student/**` → 403.
-- TEACHER mở `/teacher/tasks/reviews/[packageId]` của người khác hoặc `…/confirms/[packageId]` không gửi cho mình → 403 (`NOT_ASSIGNED`).
+- TEACHER mở `/teacher/tasks/reviews/[batchId]` có câu không giao cho mình hoặc `…/confirms/[batchId]` không có câu giao cho mình → 403 (`NOT_ASSIGNED`).
 - Token **không** lưu ở `localStorage` (cookie `httpOnly`).
 
 ---
@@ -299,16 +299,16 @@ Trang chủ theo role sau đăng nhập: STUDENT → `/student/dashboard`; TEACH
 ```
         ┌─ rớt C1/C2 (máy) ───────────────────────────► AI_REJECTED   (lưu mã lý do; chỉ Admin thấy)
 Tạo ────┤
-        └─ qua ► DRAFT ──A Duyệt──► FIRST_APPROVED ──(A Gửi gói)──► [B Xác nhận] ► SECOND_APPROVED ──Admin Import──► FINAL_APPROVED
+        └─ qua ► DRAFT ──A Duyệt──► FIRST_APPROVED ──► [B Xác nhận] ► SECOND_APPROVED ──Admin Import──► FINAL_APPROVED
                   │                       │                                  │              │
                   └──A Từ chối────────────┘ (A không sửa lại sau khi gửi)     └─B Loại bỏ──► REJECTED
                   └──► REJECTED                                                       C3 lỗi cứng ► AI_REJECTED ; lỗi mềm ► Admin: Chấp nhận (ACCEPT_FLAG→Import) | Loại (REJECTED)
 ```
 Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 
-**(b) Lô `ItemBatch`:** `GENERATING|IMPORTING` → `CHECKING` → `READY_TO_ASSIGN` → `IN_REVIEW` → `READY_TO_FINALIZE` (mọi gói `DONE` **hoặc** mọi hạn đã qua) → `FINAL_CHECKED` (sau khi Admin bấm Kiểm tra) → `DONE` (mọi câu ở trạng thái cuối: `FINAL_APPROVED`/`REJECTED`/`AI_REJECTED`). Ngoại lệ `FAILED`, `PARTIAL` (hết ngân sách AI, thiếu câu). Theo #121 không có luồng xử lý riêng cho câu chưa quyết định sau Import (xem Mục 4.5-F); lô sang `DONE` khi mọi câu đã ở trạng thái cuối.
+**(b) Lô `ItemBatch`:** `GENERATING|IMPORTING` → `CHECKING` → `READY_TO_ASSIGN` → `IN_REVIEW` → `READY_TO_FINALIZE` (mọi câu đã xong vòng 2, tức `SECOND_APPROVED` hoặc `REJECTED`, **hoặc** các câu còn lại đã quá hạn) → `FINAL_CHECKED` (sau khi Admin bấm Kiểm tra) → `DONE` (mọi câu ở trạng thái cuối: `FINAL_APPROVED`/`REJECTED`/`AI_REJECTED`). Ngoại lệ `FAILED`, `PARTIAL` (hết ngân sách AI, thiếu câu). Theo #121 không có luồng xử lý riêng cho câu chưa quyết định sau Import (xem Mục 4.5-F); lô sang `DONE` khi mọi câu đã ở trạng thái cuối.
 
-**(c) Gói `ItemPackage`:** một gói **cho mỗi GV A trong một lô** (`UNIQUE(batchId, reviewerId)`), tạo **ngay lúc Admin giao việc**: `OPEN` → (A bấm Gửi cho B) `SENT` → (mọi câu trong gói có quyết định) `DONE`.
+**(c) Giao việc theo từng câu (thay `ItemPackage`, 03/11/2026):** mỗi `Item` mang `reviewerId` (GV A) và `confirmerId` (GV B); kết quả vòng 1 ở `firstReview` (`dueAt`, `action` APPROVE/REJECT, `reviewedAt`, `comment`, `originalSnapshot`), vòng 2 ở `secondReview` (`dueAt`, `action` CONFIRM/REMOVE, `confirmedAt`, `comment`). Không còn gói, không còn bước "Gửi cho B". ⚠ chờ xác nhận: B thấy câu ngay khi A duyệt câu đó hay chờ A xong hết phần được giao.
 
 **(d) Kỳ thi `ExamRound`** (`effectiveStatus(round, now)` là nguồn duy nhất, chuyển *lazy*): `DRAFT` --Công bố (cần ≥1 SV)--> `SCHEDULED` --tới `opensAt`--> `OPEN` --tới `closesAt` hoặc Admin Đóng--> `CLOSED`; `DRAFT` --Hủy--> `CLOSED`. Không quay lui.
 
@@ -336,18 +336,18 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 **4.4-A. Luồng luôn có (mọi GV):** Đăng nhập (S01) → (S16 nếu cần) → **S12 Báo cáo lớp** (lọc theo kỳ, xuất CSV) hoặc **S13 → S14** (nhập MSSV chính xác → hồ sơ SV). GV chỉ **xem**, không có thao tác ghi.
 
 **4.4-B. GV vai A — duyệt câu (khi Admin đã giao việc cho mình; lô `IN_REVIEW`)**
-1. Nhận **email nhắc việc** ("Bạn có x câu cần duyệt, hạn dd/mm") và thấy việc ở **Hộp việc → Cần duyệt (S33)**: mỗi thẻ là **một gói của mình trong một lô** (tên lô, "Đã quyết 12 / 20", hạn, tiến độ).
-2. Bấm thẻ → **S11** (màn gói): danh sách câu trong gói + trình sửa/duyệt từng câu. Chỉ thấy **câu giao cho mình** (khác → 403).
+1. Nhận **email nhắc việc** ("Bạn có x câu cần duyệt, hạn dd/mm") và thấy việc ở **Hộp việc → Cần duyệt (S33)**: mỗi thẻ gom **các câu được giao cho mình trong một lô** (tên lô, "Đã quyết 12 / 20", hạn, tiến độ; gom theo lô chỉ để hiển thị).
+2. Bấm thẻ → **S11**: danh sách câu được giao trong lô đó + trình sửa/duyệt từng câu. Chỉ thấy **câu giao cho mình** (khác → 403).
 3. Với mỗi câu (đang `DRAFT`): có thể **sửa** nội dung, 4 phương án, đáp án đúng, giải thích (kỹ năng/CEFR/chủ đề/`irt_b` chỉ đọc `🔶 P25-3`); bấm **Lưu sửa** → server chạy lại **luật cứng + trùng T1–T2** trên bản sửa; lỗi/trùng → **chặn nút Duyệt** (`INVALID_AFTER_EDIT`/`DUPLICATE_AFTER_EDIT`).
 4. Chọn **Duyệt** (→ `FIRST_APPROVED`) hoặc **Từ chối** (→ `REJECTED`, **không có ô lý do**). Sau mỗi thao tác tự sang câu chưa quyết kế tiếp.
-5. Khi **mọi câu đã có quyết định**, nút **"Gửi cho B"** bật; gửi **một lần** → gói `SENT` (câu A từ chối **không** vào gói; sau khi gửi, A **không sửa lại**, gói chỉ đọc). Còn câu chưa quyết → `PACKAGE_INCOMPLETE`.
-6. Quá hạn chỉ hiện cảnh báo "Việc này đã quá hạn", **không khóa thao tác**. Admin có thể chỉnh hạn, giao lại, hoặc **ép gửi** gói thay A.
+5. **Không còn bước "Gửi cho B"**: sau khi A Duyệt một câu, câu đó thuộc hộp việc của B (⚠ chờ xác nhận về thời điểm). Câu A từ chối (`REJECTED`) không tới B. ⚠ chờ xác nhận: A có sửa lại được câu đã Duyệt không (trước đây khóa sau khi gửi gói).
+6. Quá hạn chỉ hiện cảnh báo "Việc này đã quá hạn", **không khóa thao tác**. Admin có thể chỉnh hạn hoặc giao lại câu cho GV khác.
 
-**4.4-C. GV vai B — xác nhận (khi một gói đã được A gửi cho mình)**
-1. Nhận email nhắc, thấy **gói** ở **Hộp việc → Cần xác nhận (S34)** (mỗi A gửi một gói riêng, vào các thời điểm khác nhau; hạn của B tính từ **ngày gói được gửi**).
-2. Bấm gói → **S35**: **chỉ đọc**. Mỗi câu hiện cờ mềm, dấu **"A đã sửa"** và **bản gốc so với bản đã sửa**.
+**4.4-C. GV vai B — xác nhận (các câu A đã duyệt và được giao cho mình)**
+1. Nhận email nhắc, thấy **các câu được giao** ở **Hộp việc → Cần xác nhận (S34)** (gom theo lô để hiển thị; hạn của B là `secondReview.dueAt` của từng câu; ⚠ chờ xác nhận: mốc tính hạn là ngày giao hay lúc A duyệt).
+2. Bấm lô → **S35**: **chỉ đọc**. Mỗi câu hiện cờ mềm, dấu **"A đã sửa"** và **bản gốc so với bản đã sửa**.
 3. Với mỗi câu: **Xác nhận** (→ `SECOND_APPROVED`) hoặc **Loại bỏ** (→ `REJECTED`, không ô lý do). Hoặc nút **"Xác nhận tất cả câu còn lại"** (chỉ tác động câu chưa quyết; ghi log `CONFIRM_ALL`).
-4. B **không sửa, không trả về A**. Mọi câu có quyết định → gói `DONE`, màn hiện "Gói đã hoàn tất." và chỉ đọc.
+4. B **không sửa, không trả về A**. Mọi câu của lô trong hộp việc đã có quyết định → màn hiện "Đã xử lý hết các câu được giao." và chỉ đọc.
 
 ### 4.5. Luồng Quản trị (ADMIN)
 **A. Tài khoản**
@@ -368,17 +368,17 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 
 **D. Giao việc (S30)** — điều kiện: lô `READY_TO_ASSIGN`.
 1. Chọn **nhóm A** (≥ 1 GV, khuyên ≥ 2), **GV B** (đúng 1, ∉ nhóm A, bắt buộc), `reviewDays` ≥ 1, `confirmDays` ≥ 1.
-2. **Xem trước phân bổ:** chia đều theo (kỹ năng, CEFR, thứ tự sinh) vòng tròn cho từng A; chênh nhau tối đa 1 câu (100/5 = 20 mỗi người; 103 → 3 người 21, 2 người 20). Hạn A = cuối ngày (ngày giao + `reviewDays`) 23:59; hạn B = cuối ngày (ngày A gửi gói + `confirmDays`).
-3. "Xác nhận giao" → tạo phân công theo từng câu, **tạo mỗi A một gói `OPEN`**, lô → `IN_REVIEW`, gửi email nhắc việc, đặt lịch nhắc **trước hạn 24 giờ** (mỗi nhóm một lần; hạn < 24 giờ lúc giao → nhắc ngay).
-4. **Theo dõi (S29):** tiến độ theo GV/gói, "Quá hạn" (tính lazy, **chỉ cảnh báo**). **Chỉnh hạn (S31)** áp dụng cho việc chưa xử lý, tính lại hạn, đặt lại nhắc. **Giao lại**: chuyển câu chưa xử lý của một A sang A khác (hoặc đổi B của gói chưa gửi/chưa xử lý), vẫn B ∉ nhóm A. **Ép gửi gói** thay A (chỉ gói `OPEN`; hộp xác nhận nêu "đã duyệt X/Y câu"; chỉ mang theo câu A đã `FIRST_APPROVED`, câu chưa quyết nằm lại trong lô). Ba thao tác này là **biện pháp dự phòng** theo #121, không phải luồng thường.
+2. **Xem trước phân bổ:** chia đều theo (kỹ năng, CEFR, thứ tự sinh) vòng tròn cho từng A; chênh nhau tối đa 1 câu (100/5 = 20 mỗi người; 103 → 3 người 21, 2 người 20). Hạn vòng 1 của A = cuối ngày (ngày giao + `reviewDays`) 23:59 (= `firstReview.dueAt` từng câu); hạn vòng 2 của B = `secondReview.dueAt` từng câu (⚠ chờ xác nhận mốc tính `confirmDays`: từ ngày giao hay từ lúc A duyệt).
+3. "Xác nhận giao" → ghi vào từng câu `reviewerId`, `confirmerId`, `firstReview.dueAt`, `secondReview.dueAt` và ghi `ItemReviewEvent` `ASSIGN` (một dòng mỗi câu), lô → `IN_REVIEW`, gửi email nhắc việc, đặt lịch nhắc **trước hạn 24 giờ** (mỗi nhóm một lần; hạn < 24 giờ lúc giao → nhắc ngay).
+4. **Theo dõi (S29):** tiến độ theo GV, "Quá hạn" (tính lazy, **chỉ cảnh báo**). **Chỉnh hạn (S31)** áp dụng cho việc chưa xử lý, tính lại hạn, đặt lại nhắc. **Giao lại**: chuyển câu chưa xử lý của một A sang A khác (hoặc đổi B của câu chưa xử lý ở vòng 2), vẫn B ∉ nhóm A; ghi `REASSIGN` một dòng mỗi câu. **Không còn "Ép gửi gói"** (đã bỏ cùng gói). Chỉnh hạn và giao lại là **biện pháp dự phòng** theo #121, không phải luồng thường.
 
 **E. Kiểm tra cuối (C3) và Import (S32)** — điều kiện: lô `READY_TO_FINALIZE`.
 1. Xem thống kê (Đã xác nhận vòng 2, Đã loại bởi A/B, AI đã loại, chưa xử lý/quá hạn).
-2. Bấm **Kiểm tra** (C3, chạy theo thay đổi): báo cáo theo câu Qua/Cờ mềm/Lỗi cứng + mã lý do + câu nghi trùng + bản gốc so bản sửa; tổng hợp theo gói; số câu A sửa, tỉ lệ A/B loại. **Lỗi cứng → tự `AI_REJECTED`.** **Lỗi mềm → Admin quyết từng câu: "Chấp nhận (cho Import)" (ghi `ACCEPT_FLAG`) hoặc "Loại" (`REJECTED`).**
+2. Bấm **Kiểm tra** (C3, chạy theo thay đổi): báo cáo theo câu Qua/Cờ mềm/Lỗi cứng + mã lý do + câu nghi trùng + bản gốc so bản sửa; tổng hợp theo GV; số câu A sửa, tỉ lệ A/B loại. **Lỗi cứng → tự `AI_REJECTED`.** **Lỗi mềm → Admin quyết từng câu: "Chấp nhận (cho Import)" (ghi `ACCEPT_FLAG`) hoặc "Loại" (`REJECTED`).**
 3. **Import** chỉ bật khi có báo cáo C3 **còn hiệu lực** (không câu nào đổi, ngân hàng không đổi kể từ lúc kiểm); nếu đổi → `FINAL_CHECK_STALE` → kiểm lại. Lúc Import, server vẫn chạy lại T1–T2 nhanh chống tranh chấp (hai Admin Import cùng lúc). Câu chưa xử lý (quá hạn) **không** được import.
 4. Thành công: các câu qua → `FINAL_APPROVED` (ghi `approved_by`, `approved_at`, `calibrated=false`) → CAT dùng được.
 
-**F. Hạn và dự phòng (chốt 18/10, #121):** đến hạn mọi GV phải hoàn thành việc được giao; **không có luồng riêng xử lý "câu tồn đọng" sau Import**. Chỉnh hạn, giao lại, ép gửi gói chỉ là biện pháp dự phòng của Admin trước khi chạy C3. Câu chưa quyết định không được import. (Đã gỡ hai đề xuất cũ: lô `FINAL_CHECKED` quay về `IN_REVIEW`; Admin loại câu chưa xử lý thành `REJECTED`.)
+**F. Hạn và dự phòng (chốt 18/10, #121):** đến hạn mọi GV phải hoàn thành việc được giao; **không có luồng riêng xử lý "câu tồn đọng" sau Import**. Chỉnh hạn và giao lại chỉ là biện pháp dự phòng của Admin trước khi chạy C3. Câu chưa quyết định không được import. (Đã gỡ hai đề xuất cũ: lô `FINAL_CHECKED` quay về `IN_REVIEW`; Admin loại câu chưa xử lý thành `REJECTED`.)
 
 **G. Báo cáo / hồ sơ:** Admin xem S12–S14 như GV (mọi SV, không lỗi "không có quyền xem"), S12 thêm thẻ "Thống kê câu hỏi theo trạng thái".
 
@@ -386,10 +386,10 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 | Bước | Ai | Việc | Màn | Trạng thái sau |
 |---|---|---|---|---|
 | 1 | Admin | Tạo lô AI "Từ vựng B1", N = 100 | S26 → S29 | Lô `GENERATING` → `CHECKING` → `READY_TO_ASSIGN`; ~100 câu `DRAFT`, một số `AI_REJECTED` |
-| 2 | Admin | Xem tab "AI đã loại", cờ mềm; **Giao việc**: A = {Lan, Hùng, Mai, Tú, Đức}, B = Bình, `reviewDays`=5, `confirmDays`=3 | S29 → S30 | Lô `IN_REVIEW`; 5 gói `OPEN` (20 câu mỗi gói); 5 email nhắc |
-| 3 | GV A (Lan) | Duyệt 17 câu, sửa 3 câu, từ chối 3 câu → **Gửi cho B** | S33 → S11 | Gói của Lan `SENT` (17 câu `FIRST_APPROVED`); 3 câu `REJECTED` |
-| 4 | GV B (Bình) | Mở gói của Lan, xác nhận 15, loại 2 | S34 → S35 | Gói `DONE`; 15 `SECOND_APPROVED`; 2 `REJECTED` |
-| 5 | (hệ thống) | Mọi gói `DONE` hoặc mọi hạn qua | — | Lô `READY_TO_FINALIZE` |
+| 2 | Admin | Xem tab "AI đã loại", cờ mềm; **Giao việc**: A = {Lan, Hùng, Mai, Tú, Đức}, B = Bình, `reviewDays`=5, `confirmDays`=3 | S29 → S30 | Lô `IN_REVIEW`; mỗi GV A được giao 20 câu (`reviewerId`, `confirmerId`=Bình); 5 email nhắc |
+| 3 | GV A (Lan) | Duyệt 17 câu, sửa 3 câu, từ chối 3 câu | S33 → S11 | 17 câu `FIRST_APPROVED`; 3 câu `REJECTED` |
+| 4 | GV B (Bình) | Mở các câu Lan đã duyệt, xác nhận 15, loại 2 | S34 → S35 | 15 `SECOND_APPROVED`; 2 `REJECTED` |
+| 5 | (hệ thống) | Mọi câu xong vòng 2 hoặc các câu còn lại quá hạn | — | Lô `READY_TO_FINALIZE` |
 | 6 | Admin | **Kiểm tra** (C3) → chấp nhận 1 cờ mềm → **Import** | S32 | Câu qua → `FINAL_APPROVED`; lô `DONE` nếu mọi câu ở trạng thái cuối |
 | 7 | SV | Làm bài kỳ thi; CAT chọn từ các câu `FINAL_APPROVED` | S02–S04 | — |
 
@@ -422,7 +422,7 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 | BR-22 | Giao việc: nhóm A ≥ 1, đúng một B ∉ A, hai số ngày ≥ 1, lô `READY_TO_ASSIGN` | S30 | Danh sách B loại trừ nhóm A; `CONFIRMER_IN_REVIEW_GROUP`; nút Xác nhận giao có điều kiện bật |
 | BR-23 | Chia đều vòng tròn, chênh tối đa 1 câu | S30 | Bảng xem trước phân bổ |
 | BR-24 | Hạn cuối ngày 23:59 giờ VN; nhắc trước 24 giờ; quá hạn chỉ cảnh báo | S31, S33–S35 | C-DUE; chỉnh hạn chỉ áp dụng việc chưa xử lý |
-| BR-25 | A chỉ Gửi khi mọi câu đã quyết; gửi một lần; sau gửi không sửa | S11, S33 | Nút "Gửi cho B" tắt khi còn câu chưa quyết; `PACKAGE_INCOMPLETE`; sau gửi gói chỉ đọc |
+| ~~BR-25~~ | ~~A chỉ Gửi khi mọi câu đã quyết; gửi một lần; sau gửi không sửa~~ **Bỏ theo quyết định 03/11/2026 (không còn gói).** ⚠ chờ xác nhận: BR thay thế (nếu có) về việc A sửa lại câu đã Duyệt; SRS Mục IXb phải sửa theo | S11, S33 | Không còn nút "Gửi cho B"; không còn `PACKAGE_INCOMPLETE` |
 | BR-26 | B chỉ đọc: Xác nhận/Loại từng câu hoặc "Xác nhận tất cả câu còn lại"; không trả về A | S35 | Không có ô sửa, không có nút trả về |
 | BR-27 | Sửa xong chạy lại luật cứng và T1–T2; hỏng/trùng chặn Duyệt | S11 | `INVALID_AFTER_EDIT`/`DUPLICATE_AFTER_EDIT`; Duyệt bị khóa |
 | BR-28 | Import khi lô `READY_TO_FINALIZE` và có báo cáo C3 còn hiệu lực | S32 | Nút Import khóa tới khi có báo cáo hợp lệ; `FINAL_CHECK_REQUIRED`/`STALE`/`BATCH_NOT_READY_TO_FINALIZE` |
@@ -440,9 +440,8 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 
 **Teacher**
 - **Không được giao việc:** Hộp việc rỗng ("Bạn chưa có việc nào được giao."); `/teacher/item-bank` rỗng.
-- **Mở câu/gói không phải của mình:** 403 `NOT_ASSIGNED` → S15.
+- **Mở câu không phải của mình:** 403 `NOT_ASSIGNED` → S15.
 - **Sửa xong bị trùng (UCGV14 4a):** lưu bị từ chối, nội dung cũ giữ nguyên, Duyệt bị khóa.
-- **Gửi gói khi còn câu chưa quyết (UCGV14 8a):** 409 `PACKAGE_INCOMPLETE`.
 - **Hạn sắp hết (UCGV14 2a):** nhận email nhắc trước 24 giờ; việc vẫn hiện trong Hộp việc (không có chuông).
 - **GV B cố sửa hoặc trả về A (UCGV15 3a):** không có thao tác tương ứng trên UI; gọi API → 403/400.
 - **Tra cứu SV không tồn tại (UCGV09):** "Không tìm thấy sinh viên."; SV chưa có hồ sơ: "Sinh viên chưa có hồ sơ năng lực."
@@ -707,7 +706,7 @@ Câu 8  (tối đa 25)                                   ⏱ 18:42
 > Layout mọi màn: **L-SIDEBAR** (menu TEACHER, Mục 2.4). Màn S08/S10/S12–S14 Admin dùng chung (khác biệt nêu rõ ở từng màn). Khung tab "Hộp việc" (Cần duyệt | Cần xác nhận) đặt ở đầu S33 và S34.
 
 ### S33 — Hộp việc: Cần duyệt (GV vai A)
-**(a)** Route `/teacher/tasks/reviews` · Guard TEACHER · API `GET /me/review-tasks`, `POST /item-packages/mine/send` · UC UCGV14 (thay UCGV05).
+**(a)** Route `/teacher/tasks/reviews` · Guard TEACHER · API `GET /me/review-tasks` · UC UCGV14 (thay UCGV05).
 **(b)**
 ```
 Hộp việc          [ Cần duyệt (2) ]  [ Cần xác nhận (1) ]
@@ -716,25 +715,23 @@ Hộp việc          [ Cần duyệt (2) ]  [ Cần xác nhận (1) ]
 │ Đã quyết 12 / 20   ███████████░░░░░░░                      │
 │ Hạn: 25/10/2026 23:59                                      │
 │ Còn 8 câu chưa quyết định                                  │
-│                           [ Mở gói ]   [ Gửi cho B ] (tắt) │
+│                                          [ Mở danh sách câu ] │
 └──────────────────────────────────────────────────────────┘
 ```
 **(c)**
 | # | Thành phần | testid | Quy tắc |
 |---|---|---|---|
 | 1 | Khung tab Hộp việc + huy hiệu số | `tasks-tabs` | Tab hiện tại gạch chân xanh |
-| 2 | Danh sách thẻ — **mỗi thẻ = gói của GV này trong một lô** | `inbox-review-list`, `inbox-batch-{id}` | Tên lô; C-PROGRESS "Đã quyết x / y" (y = số câu giao cho mình); C-DUE theo `due_at` (cuối ngày giao + `reviewDays`, 23:59:59 giờ VN); dòng phụ "Còn k câu chưa quyết định" |
-| 3 | Nút phụ **"Mở gói"** | `open-package-{id}` | → `/teacher/tasks/reviews/[packageId]` (mở tại câu đầu chưa quyết) |
-| 4 | Nút chính **"Gửi cho B"** | `send-package-{batchId}` | **Tắt** cho tới khi mọi câu đã Duyệt hoặc Từ chối (`title`: "Còn x câu chưa quyết định"); gói `SENT`/`DONE` → ẩn nút, thẻ hiện huy hiệu "Đã gửi" và chỉ đọc |
-**(d)** "Gửi cho B" → C-DIALOG: tiêu đề "Gửi cho giảng viên xác nhận?", nội dung "Sau khi gửi, bạn không thể sửa lại các câu trong gói. Câu bạn đã từ chối sẽ không được gửi đi." → [Hủy] [Gửi] → `POST /item-packages/mine/send` → OK: thẻ chuyển "Đã gửi", toast "Đã gửi gói cho giảng viên xác nhận." · `PACKAGE_INCOMPLETE` → "Còn câu chưa quyết định, chưa thể gửi gói." (làm mới tiến độ).
+| 2 | Danh sách thẻ — **mỗi thẻ = các câu được giao cho GV này trong một lô** (nhóm hiển thị, không phải thực thể) | `inbox-review-list`, `inbox-batch-{id}` | Tên lô; C-PROGRESS "Đã quyết x / y" (y = số câu giao cho mình); C-DUE theo `firstReview.dueAt` (cuối ngày giao + `reviewDays`, 23:59:59 giờ VN); dòng phụ "Còn k câu chưa quyết định" |
+| 3 | Nút chính **"Mở danh sách câu"** | `open-batch-{id}` | → `/teacher/tasks/reviews/[batchId]` (mở tại câu đầu chưa quyết; ⚠ chờ xác nhận route) |
 **(e)** Rỗng: "Bạn chưa có câu nào cần duyệt." · Quá hạn: C-DUE đỏ "Quá hạn" **nhưng vẫn thao tác được**.
-**(f)** Mock: 2 thẻ (12/20 còn 5 ngày; 20/20 đã gửi).
-**(g)** AC: nút Gửi chỉ bật khi mọi câu đã quyết; gửi một lần; câu A loại không vào gói.
+**(f)** Mock: 2 thẻ (12/20 còn 5 ngày; 20/20 đã quyết hết).
+**(g)** AC: không còn nút Gửi; câu A loại không tới B; thẻ phản ánh đúng số câu đã quyết.
 
 ---
 
-### S11 — Duyệt gói và từng câu (GV vai A)
-**(a)** Route `/teacher/tasks/reviews/[packageId]` (chọn câu bằng `?item={itemId}`) `[D]` · Guard: **chỉ GV A đúng người** (khác → 403 `NOT_ASSIGNED`) · API `GET /me/review-tasks`, `PATCH /items/:id`, `POST /items/:id/approve|reject`, `POST /item-packages/mine/send` · UC UCGV14 (gồm UCGV04 sửa câu).
+### S11 — Duyệt từng câu được giao (GV vai A)
+**(a)** Route `/teacher/tasks/reviews/[batchId]` (chọn câu bằng `?item={itemId}`) `[D]` (⚠ chờ xác nhận route mới, thay `[packageId]`) · Guard: **chỉ GV A đúng người** (khác → 403 `NOT_ASSIGNED`) · API `GET /me/review-tasks`, `PATCH /items/:id`, `POST /items/:id/approve|reject` · UC UCGV14 (gồm UCGV04 sửa câu).
 **(b)** Bố cục chia đôi (điện thoại: danh sách trước, chạm câu mới sang chi tiết).
 ```
 Lô "Từ vựng B1 – đợt 1"        Đã quyết 12 / 20      Hạn: 25/10 23:59   [Còn 5 ngày]
@@ -749,7 +746,6 @@ Lô "Từ vựng B1 – đợt 1"        Đã quyết 12 / 20      Hạn: 25/10 
 │                       │ [Xem bản gốc]   (chỉ khi đã Lưu sửa)                 │
 │                       │ [Câu trước] [Lưu sửa] [Từ chối] [ Duyệt ] [Câu sau] │
 └───────────────────────┴─────────────────────────────────────────────────────┘
-                                                    [ Gửi cho B ]  (cuối gói)
 ```
 **(c)**
 | # | Thành phần | testid | Quy tắc |
@@ -757,7 +753,7 @@ Lô "Từ vựng B1 – đợt 1"        Đã quyết 12 / 20      Hạn: 25/10 
 | 1 | Đầu trang: tên lô, "Đã quyết x / y", C-DUE | `review-progress` | |
 | 2 | Danh sách câu (cột trái) | `review-list` | Mỗi dòng: số thứ tự, trạng thái chữ+biểu tượng (Chưa quyết • / Đã duyệt ✓ / Đã từ chối ✕), chấm "(!)" nếu có cờ mềm, dấu "đã sửa" nếu A đã Lưu sửa; câu đang mở đánh dấu ◄ |
 | 3 | **Cờ mềm** (C-FLAG, 0..n) | `review-flags` | Hiện mã lý do (Phụ lục A) + liên kết "xem câu đó" cho nghi trùng. Cờ mềm là **gợi ý**, không chặn |
-| 4 | **Nội dung** (textarea) | `review-content` | Sửa được khi câu `DRAFT` và gói `OPEN`; bắt buộc |
+| 4 | **Nội dung** (textarea) | `review-content` | Sửa được khi câu `DRAFT`; bắt buộc (⚠ chờ xác nhận: sau khi Duyệt có sửa lại được không) |
 | 5 | **4 phương án** A–D (ô nhập) | `review-option-A`…`D` | Bắt buộc; 4 phương án khác nhau |
 | 6 | **Đáp án đúng** (radio A–D) | `review-correct` | Đúng 1 đáp án |
 | 7 | **Giải thích** chung + từng phương án A–D | `review-explanation` | Bắt buộc có giải thích |
@@ -766,35 +762,34 @@ Lô "Từ vựng B1 – đợt 1"        Đã quyết 12 / 20      Hạn: 25/10 
 | 10 | Nút phụ **"Lưu sửa"** | `review-save` | Bật khi có thay đổi; không đổi gì: toast "Không có thay đổi nào để lưu." |
 | 11 | Nút **"Từ chối"** (viền đỏ) | `review-reject` | → C-DIALOG "Từ chối câu này?" chỉ [Hủy] [Từ chối], **không ô lý do** → `REJECTED` |
 | 12 | Nút chính **"Duyệt"** (xanh) | `review-approve` | **Khóa** khi: có thay đổi chưa Lưu sửa, hoặc lần Lưu sửa gần nhất trả `INVALID_AFTER_EDIT`/`DUPLICATE_AFTER_EDIT`. → `FIRST_APPROVED` |
-| 13 | "Câu trước"/"Câu sau" | `review-prev`, `review-next` | Điều hướng trong gói (phím ←/→ `[D]`) |
-| 14 | Nút "Gửi cho B" (cuối trang) | `send-package-{batchId}` | Cùng quy tắc và hộp thoại như S33 |
+| 13 | "Câu trước"/"Câu sau" | `review-prev`, `review-next` | Điều hướng trong danh sách câu được giao (phím ←/→ `[D]`) |
 **(d)**
 - **Lưu sửa** → `PATCH /items/:id` → server chạy lại **luật cứng + trùng T1–T2** trên bản sửa. OK: toast "Đã lưu bản sửa."; lỗi 422: dải đỏ nhạt dưới ô ("Bản sửa trùng một câu khác." / "Bản sửa không hợp lệ: <lý do theo Phụ lục A>"), **khóa Duyệt** cho tới khi sửa xong.
-- **Duyệt/Từ chối** → API tương ứng → tự sang câu chưa quyết kế tiếp; hết câu → về S33 (hoặc hiện nút Gửi cho B nổi bật).
-- Sau khi gói `SENT`: toàn bộ ô khóa, hiển thị "Gói đã gửi, chỉ đọc."
+- **Duyệt/Từ chối** → API tương ứng → tự sang câu chưa quyết kế tiếp; hết câu → về S33.
+- Câu đã Duyệt/Từ chối: ⚠ chờ xác nhận có khóa ô hay không (trước đây khóa theo trạng thái gói); chưa có quy tắc thay thế.
 **(e)** Quá hạn: dải cam "Việc này đã quá hạn" **không khóa**; lỗi mạng: giữ nội dung đã nhập + "Thử lại"; rỗng: "Bạn chưa có câu nào cần duyệt."; không đúng người: 403.
-**(f)** Mock: gói 20 câu, 12 đã quyết; câu 13 có 1 cờ mềm nghi trùng.
-**(g)** AC: chỉ thấy câu của mình; sửa trùng/hỏng → nút Duyệt khóa; Từ chối không có ô lý do; sau gửi gói không sửa được.
+**(f)** Mock: 20 câu được giao, 12 đã quyết; câu 13 có 1 cờ mềm nghi trùng.
+**(g)** AC: chỉ thấy câu của mình; sửa trùng/hỏng → nút Duyệt khóa; Từ chối không có ô lý do; ghi đúng vào `firstReview`.
 
 ---
 
 ### S34 — Hộp việc: Cần xác nhận (GV vai B)
-**(a)** Route `/teacher/tasks/confirms` · Guard TEACHER · API `GET /me/confirm-packages` · UC UCGV15.
+**(a)** Route `/teacher/tasks/confirms` · Guard TEACHER · API `GET /me/confirm-tasks` (⚠ chờ xác nhận tên mới, thay `confirm-packages`) · UC UCGV15.
 **(c)**
 | # | Thành phần | testid | Quy tắc |
 |---|---|---|---|
 | 1 | Khung tab Hộp việc | `tasks-tabs` | Như S33 |
-| 2 | Danh sách **gói** (mỗi GV A đã gửi = một gói) | `inbox-confirm-list`, `package-row-{id}` | Cột: Lô · Ngày gửi · "Đã xử lý 7 / 15" (C-PROGRESS) · Hạn (C-DUE; **tính từ ngày gói được gửi** + `confirmDays`) · Trạng thái gói (C-BADGE "Đã gửi"/"Đã xong") |
-| 3 | Bấm hàng | — | → `/teacher/tasks/confirms/[packageId]` |
-**(e)** **Mỗi gói hiện nhãn "Gói do GV {Họ tên A} gửi ngày dd/mm"** (chốt P25-4; cũng hiện ở đầu màn S35). Chỉ hiện gói `SENT`/`DONE` gửi cho mình. Rỗng: "Bạn chưa có gói nào cần xác nhận."
+| 2 | Danh sách **lô có câu giao cho B** (nhóm hiển thị) | `inbox-confirm-list`, `batch-row-{id}` | Cột: Lô · "Đã xử lý 7 / 15" (C-PROGRESS) · Hạn (C-DUE theo `secondReview.dueAt`; ⚠ chờ xác nhận mốc tính `confirmDays`) |
+| 3 | Bấm hàng | — | → `/teacher/tasks/confirms/[batchId]` (⚠ chờ xác nhận route) |
+**(e)** B vẫn thấy tên GV A (chốt P25-4): nhãn "GV duyệt: {Họ tên A}" ở từng câu (từ `reviewerId`) trên S35. Chỉ hiện câu giao cho mình (và ⚠ chờ xác nhận theo thời điểm B thấy câu). Rỗng: "Bạn chưa có câu nào cần xác nhận."
 
 ---
 
-### S35 — Màn gói (GV vai B)
-**(a)** Route `/teacher/tasks/confirms/[packageId]` · Guard: **chỉ B của gói** (khác → 403) · API `POST /items/:id/confirm`, `POST /items/:id/remove`, `POST /item-packages/:id/confirm-all` · UC UCGV15.
+### S35 — Xác nhận từng câu được giao (GV vai B)
+**(a)** Route `/teacher/tasks/confirms/[batchId]` (⚠ chờ xác nhận route) · Guard: **chỉ B được giao** (khác → 403) · API `POST /items/:id/confirm`, `POST /items/:id/remove`, `POST /item-batches/:id/confirm-all` (⚠ chờ xác nhận tên và phạm vi) · UC UCGV15.
 **(b)**
 ```
-Gói 2 – Lô "Từ vựng B1 – đợt 1"        Đã xử lý 7 / 15        Hạn: 28/10 23:59
+Lô "Từ vựng B1 – đợt 1"        Đã xử lý 7 / 15        Hạn: 28/10 23:59
                                                 [ Xác nhận tất cả câu còn lại ]
 ┌─────────────────────────────────────────────────────────────────┐
 │ She ____ to school…   [A đã sửa]  (!cờ)  Chưa quyết  [Xác nhận][Loại bỏ] │
@@ -805,16 +800,16 @@ Chi tiết câu đang chọn:  Bản gốc │ Bản A đã sửa      (khác bi
 **(c)**
 | # | Thành phần | testid | Quy tắc |
 |---|---|---|---|
-| 1 | Đầu gói: tên lô, "Đã xử lý x / y", C-DUE | `package-header` | |
-| 2 | Nút phụ **"Xác nhận tất cả câu còn lại"** | `confirm-all` | Bật khi còn ≥ 1 câu chưa quyết; → C-DIALOG "Xác nhận tất cả {n} câu còn lại trong gói?" ([Hủy] [Xác nhận]), n = số câu chưa quyết; chỉ tác động câu chưa quyết; ghi log hàng loạt |
-| 3 | Danh sách câu | `package-items` | Mỗi dòng: nội dung rút gọn; C-FLAG; dấu **"A đã sửa"** (`item-edited-flag-{id}`); trạng thái (Chưa quyết / Đã xác nhận vòng 2 / Đã loại); 2 nút |
+| 1 | Đầu màn: tên lô, "Đã xử lý x / y", C-DUE | `confirm-header` | |
+| 2 | Nút phụ **"Xác nhận tất cả câu còn lại"** | `confirm-all` | Bật khi còn ≥ 1 câu chưa quyết; → C-DIALOG "Xác nhận tất cả {n} câu còn lại?" ([Hủy] [Xác nhận]), n = số câu chưa quyết; chỉ tác động câu chưa quyết; ghi log hàng loạt |
+| 3 | Danh sách câu | `confirm-items` | Mỗi dòng: nội dung rút gọn; C-FLAG; dấu **"A đã sửa"** (`item-edited-flag-{id}`); trạng thái (Chưa quyết / Đã xác nhận vòng 2 / Đã loại); 2 nút |
 | 4 | Nút **"Xác nhận"** | `confirm-item-{id}` | → `SECOND_APPROVED`; ẩn khi câu đã có quyết định |
 | 5 | Nút **"Loại bỏ"** (viền đỏ) | `remove-item-{id}` | → C-DIALOG [Hủy] [Loại bỏ] **không ô lý do** → `REJECTED` |
 | 6 | Khung chi tiết câu đang chọn | `diff-view` | Nội dung đầy đủ, **chỉ đọc**; nếu A đã sửa: C-DIFF bản gốc | bản sửa; giải thích |
-| 7 | Dải hoàn tất | `package-done` | Khi mọi câu có quyết định: dải xanh "Gói đã hoàn tất." và cả màn chỉ đọc |
+| 7 | Dải hoàn tất | `confirm-done` | Khi mọi câu được giao có quyết định: dải xanh "Đã xử lý hết các câu được giao." và cả màn chỉ đọc |
 **KHÔNG có:** ô nhập sửa nội dung, nút "Trả về A", nút duyệt lại.
 **(e)** Lỗi mạng khi xác nhận: giữ trạng thái, "Thử lại"; mất kết nối: khóa nút; tải: skeleton.
-**(g)** AC: B không sửa được; "tất cả còn lại" chỉ ảnh hưởng câu chưa quyết; gói xong → chỉ đọc; GV khác → 403.
+**(g)** AC: B không sửa được; "tất cả còn lại" chỉ ảnh hưởng câu chưa quyết; xử lý hết → chỉ đọc; GV khác → 403.
 
 ---
 
@@ -847,7 +842,7 @@ Chi tiết câu đang chọn:  Bản gốc │ Bản A đã sửa      (khác bi
 **(a)** API `GET /items` · UC UCGV02 (GV), UCADM06 (Admin). **Khác biệt theo role:**
 | | Teacher | Admin |
 |---|---|---|
-| Phạm vi dữ liệu | Chỉ câu/gói **được giao cho mình**; có thể rỗng | Mọi câu |
+| Phạm vi dữ liệu | Chỉ câu **được giao cho mình**; có thể rỗng | Mọi câu |
 | Nút trên đầu trang | **Không có** | "Tạo lô bằng AI" → S26 (`create-batch-ai`), "Import đề từ file" → S27 (`import-items`), liên kết "Lô cần xử lý (n) →" → S28 |
 | Chip lọc trạng thái | 5 giá trị (không `AI_REJECTED`) | 5 giá trị (không `AI_REJECTED`; câu AI loại xem ở tab của lô, S29) |
 | Chip "Lô" | Không | Có (`filter-batch`) |
@@ -949,7 +944,7 @@ Phân phối CEFR toàn hệ thống        Câu hỏi theo trạng thái
 Lô "Từ vựng B1 – đợt 1"  [Đang duyệt]                [Giao việc] [Chỉnh hạn] [Giao lại] [Kiểm tra]
 Tạo ─ AI kiểm ─ Giao việc ─ A duyệt ─ B xác nhận ─ Kiểm tra ─ Import        ← C-STEPPER
 [Chờ duyệt 40][Đã duyệt vòng1 30][Đã xác nhận 20][Đã vào NH 0][Đã loại 6][AI đã loại 4][Chưa xử lý 3]
- Tab:  Câu hỏi | Theo GV và gói | AI đã loại | Thống kê
+ Tab:  Câu hỏi | Theo GV | AI đã loại | Thống kê
 ```
 **(c)**
 | # | Thành phần | testid | Quy tắc |
@@ -957,9 +952,9 @@ Tạo ─ AI kiểm ─ Giao việc ─ A duyệt ─ B xác nhận ─ Kiểm t
 | 1 | Đầu trang: tên lô, C-BADGE trạng thái lô | `batch-status` | |
 | 2 | C-STEPPER 7 bước | `batch-progress` | Khi `GENERATING`/`IMPORTING`/`CHECKING`: hiện tiến độ, **tự làm mới** (polling 5 giây `[D]`) |
 | 3 | Hàng thẻ đếm theo trạng thái câu | `batch-counts` | Chờ duyệt vòng 1 · Đã duyệt vòng 1 · Đã xác nhận vòng 2 · Đã vào ngân hàng · Đã loại (GV/Admin) · AI đã loại · Chưa xử lý |
-| 4 | **Nút theo trạng thái lô** | `go-assign`, `go-finalize`, … | `READY_TO_ASSIGN` → **"Giao việc"** (→ S30); `IN_REVIEW` → "Chỉnh hạn" (mở S31), "Giao lại" (→ S30 tab Giao lại), "Ép gửi gói" (trên từng gói chưa gửi); `READY_TO_FINALIZE`/`FINAL_CHECKED` → **"Kiểm tra"** (→ S32). Nút không phù hợp trạng thái thì **ẩn** |
+| 4 | **Nút theo trạng thái lô** | `go-assign`, `go-finalize`, … | `READY_TO_ASSIGN` → **"Giao việc"** (→ S30); `IN_REVIEW` → "Chỉnh hạn" (mở S31), "Giao lại" (→ S30 tab Giao lại); `READY_TO_FINALIZE`/`FINAL_CHECKED` → **"Kiểm tra"** (→ S32). Nút không phù hợp trạng thái thì **ẩn** |
 | 5 | Tab **Câu hỏi** | `tab-items` | Bảng câu của lô, cờ mềm; bấm hàng → S10 |
-| 6 | Tab **Theo GV và gói** | `tab-assignees` | Theo GV A: số câu giao / đã quyết / hạn / "Quá hạn"; theo gói: A → B, trạng thái gói (Chưa gửi / Đã gửi / Đã xong), hạn của B; nút **"Ép gửi gói"** (`force-send-{packageId}`) chỉ ở gói `OPEN` → hộp xác nhận "Gửi gói thay cho {GV A}? Giảng viên sẽ không thể sửa các câu trong gói." `🔶` đề xuất |
+| 6 | Tab **Theo GV** | `tab-assignees` | Theo GV A: số câu giao / đã quyết / hạn vòng 1 / "Quá hạn"; theo GV B: số câu giao / đã xử lý / hạn vòng 2. **Không còn nút "Ép gửi gói"** (03/11/2026) `🔶` đề xuất |
 | 7 | Tab **AI đã loại** (**chỉ Admin**) | `tab-ai-rejected` | Nội dung + mã lý do (Phụ lục A) + câu bị nghi trùng; rỗng: "Chưa có câu nào bị AI loại." |
 | 8 | Tab **Thống kê** | `tab-stats` | Tỉ lệ loại theo tầng AI, theo từng GV A, theo GV B |
 | 9 | **S31 Chỉnh hạn** (ngăn bên phải) | `deadline-review-days`, `deadline-confirm-days`, `deadline-save` | 2 ô số ≥ 1: `reviewDays`, `confirmDays`; chỉ áp dụng việc **chưa xử lý**; hiện trước hạn mới "dd/mm 23:59"; nút chính "Lưu hạn" → `PATCH …/deadlines` (đặt lại lịch nhắc 24 giờ trước hạn) → toast "Đã cập nhật hạn." |
@@ -974,10 +969,10 @@ Tạo ─ AI kiểm ─ Giao việc ─ A duyệt ─ B xác nhận ─ Kiểm t
 | 1 | **Nhóm GV duyệt (A)** — danh sách chọn nhiều | `assign-reviewers` | Tối thiểu 1; gợi ý từ 2 người để chia việc. Chỉ liệt kê GV đang hoạt động |
 | 2 | **GV xác nhận (B)** — chọn đúng một | `assign-confirmer` | **Bắt buộc**; GV đã chọn vào nhóm A bị **vô hiệu hóa** trong danh sách B và ngược lại; vi phạm → `CONFIRMER_IN_REVIEW_GROUP` "GV xác nhận không được nằm trong nhóm GV duyệt." Admin có được chọn làm A/B không: `🔶 P25-1` (mặc định: **không** liệt kê Admin) |
 | 3 | **Số ngày để A duyệt** (`reviewDays` ≥ 1) | `assign-review-days` | Số nguyên |
-| 4 | **Số ngày để B xác nhận sau khi nhận gói** (`confirmDays` ≥ 1) | `assign-confirm-days` | Số nguyên |
-| 5 | Nút phụ **"Xem trước phân bổ"** | `assign-preview` | Bảng GV A – số câu theo kỹ năng/CEFR (chia đều, chênh ≤ 1 câu); hạn của A "dd/mm 23:59"; hạn của B "tính từ ngày A gửi gói" |
+| 4 | **Số ngày để B xác nhận** (`confirmDays` ≥ 1; ⚠ chờ xác nhận mốc tính: từ ngày giao hay từ lúc A duyệt) | `assign-confirm-days` | Số nguyên |
+| 5 | Nút phụ **"Xem trước phân bổ"** | `assign-preview` | Bảng GV A – số câu theo kỹ năng/CEFR (chia đều, chênh ≤ 1 câu); hạn của A "dd/mm 23:59"; hạn của B theo mốc ⚠ chờ xác nhận (xem hàng 4) |
 | 6 | Nút chính **"Xác nhận giao"** | `assign-submit` | Bật khi A ≥ 1, B đã chọn, hai số ≥ 1 và đã xem trước; → lô `IN_REVIEW`, toast "Đã giao việc" → S29 |
-Tab **Giao lại**: chọn GV A còn câu chưa xử lý → chọn GV nhận (hoặc đổi B của gói chưa gửi/chưa xử lý, vẫn B ∉ nhóm A) → nút `reassign-submit`; hạn tính lại từ ngày giao lại; ghi kiểm toán `REASSIGN`.
+Tab **Giao lại**: chọn GV A còn câu chưa xử lý → chọn GV nhận (hoặc đổi B của câu chưa xử lý ở vòng 2, vẫn B ∉ nhóm A) → nút `reassign-submit`; hạn tính lại từ ngày giao lại; ghi kiểm toán `REASSIGN` (một dòng mỗi câu).
 **(e)** Rỗng: "Chưa có giảng viên nào để giao việc." · Đang tải danh sách GV / đang tạo phân bổ · lô không ở `READY_TO_ASSIGN` → dải "Lô này không ở trạng thái chờ giao việc." (chỉ còn tab Giao lại nếu `IN_REVIEW`).
 
 ### S32 — Kiểm tra (C3) và Import cuối
@@ -997,7 +992,7 @@ Câu chưa quyết định (không được import): 3
 |---|---|---|---|
 | 1 | Thống kê đầu trang | `finalize-stats` | Đã xác nhận vòng 2 · Đã loại bởi A/B · AI đã loại · Chưa xử lý/quá hạn |
 | 2 | Nút **"Kiểm tra"** (spinner khi chạy) | `finalize-check` | → `POST …/final-check` (C3 chạy theo thay đổi) |
-| 3 | **Báo cáo theo câu** | `finalize-report` | Mỗi câu: Qua / Cờ mềm / Lỗi cứng + mã lý do + câu nghi trùng + C-DIFF nếu A sửa; tổng hợp theo gói; số câu A sửa; tỉ lệ A/B loại. **Lỗi cứng ⇒ câu đã chuyển "AI đã loại"** (hiển thị, không có nút) |
+| 3 | **Báo cáo theo câu** | `finalize-report` | Mỗi câu: Qua / Cờ mềm / Lỗi cứng + mã lý do + câu nghi trùng + C-DIFF nếu A sửa; tổng hợp theo GV; số câu A sửa; tỉ lệ A/B loại. **Lỗi cứng ⇒ câu đã chuyển "AI đã loại"** (hiển thị, không có nút) |
 | 4 | Với mỗi **cờ mềm** hai nút | `soft-accept-{itemId}`, `soft-reject-{itemId}` | "Chấp nhận (cho Import)" (ghi `ACCEPT_FLAG`) / "Loại" (`REJECTED`) → `POST /items/:id/decision` |
 | 5 | Dải cảnh báo báo cáo cũ | `finalize-stale` | "Dữ liệu đã thay đổi kể từ lần kiểm tra cuối. Vui lòng kiểm tra lại." (`FINAL_CHECK_STALE`); khi đó Import bị khóa |
 | 6 | Dòng thông tin **"Câu chưa quyết định"** | `finalize-unprocessed` | Chỉ hiển thị số lượng và danh sách câu **không được import**; **không có nút xử lý riêng** (#121: đến hạn mọi GV phải hoàn thành; dự phòng dùng S29) |
@@ -1095,7 +1090,7 @@ Tài khoản     [ Sinh viên ]  [ Giảng viên ]            [ Thêm sinh viên
 | 6 | S24, S19 | Form tạo lẻ + import dùng lại C-IMPORT-GRID |
 | 7 | S26, S27, S28, S29 (+S31) | Nút theo trạng thái lô hiện/ẩn đúng |
 | 8 | S30, S32, S36 | Chặn B ∈ nhóm A; Import khóa/mở đúng |
-| 9 | S33, S11, S34, S35 | Gửi gói chỉ bật khi đủ quyết định; B chỉ đọc |
+| 9 | S33, S11, S34, S35 | Không còn nút Gửi; B chỉ đọc |
 
 Sau mỗi lượt: đối chiếu AC (g) từng màn, đối chiếu "KHÔNG hiển thị/KHÔNG có" trong Mục 0.1, ghi `0.docs/tracking/AI_USAGE_LOG.md` (công cụ, prompt, phần sửa tay) — bắt buộc cho TC2.3.
 
@@ -1114,13 +1109,13 @@ Sau mỗi lượt: đối chiếu AC (g) từng màn, đối chiếu "KHÔNG hi�
 | ✅ P25-1 | Admin có được chọn làm GV A/B? Admin có Hộp việc? | **Đã chốt 18/10: Không** (S30 chỉ liệt kê `role = TEACHER`; menu Admin không có Hộp việc) | S30, menu |
 | P25-2 | Admin có xóa được câu `REJECTED`/lô? | **Không có nút Xóa** | S08, S29 |
 | P25-3 | GV A có sửa được kỹ năng/CEFR/chủ đề/`irt_b`? | **Không** (chỉ nội dung, đáp án, giải thích) | S11 |
-| ✅ P25-4 | GV B có thấy tên GV A trên gói? | **Đã chốt: Có** (UCGV15 bước 2): nhãn "Gói do GV {Họ tên A} gửi ngày dd/mm" ở danh sách gói (S34) và đầu màn gói (S35) | S34, S35 |
+| ✅ P25-4 | GV B có thấy tên GV A? | **Đã chốt: Có** (UCGV15 bước 2); sau 03/11/2026 hiển thị theo từng câu: nhãn "GV duyệt: {Họ tên A}" (từ `reviewerId`) ở S35, không còn nhãn "Gói do GV A gửi" | S34, S35 |
 | O4 | "Hủy bài cũ và bắt đầu lại" (SV) chưa có endpoint | Nút vẽ nhưng vô hiệu | S03 |
 | O6 | Danh sách đầy đủ SV cho GV | Không vẽ, chỉ tra MSSV | S13 |
 | O7 | Báo cáo dữ liệu quá lớn | Hiện thông điệp "thu hẹp phạm vi" | S12 |
 | K6 | Cờ `REVIEW_ENABLED` xem lại đáp án | Hỗ trợ cả hai nhánh bật/tắt | S06 |
 | Q-7…Q-10 | Ngưỡng/tham số AI, bản quyền, mô hình embedding, `pg_trgm` | **UI không hiển thị con số ngưỡng nào** | S26, S27, S29, S32 |
-| — | "Ép gửi gói" (Admin gửi thay A): **giữ làm dự phòng** theo #121 (người dùng chưa xác nhận có bỏ hẳn hay không) | Như Mục 4.5-D/F | S29 |
+| ~~—~~ | ~~"Ép gửi gói" (Admin gửi thay A)~~ **Đã bỏ 03/11/2026** cùng khái niệm gói | — | S29 |
 | R-1 | Cấu trúc đích có `/teacher/dashboard` nhưng **chưa có nội dung đặc tả** | Không sinh; GV vào `/teacher/tasks/reviews` (nếu có việc) hoặc `/teacher/reports` | Mục 3.1 |
 | R-2 | Admin xem báo cáo/hồ sơ SV ở đâu: cấu trúc đích chỉ ghi `/teacher/reports` và `/admin/dashboard` | Admin dùng chung `/teacher/reports`, `/teacher/students[/…]` (guard cho phép ADMIN; sidebar dựng theo role) | S12–S14 |
 | ✅ R-3 | Menu GV 4 mục, có "Ngân hàng câu hỏi" → `/teacher/item-bank` | **Đã chốt 16/10 (#116)**; S08 với Teacher không có nút tạo lô/import | Mục 2.4, S08 |
@@ -1168,11 +1163,11 @@ Sau mỗi lượt: đối chiếu AC (g) từng màn, đối chiếu "KHÔNG hi�
 | C9–C11 | S16–S18 | `/change-password`, `/forgot-password`, `/reset-password` | không đổi |
 | D2 / E3 | S08 | `/teacher/items`, `/teacher/item-bank` | `/teacher/item-bank`, `/admin/item-bank` |
 | D4 / E4 | S10 | `/teacher/items/[id]` | `/teacher/item-bank/[id]`, `/admin/item-bank/[id]` |
-| D5 | S11 | `/teacher/review-queue`, `/teacher/items/review` | `/teacher/tasks/reviews/[packageId]` |
+| D5 | S11 | `/teacher/review-queue`, `/teacher/items/review` | `/teacher/tasks/reviews/[batchId]` (⚠ chờ xác nhận) |
 | D6 / E5 | S12 | `/teacher/reports` | không đổi |
 | D7 / E6 | S13 | `/teacher/students` | không đổi |
 | D8 | S14 | `/teacher/students/[code]` | `/teacher/students/[studentId]` |
-| D10 / D11 / D12 | S33 / S34 / S35 | `/teacher/inbox/…`, `/me/review-tasks`, `/hod/…` | `/teacher/tasks/reviews`, `/teacher/tasks/confirms`, `/teacher/tasks/confirms/[packageId]` |
+| D10 / D11 / D12 | S33 / S34 / S35 | `/teacher/inbox/…`, `/me/review-tasks`, `/hod/…` | `/teacher/tasks/reviews`, `/teacher/tasks/confirms`, `/teacher/tasks/confirms/[batchId]` (⚠ chờ xác nhận) |
 | E2 | S36 | — | `/admin/dashboard` |
 | E8 | S20 | `/admin/exam-rounds` | không đổi |
 | E9 | S21 | `/admin/exam-rounds/new`, `/[id]/edit` | `…/new`, `/[roundId]/edit` |
@@ -1228,8 +1223,8 @@ Cuối cùng liệt kê: các điểm TODO-CONFIRM đã dùng mặc định, cá
 | UCGV07 | Xem báo cáo lớp | S12 | `GET /reports/class-distribution`, `/reports/error-patterns` | BR-13 |
 | UCGV08 | Xuất báo cáo CSV | S12 | (chưa có endpoint riêng trong API Contract) `⚠️ ĐX` | BR-13 |
 | UCGV09 | Xem hồ sơ SV | S13, S14 | `GET /placement-profiles/:id`, `…/history` | BR-16 |
-| UCGV14 | Duyệt và gửi gói (GV A) | S33, S11 | `GET /me/review-tasks`, `PATCH /items/:id`, `POST /items/:id/approve|reject`, `POST /item-packages/mine/send` | BR-16, 22, 24, 25, 27 |
-| UCGV15 | Xác nhận gói (GV B) | S34, S35 | `GET /me/confirm-packages`, `POST /items/:id/confirm|remove`, `POST /item-packages/:id/confirm-all` | BR-16, 24, 26 |
+| UCGV14 | Duyệt câu (GV A) *(đổi tên từ "Duyệt và gửi gói"; ⚠ chờ xác nhận có đổi trong đặc tả UC `.docx`)* | S33, S11 | `GET /me/review-tasks`, `PATCH /items/:id`, `POST /items/:id/approve|reject` | BR-16, 22, 24, 27 |
+| UCGV15 | Xác nhận câu (GV B) *(đổi tên từ "Xác nhận gói"; ⚠ chờ xác nhận)* | S34, S35 | `GET /me/confirm-tasks`, `POST /items/:id/confirm|remove`, `POST /item-batches/:id/confirm-all` (⚠ chờ xác nhận) | BR-16, 24, 26 |
 | UCADM04 | Xem hồ sơ SV (Admin) | S13, S14 | như UCGV09 | BR-16 |
 | UCADM05 | Báo cáo tổng thể | S36, S12 | `GET /reports/…?examRoundId=` | BR-13 |
 | UCADM06 | Quản lý/giám sát ngân hàng | S08, S10 | `GET /items`, `GET /item-batches/:id/ai-rejected` | BR-16, 21, 29, 30 |
@@ -1237,7 +1232,7 @@ Cuối cùng liệt kê: các điểm TODO-CONFIRM đã dùng mặc định, cá
 | UCADM09 | Quản lý tài khoản | S24 | `GET|POST|PATCH /students`, `/teachers`, `POST …/lock|unlock|resend-temporary-password`, `PATCH /users/:id/role` | BR-01, 02, 16…20 |
 | UCADM11 | Tạo lô bằng AI | S26, S29 | `POST /item-batches`, `GET /item-batches/:id` | BR-21, 29, 30 |
 | UCADM12 | Import đề từ file | S27, S29 | `POST /item-imports/upload|save`, `GET|DELETE /item-imports/grid` | BR-21, 29, 30 |
-| UCADM13 | Giao việc và theo dõi lô | S28, S29, S30, S31 | `GET …/assign-preview`, `POST …/assign|reassign`, `PATCH …/deadlines`, `POST /item-packages/:id/force-send` | BR-22…25 |
+| UCADM13 | Giao việc và theo dõi lô | S28, S29, S30, S31 | `GET …/assign-preview`, `POST …/assign|reassign`, `PATCH …/deadlines` | BR-22…24 |
 | UCADM14 | Kiểm tra C3 và Import | S32 | `POST|GET …/final-check`, `POST /items/:id/decision`, `POST …/import` | BR-28, 29, 30 |
 | UCADM15 | Quản lý kỳ thi | S20, S21, S22 | `POST|GET|PATCH /exam-rounds`, `POST …/publish|close` | BR-07, 08, 12 |
 | UCADM16 | Import danh sách thi | S23 | `POST …/participants/import/upload|save`, `GET|DELETE …/import/grid`, `DELETE …/participants/:studentId` | BR-03, 04, 07, 09 |
@@ -1257,12 +1252,9 @@ Ghi chú: UC `UCADM02/03/07`, `UCGV03/05/06/10` đã bỏ hoặc ngoài phạm v
 | `TestSession` | `status`, `thetaFinal`, `seFinal`, `startedAt`, `completedAt`, `expiresAt`, `stoppingReason` | S04, S05, S07, S22 |
 | `SessionResponse` | `itemId`, `response` (A–D), `isCorrect`, `thetaAfter`, `seAfter`, `responseTimeMs` | S06 (đáp án chọn, đúng/sai) |
 | `LanguageProfile` | `cefrLevel`, `cefrConfidence`, `theta`, `standardError`, `confidenceInterval95`, `boundaryEffect`, `skillProfiles` (JSON), `errorPatterns` (JSON), `aiRecommendations`, `testMetadata` | S05, S14 |
-| `Item` | `content`, `options` (JSON), `correctAnswer`, `skill`, `topicTag`, `cefrTarget`, `irtB` (∈ [−4, +4]), `status`, `approvedBy`/`approvedAt` (Admin Import), `batchId` (bắt buộc), `packageId` (sau khi A gửi) | S08, S10, S11, S35 |
+| `Item` | `content`, `options` (JSON), `correctAnswer`, `skill`, `topicTag`, `cefrTarget`, `irtB` (∈ [−4, +4]), `status`, `approvedBy`/`approvedAt` (Admin Import), `batchId` (bắt buộc), `reviewerId`/`confirmerId` (GV A/B được giao), `firstReview`/`secondReview` (JSON: `dueAt`, `action`, `reviewedAt`/`confirmedAt`, `comment`, `originalSnapshot` ở vòng 1), `firstReminderSent`/`secondReminderSent` (cờ kỹ thuật, không hiển thị) | S08, S10, S11, S35 |
 | `Explanation` | `content` (một bản cho mỗi `Item`) | S06, S10, S11 |
 | `ItemBatch` | `source` (`ItemBatchSource`), `name?`, `status`, `skill?`, `cefrTarget?`, `topicTag?`, `requestedCount?` (chỉ lô AI), `createdBy` | S28, S29 |
-| `ItemBatchAssignment` | `confirmerId` (GV B), `assignedBy`, `reviewDays`, `confirmDays` | S29, S30 |
-| `ItemPackage` | `reviewerId` (GV A), `confirmerId` (GV B), `status` (OPEN/SENT/DONE), `sentAt?`, `dueAt?` | S29, S33–S35 |
-| `ItemReviewAssignment` | `itemId` (duy nhất), `assigneeId`, `dueAt`, `reminderSent` | S33, S11, C-DUE |
 | `ItemCheckResult` | `checkpoint` (C1/C2/C3), `level` (PASS/SOFT/HARD), `reasonCodes[]`, `suspectedDuplicateId?` | S10, S27, S29, S32 (chỉ Admin) |
 | `ItemReviewEvent` | `action` (`ReviewAction`), `actorId`, `itemId`, `createdAt` | S10 "Lịch sử" (chỉ Admin) |
 

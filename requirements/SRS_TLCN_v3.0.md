@@ -16,6 +16,8 @@
 
 **[NOTE]** Changelog v3.0 vòng 3 (14/10/2026, DC-27 đến DC-45, Quyết định #110 đến #113): (1) luồng câu hỏi mới: Admin tạo lô bằng AI hoặc tự import file (lưới tạm) ⇒ AI check ⇒ Admin xem kết quả và Giao việc ⇒ GV vai A sửa/duyệt/từ chối ⇒ A gửi một gói cho GV vai B ⇒ B xác nhận hoặc loại từng câu ⇒ Admin Kiểm tra (C3) ⇒ Admin Import ⇒ FINAL_APPROVED; (2) trạng thái Item mới DRAFT → FIRST_APPROVED → SECOND_APPROVED → FINAL_APPROVED, thêm AI_REJECTED, bỏ trạng thái chờ duyệt cũ và đổi tên trạng thái đã duyệt cũ thành FINAL_APPROVED (CAT chỉ chọn FINAL_APPROVED); ItemSource được lược bỏ hoàn toàn khỏi Item (nguồn gốc xác định qua Lô ItemBatch); (3) GV không import, không có form thêm từng câu, Admin không sửa nội dung câu; (4) giải thích AI được sinh cùng lúc với câu hỏi (không sinh lazy), lưu bảng explanations; (5) khoảng irt_b hợp lệ [−4, +4] (cấu hình) khác CLAUDE.md; (6) phạm vi tăng: ai-question-generator (F-11) kéo từ Khóa luận vào Tiểu luận (F-23 đến F-28). Các đề xuất mặc định của kế hoạch sinh/duyệt đề AI bản 5 (Q-1 chọn O2, Q-3, Q-4, Q-5, Q-6) được coi là đã chấp nhận; Q-7 đến Q-10 (ngưỡng, bản quyền, mô hình embedding, pg_trgm) còn chờ chốt. Mọi tên bảng, endpoint, mã UC, màn hình và ngưỡng của phần này là đề xuất. Chi tiết: Mục IXb (9b.9 đến 9b.18) và Phụ lục A.
 
+**[NOTE]** Cập nhật sau họp GVHD 03/11/2026 (chưa phát hành số phiên bản mới): bỏ gói duyệt (ItemPackage, PackageStatus, "Gửi gói", ép gửi gói, FORCE_SEND, EXTEND, DC-42); Admin giao việc và duyệt theo TỪNG CÂU: items có reviewer_id (GV A), confirmer_id (GV B) là cột khóa ngoại, first_review và second_review là cột JSON (FirstReviewDetail, SecondReviewDetail), cờ nhắc hạn first_reminder_sent, second_reminder_sent; bỏ bảng item_batch_assignments, item_review_assignments, item_packages và cột items.package_id, items.original_snapshot (originalSnapshot nay nằm trong first_review); ReviewAction thêm ASSIGN; ExamRound sở hữu TestSession (Composition, DB Restrict). Các chỗ quyết định chưa nói rõ được đánh dấu "⚠ chờ xác nhận" tại chỗ. Căn cứ: 20261103_QUYET_DINH_THAY_DOI_THIET_KE_CLASS_DIAGRAM.md.
+
 ---
 
 ## I. TỔNG QUAN BÀI TOÁN
@@ -45,7 +47,7 @@ Sinh viên năm nhất tại các trường Cao đẳng/Đại học phải làm
 | **Nhóm** | **Mô tả** | **Quy mô** |
 | --- | --- | --- |
 | Sinh viên (STUDENT) | Năm nhất làm Placement Test; tài khoản do Admin tạo (từng người hoặc import; không tự đăng ký); đăng nhập email + mật khẩu | 50–500 người/đợt |
-| Giảng viên (TEACHER) | GV thường (tài khoản do Admin tạo, từng người hoặc import): xem kết quả — báo cáo lớp (lọc theo kỳ), tra cứu hồ sơ SV; đổi/quên mật khẩu. Khi Admin giao một lô câu hỏi: vai A (sửa/duyệt/từ chối câu được giao rồi gửi gói) hoặc vai B (một GV đại diện, xác nhận/loại từng câu trong gói gửi cho mình). GV không import đề, không tạo lô | 5–20 người (gộp GV + Admin, số liệu v2.6) |
+| Giảng viên (TEACHER) | GV thường (tài khoản do Admin tạo, từng người hoặc import): xem kết quả — báo cáo lớp (lọc theo kỳ), tra cứu hồ sơ SV; đổi/quên mật khẩu. Khi Admin giao một lô câu hỏi: vai A (sửa/duyệt/từ chối câu được giao) hoặc vai B (xác nhận/loại từng câu được giao cho mình). GV không import đề, không tạo lô | 5–20 người (gộp GV + Admin, số liệu v2.6) |
 | Admin (ADMIN) | Admin của trường, siêu tập của Teacher: tạo lô câu hỏi (AI sinh hoặc import file), giao việc, theo dõi, kiểm tra và import cuối (không soạn, không sửa nội dung câu); quản lý kỳ thi + danh sách thi, tạo từng người hoặc import tài khoản, quản lý tài khoản SV/GV, nâng/thu hồi Admin; tài khoản đầu tiên tạo bằng seed | Trong tổng 5–20 người nêu trên |
 | EduZ System | Consume Language Profile qua API | Machine-to-machine |
 
@@ -105,7 +107,7 @@ src/modules/
 ├── exam-round/            # (v3.0) Kỳ thi, danh sách thi, import danh sách thi theo lưới tạm (UCADM15-17)
 ├── mail/                  # (v3.0) MailPort + SmtpMailAdapter (SMTP) + BullMQ processor gửi email
 ├── item-bank/             # CRUD câu hỏi + IRT params
-├── item-generation/       # (v3.0 vòng 3, đề xuất) Lô câu hỏi: AI sinh + import file; ItemCheckService (C1/C2/C3), ItemDuplicateChecker; giao việc, gói A→B, hạn và nhắc (UCADM11-14, UCGV14-15)
+├── item-generation/       # (v3.0 vòng 3, đề xuất) Lô câu hỏi: AI sinh + import file; ItemCheckService (C1/C2/C3), ItemDuplicateChecker; giao việc từng câu cho A/B, hạn và nhắc (UCADM11-14, UCGV14-15)
 ├── llm-gateway/           # (v3.0 vòng 3, đề xuất) Cổng gọi LLM dùng chung: dự phòng nhà cung cấp, cache theo hash prompt, ghi mô hình/token
 ├── cat-engine/            # ⭐ CAT Algorithm: IRT + EAP + Item Selection
 ├── test-session/          # Session management: dual-write Redis + PostgreSQL
@@ -124,10 +126,10 @@ src/modules/
 | ItemGenerationService | Điều phối lô: nhận yêu cầu (skill, CEFR, topic, N), chạy nền qua BullMQ các bước G1 đến G7, tạo lô, ghi tên/phiên bản mô hình và token mỗi lời gọi | UCADM11, UCADM12 |
 | ItemCheckService (3 checkpoint) | Một dịch vụ, ba điểm kiểm: C1 sau khi AI sinh, C2 khi import file, C3 trước FINAL_APPROVED; tầng rẻ (luật cứng, băm, pg_trgm) chạy trước, embedding và AI chỉ chạy cho câu còn sống; kết quả gắn content_hash và được tái sử dụng | Mục 9b.12 |
 | ItemDuplicateChecker (+ DuplicateStrategy) | Lọc trùng ba tầng dùng chung mọi điểm kiểm: T1 băm chuẩn hóa, T2 pg_trgm, T3 embedding (cosine tính trong ứng dụng); mỗi tầng là một strategy | DC-30, DC-35 |
-| ReviewDistributionService | Chia đều câu cho nhóm A (sắp theo skill, CEFR rồi chia vòng tròn); giao lại | Mục 9b.13 |
+| ReviewDistributionService | Chia đều câu cho nhóm A (sắp theo skill, CEFR rồi chia vòng tròn); giao lại (⚠ chờ xác nhận: còn dùng cách chia đều sau khi giao theo từng câu không) | Mục 9b.13 |
 | DeadlineReminderService | Tính due_at (cuối ngày), đặt job trễ BullMQ nhắc trước hạn 24 giờ, đối chiếu lazy khi mở hộp việc phòng mất job | Mục 9b.14 |
 | LLM Gateway | Cổng gọi LLM có dự phòng nhà cung cấp, cache theo hash prompt, trần lời gọi/token mỗi lô; dùng cho sinh câu, giải thích, kiểm đáp án độc lập (G5) và embedding | Mô hình embedding chờ chốt (Q-9) |
-| Thực thể mới | ItemBatch, ItemPackage, ItemReviewAssignment, ItemCheckResult (cùng ItemReviewEvent tùy chọn) | Mục 6.2b |
+| Thực thể mới | ItemBatch, ItemCheckResult (cùng ItemReviewEvent tùy chọn); kiểu giá trị FirstReviewDetail, SecondReviewDetail của Item (cột JSON) | Mục 6.2, 6.2b |
 
 **[NOTE]** Tên lớp, tên module và tên bảng ở trên là đề xuất theo kế hoạch sinh/duyệt đề AI bản 5 (Mục 11); Class Diagram và Sequence sẽ cập nhật ở tài liệu riêng. Sơ đồ ASCII ở đầu Mục III chưa vẽ LLM Gateway.
 
@@ -411,8 +413,12 @@ CREATE TABLE items (
     approved_at     TIMESTAMPTZ,                  -- NULL tới khi FINAL_APPROVED
     content_hash    VARCHAR(64),                  -- v3.0 vòng 3: SHA-256 (hex) của nội dung + đáp án + giải thích đã chuẩn hóa (T1)
     batch_id        UUID NOT NULL REFERENCES item_batches(id),   -- lô sinh/import; bắt buộc (quyết định 16/10/2026), câu seed thuộc lô seed
-    package_id      UUID REFERENCES item_packages(id),  -- gói A→B; NULL tới khi A gửi gói (đề xuất)
-    original_snapshot JSONB,                      -- bản gốc (content, options, correct_answer, giải thích) trước khi GV A sửa lần đầu; NULL nếu chưa sửa; để GV B/Admin xem diff (UCGV15, C3)
+    reviewer_id     UUID REFERENCES users(id),     -- GV vai A được giao (họp GVHD 03/11/2026); cột khóa ngoại, ON DELETE RESTRICT; NULL tới khi Admin giao việc
+    confirmer_id    UUID REFERENCES users(id),     -- GV vai B được giao; cột khóa ngoại, ON DELETE RESTRICT; NULL tới khi giao việc
+    first_review    JSONB,                         -- FirstReviewDetail { dueAt, action (APPROVE | REJECT | null), reviewedAt, comment, originalSnapshot }; originalSnapshot = bản gốc (content, options, correct_answer, giải thích) trước khi GV A sửa lần đầu, ghi một lần, để GV B/Admin xem diff (UCGV15, C3)
+    second_review   JSONB,                         -- SecondReviewDetail { dueAt, action (CONFIRM | REMOVE | null), confirmedAt, comment }
+    first_reminder_sent  BOOLEAN NOT NULL DEFAULT false,   -- cờ kỹ thuật của job nhắc hạn vòng 1; cột riêng để job không ghi đè JSON kết quả duyệt
+    second_reminder_sent BOOLEAN NOT NULL DEFAULT false,   -- tương tự cho vòng 2
     -- Audit: chỉ item có status='FINAL_APPROVED' được CAT engine dùng (xem Mục 4.4)
 
     calibrated      BOOLEAN DEFAULT FALSE,   -- Đã calibrate thực tế chưa?
@@ -426,14 +432,17 @@ CREATE TABLE items (
 
 -- Index cho CAT query performance
 CREATE INDEX idx_items_cat ON items(status, skill, irt_b) WHERE status = 'FINAL_APPROVED';
+-- Hộp việc của GV A / GV B (03/11/2026)
+CREATE INDEX idx_items_reviewer  ON items (reviewer_id, status);
+CREATE INDEX idx_items_confirmer ON items (confirmer_id, status);
 -- Chỉ mục lọc trùng (v3.0 vòng 3, đề xuất)
 CREATE INDEX idx_items_content_hash ON items (content_hash);                      -- T1: băm chuẩn hóa
 CREATE INDEX idx_items_content_trgm ON items USING GIN (content gin_trgm_ops);    -- T2: cần CREATE EXTENSION pg_trgm (chờ chốt Q-10)
 ```
 
-**[NOTE]** v3.0 (vòng 3): approved_by / approved_at ghi Admin bấm Import (chuyển câu sang FINAL_APPROVED); nội dung câu được duyệt bởi GV vai A (FIRST_APPROVED) và GV vai B (SECOND_APPROVED), truy vết ở item_review_events. Nội dung này thay quy tắc DC-18 "Admin tự duyệt câu hỏi do mình soạn": Admin không soạn và không sửa nội dung câu (DC-29); câu FINAL_APPROVED cấm sửa (#64). Rủi ro chất lượng xem R12, R17, R18. Điều kiện guard của CAT đổi thành WHERE status = 'FINAL_APPROVED' (Mục 4.4). Vì items tham chiếu item_batches và item_packages, khi viết migration phải tạo hai bảng này trước (hoặc thêm khóa ngoại sau bằng ALTER).
+**[NOTE]** v3.0 (vòng 3): approved_by / approved_at ghi Admin bấm Import (chuyển câu sang FINAL_APPROVED); nội dung câu được duyệt bởi GV vai A (FIRST_APPROVED) và GV vai B (SECOND_APPROVED), truy vết ở item_review_events. Nội dung này thay quy tắc DC-18 "Admin tự duyệt câu hỏi do mình soạn": Admin không soạn và không sửa nội dung câu (DC-29); câu FINAL_APPROVED cấm sửa (#64). Rủi ro chất lượng xem R12, R17, R18. Điều kiện guard của CAT đổi thành WHERE status = 'FINAL_APPROVED' (Mục 4.4). Vì items tham chiếu item_batches, khi viết migration phải tạo bảng này trước (hoặc thêm khóa ngoại sau bằng ALTER). Giao việc theo từng câu (03/11/2026): người duyệt và hạn nằm ngay trên items, không còn bảng giao việc hay bảng gói.
 
-**[NOTE]** Lô seed (quyết định 16/10/2026): mọi câu thuộc một lô, kể cả câu seed. Script cài đặt phải tạo tài khoản Admin hệ thống trước (ví dụ admin@apt.edu.vn), sau đó lấy id Admin điền vào created_by của các lô seed. Mỗi lô seed ghi source = IMPORTED, status = DONE, requested_count = NULL, name = tên bộ nguồn (một lô cho mỗi bộ: CEFR-J, CLOTH, đề GV tự soạn); câu nạp vào gán batch_id đúng lô. Migration cho dữ liệu cũ: gán batch_id của các câu chưa có lô vào lô seed tương ứng rồi mới đặt NOT NULL. Lô seed không chạy C1/C2/C3 và không có gói/giao việc.
+**[NOTE]** Lô seed (quyết định 16/10/2026): mọi câu thuộc một lô, kể cả câu seed. Script cài đặt phải tạo tài khoản Admin hệ thống trước (ví dụ admin@apt.edu.vn), sau đó lấy id Admin điền vào created_by của các lô seed. Mỗi lô seed ghi source = IMPORTED, status = DONE, requested_count = NULL, name = tên bộ nguồn (một lô cho mỗi bộ: CEFR-J, CLOTH, đề GV tự soạn); câu nạp vào gán batch_id đúng lô. Migration cho dữ liệu cũ: gán batch_id của các câu chưa có lô vào lô seed tương ứng rồi mới đặt NOT NULL. Lô seed không chạy C1/C2/C3 và không có giao việc.
 
 ### 6.2b. Bảng bổ sung cho lô, giao việc và kiểm tra (v3.0 vòng 3 — đề xuất)
 
@@ -457,31 +466,8 @@ CREATE TABLE item_batches (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Hạn chỉ có khi đã giao việc => bảng riêng, tránh cột trống
-CREATE TABLE item_batch_assignments (
-    batch_id        UUID PRIMARY KEY REFERENCES item_batches(id),
-    confirmer_id    UUID NOT NULL REFERENCES users(id),   -- GV vai B, không thuộc nhóm A (kiểm ở tầng ứng dụng)
-    review_days     INT NOT NULL CHECK (review_days >= 1),
-    confirm_days    INT NOT NULL CHECK (confirm_days >= 1)
-);
-
-CREATE TABLE item_review_assignments (
-    item_id         UUID PRIMARY KEY REFERENCES items(id),   -- UNIQUE(item_id): mỗi câu một người vai A
-    assignee_id     UUID NOT NULL REFERENCES users(id),
-    assigned_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    due_at          TIMESTAMPTZ NOT NULL,           -- cuối ngày (ngày giao + review_days), 23:59:59 giờ VN (cấu hình)
-    reminder_sent   BOOLEAN NOT NULL DEFAULT false
-);
-
-CREATE TABLE item_packages (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    batch_id        UUID NOT NULL REFERENCES item_batches(id),
-    reviewer_id     UUID NOT NULL REFERENCES users(id),   -- GV vai A gửi gói (mỗi A một gói)
-    confirmer_id    UUID NOT NULL REFERENCES users(id),   -- GV vai B
-    status          VARCHAR(10) NOT NULL,           -- OPEN | SENT | DONE
-    due_at          TIMESTAMPTZ,                    -- đặt khi gói được gửi: cuối ngày (ngày gửi + confirm_days)
-    reminder_sent   BOOLEAN NOT NULL DEFAULT false
-);
+-- Giao việc và duyệt theo TỪNG CÂU (họp GVHD 03/11/2026): KHÔNG còn item_batch_assignments, item_review_assignments, item_packages.
+-- Người được giao (reviewer_id, confirmer_id), hạn và kết quả hai vòng duyệt (first_review, second_review) nằm trên bảng items (Mục 6.2).
 
 CREATE TABLE item_embeddings (
     item_id         UUID PRIMARY KEY REFERENCES items(id),
@@ -505,15 +491,14 @@ CREATE TABLE item_review_events (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     batch_id        UUID REFERENCES item_batches(id),
     item_id         UUID REFERENCES items(id),
-    package_id      UUID REFERENCES item_packages(id),
     actor_id        UUID REFERENCES users(id),
     event_type      VARCHAR(20) NOT NULL,           -- APPROVE | REJECT | CONFIRM | REMOVE | CONFIRM_ALL | IMPORT |
-                                                    -- REASSIGN | EXTEND | FORCE_SEND | ACCEPT_FLAG
+                                                    -- ASSIGN | REASSIGN | ACCEPT_FLAG (ASSIGN, REASSIGN: một dòng cho mỗi câu, actor = Admin)
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ```
 
-**[NOTE]** Toàn bộ DDL ở Mục 6.2b là mô tả theo Mục 10 của kế hoạch sinh/duyệt đề AI bản 5: tên bảng, tên cột, kiểu dữ liệu và giá trị enum là đề xuất, chưa có trong schema.prisma và custom_migrations.sql. Nguồn chân lý thực thi vẫn là schema.prisma + custom_migrations.sql sau khi đồng bộ. Bảng explanations (giải thích gắn Item, sinh cùng lúc sinh câu hỏi) đã tồn tại theo #63 và không nằm trong danh sách trên. Các kiểm tra "B không thuộc nhóm A", "A khác B" và "mỗi A một gói" thực hiện ở tầng ứng dụng.
+**[NOTE]** Toàn bộ DDL ở Mục 6.2b là mô tả theo Mục 10 của kế hoạch sinh/duyệt đề AI bản 5: tên bảng, tên cột, kiểu dữ liệu và giá trị enum là đề xuất, chưa có trong schema.prisma và custom_migrations.sql. Nguồn chân lý thực thi vẫn là schema.prisma + custom_migrations.sql sau khi đồng bộ. Bảng explanations (giải thích gắn Item, sinh cùng lúc sinh câu hỏi) đã tồn tại theo #63 và không nằm trong danh sách trên. Kiểm tra "A khác B" cho từng câu thực hiện ở tầng ứng dụng (⚠ chờ xác nhận: ràng buộc cũ "B không thuộc nhóm A của lô" còn hay không).
 
 ### 6.3. Phân bổ Item Bank
 
@@ -708,6 +693,8 @@ CREATE UNIQUE INDEX uq_session_round_student
   ON test_sessions (exam_round_id, student_id) WHERE status <> 'ABANDONED';
 ```
 
+**[NOTE]** Quan hệ ExamRound ◆ TestSession là Composition (họp GVHD 03/11/2026): phiên chỉ phục vụ đúng một kỳ thi. Ở DB, quan hệ này dùng ON DELETE RESTRICT (hoặc xóa mềm): kỳ thi đã có sinh viên làm bài thì không xóa được, để bảo vệ lịch sử thi (schema.prisma: TestSession → ExamRound `onDelete: Restrict`).
+
 **[NOTE] Tạo tài khoản (DC-24): MSSV lưu ở student_profiles.student_code (UNIQUE) và Mã GV lưu ở teacher_profiles.teacher_code (UNIQUE, VARCHAR(50)); cả hai bảng đã có trong schema.prisma nên tạo tài khoản SV/GV không cần thêm bảng hay cột. ADMIN không bắt buộc có teacher_profiles. duration_minutes là NOT NULL DEFAULT 45 nên không còn trường hợp NULL hay giá trị thay thế khi đọc.**
 
 ### Redis Key Schema (L1 Cache — không phải Source of Truth)
@@ -760,9 +747,9 @@ Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tư�
 | F-22 | Quản lý tài khoản SV & GV | Admin tạo từng tài khoản SV/GV, xem/sửa/khóa/mở khóa, gửi lại mật khẩu tạm; nâng/thu hồi quyền Admin (UCADM09) | P1 (đề xuất) |
 | F-23 | Tạo lô câu hỏi bằng AI | Admin nhập skill, CEFR, topic (tùy chọn), N; chạy nền BullMQ: lấy câu mẫu few-shot, sinh dư kèm giải thích trong cùng lời gọi, AI check C1, bù phần thiếu; qua LLM Gateway, có trần chi phí mỗi lô (UCADM11; DC-27, DC-31, DC-45) | P0 (đề xuất) |
 | F-24 | Import đề từ file (lưới tạm) | Chỉ Admin; tải một hoặc nhiều file .xlsx vào lưới tạm, dòng lỗi/trùng bị loại kèm popup, bấm Lưu mới tạo lô source IMPORTED; AI check C2; dòng thiếu giải thích được AI sinh bổ sung (UCADM12; DC-22, DC-28, DC-32) | P0 (đề xuất) |
-| F-25 | Giao việc, chia đều, hạn và nhắc | Admin chọn nhóm A (≥ 1 GV) và một GV B không thuộc A, reviewDays, confirmDays; xem trước rồi chia đều; hạn cuối ngày; nhắc trước 24 giờ; chỉnh hạn, giao lại, ép gửi gói (UCADM13; DC-37, DC-38, DC-40, DC-41) | P0 (đề xuất) |
-| F-26 | GV vai A: duyệt và gửi gói | Hộp việc chỉ chứa câu giao cho mình; sửa nội dung/đáp án/giải thích, Duyệt (FIRST_APPROVED) hoặc Từ chối (REJECTED, không lý do); sau mỗi lần sửa kiểm lại luật cứng + T1–T2; quyết hết câu mới Gửi cho B, mỗi A một gói (UCGV14; DC-33, DC-42, DC-43) | P0 (đề xuất) |
-| F-27 | GV vai B: confirm gói | Chỉ đọc; Xác nhận (SECOND_APPROVED) hoặc Loại bỏ (REJECTED) từng câu, hoặc "Xác nhận tất cả câu còn lại"; không sửa, không trả về A (UCGV15; DC-33, DC-40) | P0 (đề xuất) |
+| F-25 | Giao việc, hạn và nhắc | Admin giao từng câu cho GV A (reviewerId) và GV B (confirmerId), A khác B; mỗi vòng có hạn riêng (dueAt), cuối ngày; nhắc trước 24 giờ; chỉnh hạn, giao lại (UCADM13; DC-37, DC-38, DC-40, DC-41; sửa theo họp GVHD 03/11/2026, đã bỏ ép gửi gói). ⚠ chờ xác nhận: cách Admin chọn GV (chọn tay từng câu, nhóm A + B rồi chia đều) và cách nhập hạn | P0 (đề xuất) |
+| F-26 | GV vai A: duyệt câu được giao | Hộp việc chỉ chứa câu giao cho mình; sửa nội dung/đáp án/giải thích, Duyệt (FIRST_APPROVED) hoặc Từ chối (REJECTED, không lý do); sau mỗi lần sửa kiểm lại luật cứng + T1–T2; quyết định ghi vào first_review, không còn bước Gửi gói (UCGV14; DC-33, DC-43) | P0 (đề xuất) |
+| F-27 | GV vai B: confirm câu được giao | Chỉ đọc; Xác nhận (SECOND_APPROVED) hoặc Loại bỏ (REJECTED) từng câu, hoặc "Xác nhận tất cả câu còn lại" (⚠ chờ xác nhận phạm vi sau khi bỏ gói); quyết định ghi vào second_review; không sửa, không trả về A (UCGV15; DC-33, DC-40) | P0 (đề xuất) |
 | F-28 | Kiểm tra cuối (C3) và Import vào ngân hàng | Khi lô READY_TO_FINALIZE, Admin bấm Kiểm tra (C3 chạy theo delta), xử lý lỗi cứng/mềm, rồi Import ⇒ FINAL_APPROVED; Import bị khóa khi chưa có báo cáo C3 còn hiệu lực (UCADM14; DC-44, DC-45) | P0 (đề xuất) |
 
 **[NOTE]** F-18 đến F-22 là chức năng bổ sung của v3.0 (F-18 mở rộng ở vòng 2: tạo tài khoản cho cả SV và GV, tạo từng người gộp vào UCADM09 — đề xuất, ít UC mới nhất), đánh số tiếp sau F-17 vì F-11 đến F-17 đã thuộc phạm vi Khóa luận; mức ưu tiên ghi "đề xuất" chờ nhóm xác nhận. F-01 và F-02 được sửa theo DC-02, DC-18, DC-19. F-23 đến F-28 là chức năng bổ sung của vòng 3 (14/10/2026), kéo phần ai-question-generator (F-11) từ Khóa luận vào Tiểu luận; tên, mức ưu tiên và mã UC đều là đề xuất. Phạm vi tăng phải được ghi vào COMMITMENT_BASELINE.md trước khi ký (R15, Q-11). F-02 và F-05 được sửa theo DC-29, DC-31, DC-39.
@@ -804,11 +791,11 @@ Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tư�
 | **Chức năng (Use Case)** | **TEACHER (không được giao)** | **GV vai A** | **GV vai B** | **ADMIN** |
 | --- | --- | --- | --- | --- |
 | Tạo lô câu hỏi bằng AI; import đề từ file (UCADM11, UCADM12) | ❌ | ❌ | ❌ | ✅ |
-| Giao việc, giao lại, chỉnh hạn, ép gửi gói, theo dõi lô (UCADM13) | ❌ | ❌ | ❌ | ✅ |
+| Giao việc, giao lại, chỉnh hạn, theo dõi lô (UCADM13) | ❌ | ❌ | ❌ | ✅ |
 | Kiểm tra (C3), quyết lỗi mềm, Import cuối (UCADM14) | ❌ | ❌ | ❌ | ✅ |
 | Xem "AI đã loại" và thống kê loại theo tầng/GV/lô | ❌ | ❌ | ❌ | ✅ |
-| Sửa nội dung/đáp án/giải thích; Duyệt/Từ chối; Gửi gói cho B (UCGV14) | ❌ | ✅ câu giao cho mình | ❌ | ❌ (Admin không sửa nội dung) |
-| Xác nhận / Loại bỏ từng câu; xác nhận tất cả câu còn lại (UCGV15) | ❌ | ❌ | ✅ gói gửi cho mình | ❌ |
+| Sửa nội dung/đáp án/giải thích; Duyệt/Từ chối (UCGV14) | ❌ | ✅ câu giao cho mình | ❌ | ❌ (Admin không sửa nội dung) |
+| Xác nhận / Loại bỏ từng câu; xác nhận tất cả câu còn lại (UCGV15) | ❌ | ❌ | ✅ câu giao cho mình | ❌ |
 | Tạo kỳ thi, import danh sách thi, theo dõi dự thi (UCADM15–17) | ❌ | ❌ | ❌ | ✅ |
 | Báo cáo lớp (UCGV07/08), tra cứu hồ sơ SV (UCGV09) | ✅ | ✅ | ✅ | ✅ |
 | Import tài khoản SV/GV (UCADM08) | ❌ | ❌ | ❌ | ✅ |
@@ -816,7 +803,7 @@ Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tư�
 | Tổng quan hệ thống, cấu hình (UCADM05) | ❌ | ❌ | ❌ | ✅ |
 | Đổi / quên mật khẩu (UCSV08/09) | ✅ | ✅ | ✅ | ✅ |
 
-STUDENT chỉ truy cập dữ liệu của chính mình, thi, đổi/quên mật khẩu. Admin là siêu tập của Teacher về xem kết quả; riêng nghiệp vụ câu hỏi, Admin chỉ tạo lô, giao việc, kiểm tra và import, không sửa và không duyệt nội dung (DC-29). Tài khoản Admin đầu tiên tạo bằng seed; không thu hồi Admin cuối cùng (BR-18). Không đủ quyền ⇒ HTTP 403 (BR-16). Vai A và vai B do Admin gán theo từng lô (DC-40) cho GV; ràng buộc đã chốt là trong cùng một lô B không thuộc nhóm A (việc chỉ gán cho tài khoản role TEACHER và việc một GV làm A ở lô này, B ở lô khác là diễn giải của AI, chờ xác nhận). Mã UC: UCADM15–17 và UCADM08–09 tác nhân Admin như trên. Phần câu hỏi vòng 3 (đề xuất): UCADM11 Tạo lô AI, UCADM12 Import đề (lưới tạm), UCADM13 Giao việc và theo dõi, UCADM14 Kiểm tra và import cuối; UCGV14 Duyệt và gửi gói (GV vai A), UCGV15 Confirm gói (GV vai B); bỏ UCGV03 (không còn form thêm từng câu) và thay UCGV05 cũ (duyệt do Admin); UCGV02, UCGV04, UCGV06 sửa theo quyền mới (Mục 9b.16).
+STUDENT chỉ truy cập dữ liệu của chính mình, thi, đổi/quên mật khẩu. Admin là siêu tập của Teacher về xem kết quả; riêng nghiệp vụ câu hỏi, Admin chỉ tạo lô, giao việc, kiểm tra và import, không sửa và không duyệt nội dung (DC-29). Tài khoản Admin đầu tiên tạo bằng seed; không thu hồi Admin cuối cùng (BR-18). Không đủ quyền ⇒ HTTP 403 (BR-16). Vai A và vai B do Admin gán cho GV (DC-40), từ 03/11/2026 theo từng câu; ràng buộc cũ "trong cùng một lô B không thuộc nhóm A" ⚠ chờ xác nhận có còn hay đổi thành "A khác B trên từng câu" (việc chỉ gán cho tài khoản role TEACHER và việc một GV làm A ở lô này, B ở lô khác là diễn giải của AI, chờ xác nhận). Mã UC: UCADM15–17 và UCADM08–09 tác nhân Admin như trên. Phần câu hỏi vòng 3 (đề xuất): UCADM11 Tạo lô AI, UCADM12 Import đề (lưới tạm), UCADM13 Giao việc và theo dõi, UCADM14 Kiểm tra và import cuối; UCGV14 Duyệt câu (GV vai A), UCGV15 Confirm câu (GV vai B); bỏ UCGV03 (không còn form thêm từng câu) và thay UCGV05 cũ (duyệt do Admin); UCGV02, UCGV04, UCGV06 sửa theo quyền mới (Mục 9b.16).
 
 ### 9b.3. Luồng nghiệp vụ chính
 
@@ -886,19 +873,19 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 | BR-13 | Báo cáo lớp (UCGV07/08, UCADM05) lọc được theo kỳ; mặc định hiển thị toàn hệ thống. |
 | BR-14 | Quên mật khẩu: phản hồi luôn như nhau dù email có tồn tại hay không; rate limit theo email + IP; OTP dùng một lần, hiệu lực 10 phút, tối đa 5 lần nhập sai (DC-21). |
 | BR-15 | Mọi import ghi nhật ký kiểm toán tối thiểu: ai, khi nào, số dòng, kết quả (không ghi mật khẩu). |
-| BR-16 | Phân quyền theo role và theo phân công: TEACHER xem báo cáo lớp và hồ sơ SV, và chỉ xử lý câu/gói được giao cho mình (vai A hoặc B); ADMIN làm mọi chức năng quản trị (không sửa nội dung câu) và chức năng xem của Teacher; STUDENT chỉ dữ liệu của mình. Không đủ quyền ⇒ 403 (NOT_ASSIGNED với việc không được giao). |
+| BR-16 | Phân quyền theo role và theo phân công: TEACHER xem báo cáo lớp và hồ sơ SV, và chỉ xử lý câu được giao cho mình (vai A hoặc B); ADMIN làm mọi chức năng quản trị (không sửa nội dung câu) và chức năng xem của Teacher; STUDENT chỉ dữ liệu của mình. Không đủ quyền ⇒ 403 (NOT_ASSIGNED với việc không được giao). |
 | BR-17 | Admin quản lý tài khoản giảng viên: tạo, sửa, khóa/mở khóa; nâng TEACHER → ADMIN và thu hồi ADMIN → TEACHER. Admin không tự thu hồi quyền của chính mình. |
 | BR-18 | Nâng/thu hồi Admin ghi nhật ký kiểm toán; không thu hồi nếu đó là Admin cuối cùng (đề xuất); token cũ của người bị đổi quyền phải mất hiệu lực quyền cũ. |
 | BR-19 | Quản lý tài khoản (SV và GV): khóa tài khoản ⇒ không đăng nhập được, phiên IN_PROGRESS xử lý theo K5; không xóa cứng tài khoản đã có phiên/hồ sơ (chỉ khóa). Gửi lại mật khẩu tạm ⇒ sinh mật khẩu mới, mustChangePassword = true. |
 | BR-20 | Tạo từng tài khoản (UCADM09, đề xuất): SV nhập MSSV, họ tên, email; GV nhập Mã GV, họ tên, email; trùng email/MSSV/Mã GV ⇒ từ chối và báo lỗi (HTTP 409; mã lỗi cụ thể chờ chốt). Sinh mật khẩu tạm 12 ký tự, argon2, mustChangePassword = true, gửi email qua MailPort/BullMQ sau khi lưu — giống import. Import không cập nhật tài khoản có sẵn. |
 | BR-21 | Câu hỏi chỉ vào ngân hàng qua lô (AI sinh hoặc Admin import file). Không có form thêm từng câu; GV không import; Admin không sửa nội dung câu (DC-28, DC-29, DC-32). |
-| BR-22 | Giao việc: nhóm A có ít nhất 1 GV (khuyên ≥ 2); phải chọn đúng một GV B và B không thuộc nhóm A (vi phạm ⇒ 409 CONFIRMER_IN_REVIEW_GROUP); reviewDays và confirmDays ≥ 1; lô phải ở READY_TO_ASSIGN (DC-40, DC-41; Q-5 mặc định). |
-| BR-23 | Chia đều: sắp các câu DRAFT theo (skill, CEFR, thứ tự sinh) rồi giao vòng tròn cho từng GV A; số câu mỗi GV chênh nhau tối đa 1. |
-| BR-24 | Hạn: A có due_at = cuối ngày (ngày giao + reviewDays); mỗi gói của B có due_at = cuối ngày (ngày gửi gói + confirmDays); giờ chốt 23:59:59 giờ Việt Nam (cấu hình); Admin chỉnh được cho việc chưa xử lý. Nhắc bằng job trễ BullMQ trước hạn 24 giờ, mỗi nhóm (lô, bước, GV, gói) một lần. Quá hạn chỉ cảnh báo, không tự đổi trạng thái hay tự giao lại (Q-2, Q-3, Q-4 mặc định). |
-| BR-25 | Gửi gói: A chỉ bấm Gửi cho B khi mọi câu được giao đã có quyết định (Duyệt hoặc Từ chối), ngược lại ⇒ 409 PACKAGE_INCOMPLETE; A gửi một lần, mỗi A một gói; câu A loại không vào gói; sau khi gửi A không sửa các câu trong gói. |
-| BR-26 | GV vai B chỉ đọc: Xác nhận hoặc Loại bỏ từng câu, hoặc "Xác nhận tất cả câu còn lại" (chỉ ảnh hưởng câu chưa quyết, ghi log hành động hàng loạt). B không sửa nội dung và không có thao tác trả về A (DC-33). |
+| BR-22 | Giao việc: Admin giao từng câu cho một GV A (reviewerId) và một GV B (confirmerId), A khác B; mỗi vòng có hạn dueAt riêng; lô phải ở READY_TO_ASSIGN (DC-40, DC-41; sửa theo họp GVHD 03/11/2026). ⚠ chờ xác nhận: nhóm A ≥ 1 GV và mã lỗi 409 CONFIRMER_IN_REVIEW_GROUP còn dùng không; reviewDays/confirmDays còn là giá trị mặc định cho dueAt hay Admin nhập hạn từng câu. |
+| BR-23 | Chia đều: sắp các câu DRAFT theo (skill, CEFR, thứ tự sinh) rồi giao vòng tròn cho từng GV A; số câu mỗi GV chênh nhau tối đa 1. ⚠ chờ xác nhận: sau khi bỏ gói, chia đều còn là cách giao mặc định không. |
+| BR-24 | Hạn: mỗi câu có hạn riêng cho từng vòng, first_review.dueAt (A) và second_review.dueAt (B), đặt lúc giao việc, cuối ngày, giờ chốt 23:59:59 giờ Việt Nam (cấu hình); Admin chỉnh được cho việc chưa xử lý. ⚠ chờ xác nhận: cách tính hạn của B (ngày giao + số ngày, hay từ lúc A duyệt câu) và hành động ghi nhật ký khi chỉnh hạn (EXTEND đã bỏ khỏi ReviewAction). Nhắc bằng job trễ BullMQ trước hạn 24 giờ, mỗi (câu, vòng) một lần, đánh dấu bằng items.first_reminder_sent / second_reminder_sent; email nhắc gộp theo (lô, bước, GV). Quá hạn chỉ cảnh báo, không tự đổi trạng thái hay tự giao lại (Q-2, Q-4 mặc định; Q-3 xem Mục điểm mở). |
+| BR-25 | Quyết định của A: A Duyệt hoặc Từ chối từng câu được giao, ghi vào first_review; không còn bước Gửi gói (họp GVHD 03/11/2026) nên bỏ mã lỗi PACKAGE_INCOMPLETE; câu đã quyết (FIRST_APPROVED hoặc REJECTED) A không sửa lại. ⚠ chờ xác nhận: thời điểm câu FIRST_APPROVED hiện cho B (ngay khi A duyệt câu đó hay chờ A quyết hết các câu được giao). |
+| BR-26 | GV vai B chỉ đọc: Xác nhận hoặc Loại bỏ từng câu, hoặc "Xác nhận tất cả câu còn lại" (chỉ ảnh hưởng câu chưa quyết được giao cho B, ghi log hành động hàng loạt; ⚠ chờ xác nhận phạm vi sau khi bỏ gói: theo lô hay toàn bộ việc của B). B không sửa nội dung và không có thao tác trả về A (DC-33). |
 | BR-27 | Sau mỗi lần A sửa, hệ thống chạy lại luật cứng và T1–T2 trên bản sửa; hỏng hoặc trùng ⇒ chặn Duyệt (422 INVALID_AFTER_EDIT / DUPLICATE_AFTER_EDIT). |
-| BR-28 | Import chỉ khi lô ở READY_TO_FINALIZE (mọi gói DONE hoặc mọi hạn đã qua) và có báo cáo C3 còn hiệu lực (409 FINAL_CHECK_REQUIRED / FINAL_CHECK_STALE / BATCH_NOT_READY_TO_FINALIZE); lúc Import vẫn chạy lại T1–T2 nhanh chống tranh chấp; câu chưa xử lý không được import (DC-44). |
+| BR-28 | Import chỉ khi lô ở READY_TO_FINALIZE (mọi câu đã xong vòng 2: SECOND_APPROVED hoặc REJECTED, hoặc các câu còn lại đã quá hạn) và có báo cáo C3 còn hiệu lực (409 FINAL_CHECK_REQUIRED / FINAL_CHECK_STALE / BATCH_NOT_READY_TO_FINALIZE); lúc Import vẫn chạy lại T1–T2 nhanh chống tranh chấp; câu chưa xử lý không được import (DC-44). |
 | BR-29 | Câu loại: người loại ⇒ REJECTED, không lưu lý do (#56); máy loại ⇒ AI_REJECTED, lưu mã lý do, chỉ Admin xem và không đưa cho GV (DC-43). Lỗi cứng ở C3 ⇒ AI_REJECTED; lỗi mềm ⇒ Admin quyết Import (ghi ACCEPT_FLAG) hoặc Loại (REJECTED). |
 | BR-30 | Trạng thái Item chỉ đi một chiều, không có đường quay lại; FINAL_APPROVED không sửa (#64); irt_b hợp lệ trong [−4, +4] (cấu hình, DC-34); câu mới calibrated = false, irt_b khởi tạo theo trung bình irt_b của các câu mẫu hoặc giá trị file (nếu có). |
 
@@ -945,11 +932,11 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 
 - Q-11 (chưa thực hiện): phạm vi và thời gian — sinh đề AI nay vào Tiểu luận, làm đủ T3 và G5; cập nhật COMMITMENT_BASELINE.md trước khi ký (gate G1, hết Tuần 6) và ghi rủi ro trễ (R15). Q-12 (chưa thực hiện): sửa CLAUDE.md theo khoảng irt_b [−4, +4] và kiểm tác động chọn câu CAT bằng test.
 
-- Đã chấp nhận theo mặc định của kế hoạch bản 5: Q-1 chọn O2 (lỗi cứng ở C3 tự AI_REJECTED, lỗi mềm Admin quyết); Q-2 (câu quá hạn nằm lại lô, Admin xử lý thủ công); Q-3 (hạn của B tính từ ngày gửi gói); Q-4 (23:59:59 giờ Việt Nam, nhắc ngay nếu hạn dưới 24 giờ lúc giao); Q-5 (nhóm A ≥ 1 GV, B bắt buộc); Q-6 (tên AI_REJECTED và IMPORTED). Các tên và con số này vẫn là đề xuất của AI cho tới khi nhóm xác nhận lại.
+- Đã chấp nhận theo mặc định của kế hoạch bản 5: Q-1 chọn O2 (lỗi cứng ở C3 tự AI_REJECTED, lỗi mềm Admin quyết); Q-2 (câu quá hạn nằm lại lô, Admin xử lý thủ công); Q-3 (hạn của B tính từ ngày gửi gói; không còn áp dụng sau họp GVHD 03/11/2026, ⚠ chờ xác nhận cách tính mới); Q-4 (23:59:59 giờ Việt Nam, nhắc ngay nếu hạn dưới 24 giờ lúc giao); Q-5 (nhóm A ≥ 1 GV, B bắt buộc); Q-6 (tên AI_REJECTED và IMPORTED). Các tên và con số này vẫn là đề xuất của AI cho tới khi nhóm xác nhận lại.
 
 ### 9b.9. Phạm vi và vòng đời câu hỏi (vòng 3)
 
-Từ vòng 3 (DC-27 đến DC-45), câu hỏi chỉ vào Item Bank qua một lô (batch) và đi một chiều: Admin tạo lô bằng AI hoặc tự import file ⇒ AI check ⇒ Admin xem kết quả rồi bấm Giao việc ⇒ GV vai A sửa/duyệt/từ chối ⇒ A xong phần mình thì gửi một gói cho GV vai B ⇒ B xác nhận hoặc loại từng câu ⇒ khi cả lô xong hoặc quá hạn, Admin bấm Kiểm tra (AI check lần cuối) ⇒ Admin Import ⇒ FINAL_APPROVED. Không có đường quay lại: B không trả về A, câu rớt C3 không trả về A.
+Từ vòng 3 (DC-27 đến DC-45), câu hỏi chỉ vào Item Bank qua một lô (batch) và đi một chiều: Admin tạo lô bằng AI hoặc tự import file ⇒ AI check ⇒ Admin xem kết quả rồi bấm Giao việc ⇒ GV vai A sửa/duyệt/từ chối từng câu được giao ⇒ GV vai B xác nhận hoặc loại từng câu đã được A duyệt ⇒ khi cả lô xong hoặc quá hạn, Admin bấm Kiểm tra (AI check lần cuối) ⇒ Admin Import ⇒ FINAL_APPROVED. Không có đường quay lại: B không trả về A, câu rớt C3 không trả về A.
 
 Không ai thêm từng câu bằng form (bỏ UCGV03); GV không import; Admin không soạn, không sửa và không duyệt nội dung câu, chỉ quản lý lô, giao việc, kiểm tra và import.
 
@@ -964,7 +951,7 @@ DRAFT ── Admin bấm Giao việc ──► GV vai A duyệt
         │ Duyệt                      │ Từ chối
         ▼                            ▼
 FIRST_APPROVED                    REJECTED
-        │ A quyết hết câu, bấm Gửi cho B (mỗi A một gói)
+        │ câu đã được A duyệt chuyển sang vòng 2 của B
         ▼
 GV vai B:  Xác nhận ──► SECOND_APPROVED
            Loại bỏ  ──► REJECTED
@@ -981,7 +968,7 @@ Admin bấm Kiểm tra (C3)
 | **Trạng thái Item** | **Ý nghĩa** | **Ai/cái gì chuyển** |
 | --- | --- | --- |
 | DRAFT | Đã qua AI check, chờ Admin giao việc, hoặc đã giao và chờ A duyệt | Hệ thống (sau C1/C2) |
-| FIRST_APPROVED (mới) | A đã duyệt; nằm trong "phần của A" cho đến khi A gửi gói; sau khi gửi thì chờ B | A bấm Duyệt |
+| FIRST_APPROVED (mới) | A đã duyệt (ghi first_review); chờ B xác nhận | A bấm Duyệt |
 | SECOND_APPROVED (mới) | B đã xác nhận; chờ Admin kiểm tra và import | B bấm Xác nhận (từng câu hoặc "tất cả câu còn lại") |
 | FINAL_APPROVED (đổi tên từ trạng thái đã duyệt cũ) | Đã vào ngân hàng, dùng cho CAT, cấm sửa (#64); calibrated = false | Admin bấm Import (ghi approved_by, approved_at) |
 | REJECTED | Người loại: A, B hoặc Admin (khi quyết lỗi mềm). Không lưu lý do (#56) | A, B, Admin |
@@ -989,7 +976,7 @@ Admin bấm Kiểm tra (C3)
 
 Hai trạng thái cũ "chờ duyệt" và "đã duyệt" (tên cũ) bị bỏ; không còn giá trị nào ngoài sáu giá trị trên.
 
-Trạng thái của lô (item_batches.status, đề xuất): GENERATING hoặc IMPORTING ⇒ CHECKING ⇒ READY_TO_ASSIGN ⇒ IN_REVIEW ⇒ READY_TO_FINALIZE (mọi gói đã xong hoặc mọi hạn đã qua) ⇒ FINAL_CHECKED (sau khi Admin bấm Kiểm tra) ⇒ DONE (mọi câu ở trạng thái cuối: FINAL_APPROVED, REJECTED, AI_REJECTED). Lỗi: FAILED; hết ngân sách: PARTIAL.
+Trạng thái của lô (item_batches.status, đề xuất): GENERATING hoặc IMPORTING ⇒ CHECKING ⇒ READY_TO_ASSIGN ⇒ IN_REVIEW ⇒ READY_TO_FINALIZE (mọi câu đã xong vòng 2 hoặc các câu còn lại đã quá hạn) ⇒ FINAL_CHECKED (sau khi Admin bấm Kiểm tra) ⇒ DONE (mọi câu ở trạng thái cuối: FINAL_APPROVED, REJECTED, AI_REJECTED). Lỗi: FAILED; hết ngân sách: PARTIAL.
 
 ### 9b.11. Tạo lô: bằng AI và bằng import file
 
@@ -1030,13 +1017,13 @@ Nguyên tắc chung (DC-30, DC-45): (1) rẻ trước, đắt sau — luật c�
 | **Kiểm** | **Chạy trên** | **Cách tiết kiệm** | **Loại lỗi** |
 | --- | --- | --- | --- |
 | Luật cứng (tầng 1) | Mọi câu SECOND_APPROVED | Không tốn API | Cứng |
-| Toàn vẹn quy trình | Mọi câu | Không tốn API: A khác B, gói đủ, mọi câu có người duyệt và người confirm, trạng thái đi đúng chiều | Cứng |
+| Toàn vẹn quy trình | Mọi câu | Không tốn API: A khác B, mọi câu có reviewer_id và confirmer_id, mọi câu đã có quyết định hoặc quá hạn, trạng thái đi đúng chiều | Cứng |
 | Trùng T1–T2 | Mọi câu, so với ngân hàng hiện tại (có thể có câu mới từ lô khác) và các câu cùng lô | Không tốn API | Cứng (T1, T2 ≥ ngưỡng cao); mềm (giữa hai ngưỡng) |
 | Trùng T3 | Câu đã đổi hash hoặc chưa có embedding; còn lại chỉ so với các câu ngân hàng mới thêm kể từ lần check trước | Embedding đã lưu, cosine trong ứng dụng | Mềm |
 | G5 + giải thích khớp | Chỉ câu A đã sửa (hash khác hash lúc qua C1/C2) | Câu không sửa dùng lại kết quả lần trước; gộp nhóm | Mềm |
 | Thống kê | — | — | Báo cáo: số câu A sửa, tỷ lệ A/B loại |
 
-Kết quả C3 hiển thị cho Admin theo câu (qua / cờ mềm / lỗi cứng, mã lý do, câu bị nghi trùng, bản gốc so với bản đã sửa) và tổng hợp theo gói. Import bị khóa cho đến khi có báo cáo C3 còn hiệu lực (không câu nào đổi và ngân hàng không đổi kể từ lúc kiểm); nếu đổi, hệ thống yêu cầu kiểm lại phần chênh (FINAL_CHECK_STALE).
+Kết quả C3 hiển thị cho Admin theo câu (qua / cờ mềm / lỗi cứng, mã lý do, câu bị nghi trùng, bản gốc so với bản đã sửa) và tổng hợp theo GV. Import bị khóa cho đến khi có báo cáo C3 còn hiệu lực (không câu nào đổi và ngân hàng không đổi kể từ lúc kiểm); nếu đổi, hệ thống yêu cầu kiểm lại phần chênh (FINAL_CHECK_STALE).
 
 **Xử lý câu rớt C3 (phương án O2, mặc định đã chấp nhận):** lỗi cứng (cấu trúc, trùng gần như giống hệt) tự chuyển AI_REJECTED; lỗi mềm hiện cho Admin quyết: Import hoặc Loại (REJECTED); câu bị cờ mềm mà Admin chọn Import được ghi ACCEPT_FLAG để truy vết. Hai phương án đã loại: O1 (mọi câu rớt tự AI_REJECTED — loại nhầm câu chỉ bị cờ nhẹ) và O3 (trả lại A để sửa — mở lại vòng lặp, đảo #109). Lý do chọn O2: giữ luồng một chiều; không dồn phán đoán chủ quan cho máy; Admin không sửa nội dung nên không phá tính độc lập.
 
@@ -1044,25 +1031,25 @@ Kết quả C3 hiển thị cho Admin theo câu (qua / cờ mềm / lỗi cứng
 
 Điều kiện: lô ở READY_TO_ASSIGN (đã qua C1/C2); Admin xem được số câu còn lại, danh sách "AI đã loại" và cờ mềm. Các bước Admin:
 
-- Bấm Giao việc; chọn nhóm A (một hoặc nhiều GV, khuyên ≥ 2 để chia việc) và đúng một GV B không nằm trong nhóm A (vi phạm ⇒ 409 CONFIRMER_IN_REVIEW_GROUP; thiếu B ⇒ lỗi kiểm tra đầu vào, mã chưa định).
+- Bấm Giao việc; giao từng câu cho một GV A (reviewerId) và một GV B (confirmerId), A khác B (vi phạm ⇒ 409 CONFIRMER_IN_REVIEW_GROUP, tên mã ⚠ chờ xác nhận; thiếu B ⇒ lỗi kiểm tra đầu vào, mã chưa định). ⚠ chờ xác nhận: Admin chọn GV cho từng câu hay chọn nhóm A + B rồi chia đều như bản trước 03/11/2026.
 
-- Đặt hạn: reviewDays (hạn cho A, tính từ ngày giao) và confirmDays (hạn cho B, tính từ ngày mỗi gói được gửi); mỗi số ≥ 1.
+- Đặt hạn: mỗi câu có hạn riêng cho từng vòng (first_review.dueAt cho A, second_review.dueAt cho B), cuối ngày. ⚠ chờ xác nhận: cách Admin đặt (nhập ngày cho từng câu/nhóm câu, hay reviewDays/confirmDays làm giá trị mặc định) và cách tính hạn của B.
 
 - Hệ thống hiện xem trước phân bổ (bảng GV – số câu, theo từng kỹ năng/CEFR); Admin bấm Xác nhận giao.
 
-Cách chia đều: sắp xếp các câu DRAFT theo (skill, cefr, thứ tự sinh) rồi giao vòng tròn: câu thứ i giao cho GV A thứ (i chia dư M), M là số GV A. Nhờ sắp theo skill và CEFR trước, mỗi GV nhận mức trộn đều các loại câu; số câu mỗi GV chênh nhau tối đa 1 (ví dụ 100 câu cho 5 GV là 20 câu mỗi người; 103 câu thì 3 người nhận 21 và 2 người nhận 20).
+Cách chia đều (⚠ chờ xác nhận còn áp dụng sau khi bỏ gói không): sắp xếp các câu DRAFT theo (skill, cefr, thứ tự sinh) rồi giao vòng tròn: câu thứ i giao cho GV A thứ (i chia dư M), M là số GV A. Nhờ sắp theo skill và CEFR trước, mỗi GV nhận mức trộn đều các loại câu; số câu mỗi GV chênh nhau tối đa 1 (ví dụ 100 câu cho 5 GV là 20 câu mỗi người; 103 câu thì 3 người nhận 21 và 2 người nhận 20).
 
-Sau khi giao: tạo item_review_assignments (mỗi câu một dòng: người nhận, assigned_at, due_at) và tạo mỗi GV A một item_packages ở trạng thái OPEN (confirmer_id = GV B của lô, chưa có sent_at/due_at) — quyết định 16/10/2026; lô chuyển IN_REVIEW; A nhận email nhắc việc qua MailPort (BullMQ) "Bạn có x câu cần duyệt, hạn dd/mm" và thấy việc trong Hộp việc (Tiểu luận không làm chuông thông báo thời gian thực); đặt lịch nhắc. Giao lại: Admin chuyển các câu chưa xử lý của một A cho A khác (hoặc đổi B của gói chưa gửi/chưa xử lý), vẫn ràng buộc B không thuộc nhóm A; hạn tính lại từ ngày giao lại; ghi kiểm toán (REASSIGN).
+Sau khi giao: ghi reviewer_id, confirmer_id, first_review.dueAt, second_review.dueAt của từng câu (không còn item_review_assignments và item_packages; họp GVHD 03/11/2026) và ghi item_review_events ASSIGN, một dòng cho mỗi câu (actor = Admin); lô chuyển IN_REVIEW; A nhận email nhắc việc qua MailPort (BullMQ) "Bạn có x câu cần duyệt, hạn dd/mm" và thấy việc trong Hộp việc (Tiểu luận không làm chuông thông báo thời gian thực); đặt lịch nhắc. Giao lại: Admin chuyển các câu chưa xử lý của một A cho A khác (hoặc đổi B của câu chưa xử lý), vẫn ràng buộc A khác B; hạn tính lại từ ngày giao lại; ghi kiểm toán (REASSIGN, một dòng cho mỗi câu).
 
-### 9b.14. Gói, GV vai A, GV vai B, hạn và nhắc
+### 9b.14. GV vai A, GV vai B, hạn và nhắc
 
-**GV vai A (UCGV14).** Mở "Hộp việc → Cần duyệt", chỉ thấy câu giao cho mình kèm cờ mềm, giải thích, hạn còn lại. Với mỗi câu, A được sửa nội dung/đáp án/giải thích rồi chọn Duyệt (FIRST_APPROVED) hoặc Từ chối (REJECTED, không lưu lý do). Sau mỗi lần sửa, hệ thống chạy lại luật cứng và T1–T2 trên bản sửa; hỏng hoặc trùng ⇒ chặn Duyệt. Khi mọi câu giao cho A đã có quyết định, A bấm Gửi cho B ⇒ gói OPEN của A chuyển SENT (ghi sent_at, tính due_at của B) gồm các câu FIRST_APPROVED của A (gán package_id; câu A loại không vào gói). A không gửi được khi còn câu chưa quyết (PACKAGE_INCOMPLETE); gửi một lần, sau đó không sửa lại.
+**GV vai A (UCGV14).** Mở "Hộp việc → Cần duyệt", chỉ thấy câu giao cho mình kèm cờ mềm, giải thích, hạn còn lại. Với mỗi câu, A được sửa nội dung/đáp án/giải thích rồi chọn Duyệt (FIRST_APPROVED) hoặc Từ chối (REJECTED, không lưu lý do). Sau mỗi lần sửa, hệ thống chạy lại luật cứng và T1–T2 trên bản sửa; hỏng hoặc trùng ⇒ chặn Duyệt. Quyết định của A ghi vào items.first_review (action, reviewedAt, comment); lần sửa đầu tiên chụp originalSnapshot (ghi một lần). Không còn bước "Gửi cho B" (bỏ gói, họp GVHD 03/11/2026); câu đã Duyệt hoặc Từ chối thì A không sửa lại. ⚠ chờ xác nhận: thời điểm câu FIRST_APPROVED hiện cho B.
 
-**GV vai B (UCGV15).** Mở "Hộp việc → Cần confirm", thấy từng gói (một gói cho mỗi A), chỉ đọc; mỗi câu hiện cờ và dấu "A đã sửa" kèm bản gốc so với bản sửa. B xử lý từng câu: Xác nhận (SECOND_APPROVED) hoặc Loại bỏ (REJECTED), hoặc bấm "Xác nhận tất cả câu còn lại" (xác nhận hết câu chưa quyết trong gói; ghi log hành động hàng loạt). B không sửa, không trả về A. Gói xong (DONE) khi mọi câu trong gói có quyết định.
+**GV vai B (UCGV15).** Mở "Hộp việc → Cần confirm", thấy các câu được giao cho mình, chỉ đọc; mỗi câu hiện cờ và dấu "A đã sửa" kèm bản gốc so với bản sửa. B xử lý từng câu: Xác nhận (SECOND_APPROVED) hoặc Loại bỏ (REJECTED), hoặc bấm "Xác nhận tất cả câu còn lại" (xác nhận hết câu chưa quyết được giao cho B; ghi log hành động hàng loạt; ⚠ chờ xác nhận phạm vi sau khi bỏ gói). B không sửa, không trả về A. Quyết định của B ghi vào items.second_review (action, confirmedAt, comment).
 
-**Hạn và nhắc.** A: due_at = cuối ngày (ngày giao + reviewDays); B: mỗi gói due_at = cuối ngày (ngày gửi gói + confirmDays); giờ chốt 23:59:59 giờ Việt Nam (cấu hình). Admin chỉnh hạn (reviewDays, confirmDays; chỉ áp dụng cho việc chưa xử lý) ⇒ tính lại due_at, hủy và tạo lại lịch nhắc. Nhắc: job trễ BullMQ chạy lúc due_at trừ 24 giờ, nếu nhóm (lô, bước, GV, gói) còn việc chưa xong thì gửi một email nhắc gộp qua MailPort (việc vẫn hiện trong Hộp việc); hạn còn dưới 24 giờ lúc giao/chỉnh ⇒ nhắc ngay một lần; kèm đối chiếu lazy khi mở hộp việc phòng mất job. Quá hạn: chỉ hiển thị "quá hạn" cho Admin và GV (tính lazy), không tự đổi trạng thái hay tự giao lại; Admin chọn chỉnh hạn, giao lại, hoặc ép gửi gói hiện có thay A (FORCE_SEND: gói OPEN chuyển SENT chỉ với các câu A đã FIRST_APPROVED; câu A chưa quyết không vào gói và nằm lại trong lô; ghi item_review_events FORCE_SEND; Admin không sửa nội dung câu).
+**Hạn và nhắc.** Mỗi câu có hạn riêng cho từng vòng: first_review.dueAt (A) và second_review.dueAt (B), cuối ngày, giờ chốt 23:59:59 giờ Việt Nam (cấu hình). ⚠ chờ xác nhận: cách tính hạn của B. Admin chỉnh hạn (chỉ áp dụng cho việc chưa xử lý) ⇒ tính lại dueAt, hủy và tạo lại lịch nhắc (⚠ chờ xác nhận: hành động ghi nhật ký khi chỉnh hạn, vì EXTEND đã bỏ). Nhắc: job trễ BullMQ chạy lúc dueAt trừ 24 giờ, nếu việc chưa xong và cờ first_reminder_sent / second_reminder_sent còn false thì gửi một email nhắc gộp theo (lô, bước, GV) qua MailPort rồi bật cờ (việc vẫn hiện trong Hộp việc); cờ là cột riêng của items, tách khỏi JSON kết quả duyệt nên job nhắc không ghi đè quyết định của GV; hạn còn dưới 24 giờ lúc giao/chỉnh ⇒ nhắc ngay một lần; kèm đối chiếu lazy khi mở hộp việc phòng mất job. Quá hạn: chỉ hiển thị "quá hạn" cho Admin và GV (tính lazy bằng Item.isOverdue(round, at)), không tự đổi trạng thái hay tự giao lại; Admin chọn chỉnh hạn hoặc giao lại. Đã bỏ "ép gửi gói" (FORCE_SEND) cùng với gói.
 
-**Sau khi B confirm.** Câu SECOND_APPROVED nằm chờ trong lô, chưa vào ngân hàng. Khi mọi gói DONE hoặc mọi hạn đã qua ⇒ lô READY_TO_FINALIZE; Admin thấy thống kê (SECOND_APPROVED, REJECTED bởi A/B, AI_REJECTED, chưa xử lý). Admin bấm Kiểm tra (C3), đọc báo cáo, xử lý lỗi mềm, rồi bấm Import ⇒ câu qua (và lỗi mềm Admin chấp nhận) thành FINAL_APPROVED, ghi approved_by, approved_at, có hiệu lực cho CAT, calibrated = false. Câu chưa quyết định (còn DRAFT hoặc FIRST_APPROVED chưa tới B) không được import. Quy tắc nghiệp vụ (chốt 18/10/2026): đến hạn mọi GV phải hoàn thành việc được giao, nên không có "câu tồn đọng" cần xử lý riêng sau Import; chỉnh hạn, giao lại và ép gửi gói chỉ là biện pháp dự phòng của Admin trước khi chạy C3. Lô chuyển DONE khi mọi câu đã ở trạng thái cuối.
+**Sau khi B confirm.** Câu SECOND_APPROVED nằm chờ trong lô, chưa vào ngân hàng. Khi mọi câu đã xong vòng 2 (SECOND_APPROVED hoặc REJECTED) hoặc các câu còn lại đã quá hạn ⇒ lô READY_TO_FINALIZE; Admin thấy thống kê (SECOND_APPROVED, REJECTED bởi A/B, AI_REJECTED, chưa xử lý). Admin bấm Kiểm tra (C3), đọc báo cáo, xử lý lỗi mềm, rồi bấm Import ⇒ câu qua (và lỗi mềm Admin chấp nhận) thành FINAL_APPROVED, ghi approved_by, approved_at, có hiệu lực cho CAT, calibrated = false. Câu chưa quyết định (còn DRAFT hoặc FIRST_APPROVED chưa tới B) không được import. Quy tắc nghiệp vụ (chốt 18/10/2026): đến hạn mọi GV phải hoàn thành việc được giao, nên không có "câu tồn đọng" cần xử lý riêng sau Import; chỉnh hạn và giao lại chỉ là biện pháp dự phòng của Admin trước khi chạy C3. Lô chuyển DONE khi mọi câu đã ở trạng thái cuối.
 
 ### 9b.15. Câu bị loại
 
@@ -1079,11 +1066,11 @@ Câu AI_REJECTED không được đưa cho GV. Thống kê bắt buộc: tỷ l�
 | **Hành động** | **Admin** | **GV vai A (đúng người)** | **GV vai B (đúng người)** | **GV khác** | **SV** |
 | --- | --- | --- | --- | --- | --- |
 | Tạo lô AI, import file, giao việc, giao lại, chỉnh hạn, Kiểm tra, Import, quyết lỗi mềm | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Sửa nội dung, Duyệt/Từ chối, Gửi gói | ❌ | ✅ câu của mình | ❌ | ❌ | ❌ |
-| Xác nhận/Loại, "xác nhận tất cả còn lại" | ❌ | ❌ | ✅ gói gửi cho mình | ❌ | ❌ |
+| Sửa nội dung, Duyệt/Từ chối | ❌ | ✅ câu của mình | ❌ | ❌ | ❌ |
+| Xác nhận/Loại, "xác nhận tất cả còn lại" | ❌ | ❌ | ✅ câu giao cho mình | ❌ | ❌ |
 | Xem "AI đã loại" và thống kê | ✅ | ❌ | ❌ | ❌ | ❌ |
 
-Các UC cũ sửa theo quyền mới (đề xuất, chờ đồng bộ với đặc tả Use Case): UCGV02 (xem/lọc ngân hàng): Admin xem mọi câu của lô kể cả AI_REJECTED; GV chỉ thấy câu/gói được giao (xem chỉ đọc ở màn Ngân hàng câu hỏi của giảng viên /teacher/item-bank và qua Hộp việc). UCGV04 (xem/sửa chi tiết câu): chỉ GV vai A sửa câu được giao khi còn DRAFT; từ FIRST_APPROVED trở đi không sửa; FINAL_APPROVED cấm sửa (#64). UCGV06 (xóa câu Nháp/Từ chối): câu REJECTED và AI_REJECTED giữ trong lô (DC-43), AI_REJECTED dọn theo cấu hình; việc UCGV06 còn tồn tại hay không chờ chốt. UCGV03 (thêm câu bằng form) bỏ; UCGV05 (duyệt) được thay bằng UCGV14, UCGV15.
+Các UC cũ sửa theo quyền mới (đề xuất, chờ đồng bộ với đặc tả Use Case): UCGV02 (xem/lọc ngân hàng): Admin xem mọi câu của lô kể cả AI_REJECTED; GV chỉ thấy câu được giao (xem chỉ đọc ở màn Ngân hàng câu hỏi của giảng viên /teacher/item-bank và qua Hộp việc). UCGV04 (xem/sửa chi tiết câu): chỉ GV vai A sửa câu được giao khi còn DRAFT; từ FIRST_APPROVED trở đi không sửa; FINAL_APPROVED cấm sửa (#64). UCGV06 (xóa câu Nháp/Từ chối): câu REJECTED và AI_REJECTED giữ trong lô (DC-43), AI_REJECTED dọn theo cấu hình; việc UCGV06 còn tồn tại hay không chờ chốt. UCGV03 (thêm câu bằng form) bỏ; UCGV05 (duyệt) được thay bằng UCGV14, UCGV15.
 
 ### 9b.17. Luồng nghiệp vụ câu hỏi L-1 đến L-8
 
@@ -1093,13 +1080,13 @@ Ký hiệu: A = GV vai A, B = GV vai B, Ad = Admin, H = hệ thống.
 
 **L-2 — Tạo lô bằng import file (UCADM12, đề xuất).** Ad tải một hoặc nhiều file vào lưới (C2 tầng 1 đến 4 chạy ngay) ⇒ xem lưới và popup ⇒ bấm Lưu ⇒ H tạo lô IMPORTED, chạy C2 tầng 5 ⇒ READY_TO_ASSIGN.
 
-**L-3 — Xem kết quả và giao việc (UCADM13, đề xuất).** Ad xem số câu qua, danh sách AI đã loại, cờ ⇒ Giao việc (chọn A, B, reviewDays, confirmDays) ⇒ xem trước phân bổ ⇒ xác nhận ⇒ H tạo assignment, lô IN_REVIEW, thông báo và đặt lịch nhắc.
+**L-3 — Xem kết quả và giao việc (UCADM13, đề xuất).** Ad xem số câu qua, danh sách AI đã loại, cờ ⇒ Giao việc (giao từng câu cho A và B kèm hạn từng vòng; ⚠ chờ xác nhận cách chọn) ⇒ xem trước phân bổ ⇒ xác nhận ⇒ H ghi reviewer_id, confirmer_id, hạn của từng câu và nhật ký ASSIGN, lô IN_REVIEW, thông báo và đặt lịch nhắc.
 
-**L-4 — A duyệt và gửi gói (UCGV14).** A sửa/duyệt/từ chối từng câu (H kiểm lại luật cứng + T1–T2 sau sửa) ⇒ khi hết việc, bấm Gửi cho B ⇒ H tạo gói, đặt due_at của gói, nhắc cho B.
+**L-4 — A duyệt (UCGV14).** A sửa/duyệt/từ chối từng câu (H kiểm lại luật cứng + T1–T2 sau sửa) ⇒ quyết định ghi vào first_review; không còn bước gửi gói.
 
-**L-5 — B confirm (UCGV15).** B mở gói ⇒ xử lý từng câu hoặc "xác nhận tất cả còn lại" ⇒ gói DONE.
+**L-5 — B confirm (UCGV15).** B mở danh sách câu được giao ⇒ xử lý từng câu hoặc "xác nhận tất cả còn lại" ⇒ ghi second_review.
 
-**L-6 — Theo dõi, chỉnh hạn, giao lại.** Ad xem tiến độ theo gói/GV, chỉnh hạn, giao lại, ép gửi gói thay A.
+**L-6 — Theo dõi, chỉnh hạn, giao lại.** Ad xem tiến độ theo câu/GV, chỉnh hạn, giao lại.
 
 **L-7 — Kiểm tra và import (UCADM14, đề xuất).** Lô READY_TO_FINALIZE ⇒ Ad bấm Kiểm tra (C3) ⇒ xem báo cáo ⇒ quyết lỗi mềm ⇒ Import (H chạy lại T1–T2 nhanh) ⇒ FINAL_APPROVED.
 
@@ -1109,9 +1096,8 @@ Ký hiệu: A = GV vai A, B = GV vai B, Ad = Admin, H = hệ thống.
 
 | **Mã lỗi** | **HTTP** | **Ngữ cảnh** |
 | --- | --- | --- |
-| NOT_ASSIGNED | 403 | GV thao tác câu/gói không được giao cho mình (hoặc sai vai A/B) |
-| CONFIRMER_IN_REVIEW_GROUP | 409 | GV B được chọn nằm trong nhóm A của cùng lô |
-| PACKAGE_INCOMPLETE | 409 | A bấm Gửi cho B khi còn câu chưa quyết |
+| NOT_ASSIGNED | 403 | GV thao tác câu không được giao cho mình (hoặc sai vai A/B) |
+| CONFIRMER_IN_REVIEW_GROUP | 409 | GV B trùng GV A của cùng câu (⚠ chờ xác nhận tên mã và phạm vi; trước 03/11/2026: B nằm trong nhóm A của cùng lô) |
 | FINAL_CHECK_REQUIRED | 409 | Import khi chưa có báo cáo C3 |
 | FINAL_CHECK_STALE | 409 | Import khi báo cáo C3 hết hiệu lực (câu hoặc ngân hàng đã đổi sau lúc kiểm) |
 | BATCH_NOT_READY_TO_FINALIZE | 409 | Kiểm tra/Import khi lô chưa ở READY_TO_FINALIZE |
@@ -1120,7 +1106,7 @@ Ký hiệu: A = GV vai A, B = GV vai B, Ad = Admin, H = hệ thống.
 | BATCH_BUDGET_EXCEEDED | 409 | Vượt trần lời gọi/token mỗi lô |
 | IMPORT_GRID_EXPIRED | 410 | Lưới tạm import đề hết TTL (mã dùng chung với Mục 9b.7) |
 
-**[NOTE]** Ca test bắt buộc khi code (theo kế hoạch bản 5, Mục 13): giao việc 100 câu cho 5 GV A ra 20 câu mỗi người, 103 câu chênh tối đa 1, B nằm trong nhóm A ⇒ 409; gói chưa quyết hết mà Gửi ⇒ PACKAGE_INCOMPLETE, câu A loại không vào gói, nhiều A ⇒ nhiều gói độc lập; B gọi API sửa hoặc "trả về" ⇒ lỗi; C3 dùng lại kết quả với câu không đổi, chạy lại G5 với câu A sửa, bắt trùng với câu mới vào ngân hàng; Import chỉ khi READY_TO_FINALIZE và C3 còn hiệu lực, hai Admin import cùng lúc không tạo trùng; chỉ FINAL_APPROVED được CAT chọn; irt_b −4 và +4 hợp lệ, ngoài biên bị loại. Chưa chạy ca test nào (chưa có mã).
+**[NOTE]** Ca test bắt buộc khi code (theo kế hoạch bản 5, Mục 13): giao việc 100 câu cho 5 GV A ra 20 câu mỗi người, 103 câu chênh tối đa 1, A trùng B trên cùng một câu ⇒ 409 (⚠ chờ xác nhận có còn ca chia đều 100 câu/5 GV không); cờ nhắc hạn là cột riêng, job nhắc không ghi đè first_review/second_review; B chỉ thấy và xử lý câu được giao cho mình; B gọi API sửa hoặc "trả về" ⇒ lỗi; C3 dùng lại kết quả với câu không đổi, chạy lại G5 với câu A sửa, bắt trùng với câu mới vào ngân hàng; Import chỉ khi READY_TO_FINALIZE và C3 còn hiệu lực, hai Admin import cùng lúc không tạo trùng; chỉ FINAL_APPROVED được CAT chọn; irt_b −4 và +4 hợp lệ, ngoài biên bị loại. Chưa chạy ca test nào (chưa có mã).
 
 ---
 
@@ -1161,10 +1147,9 @@ LÔ CÂU HỎI (ADMIN)  [đề xuất]
 
 GIAO VIỆC (ADMIN)  [đề xuất]
   GET    /api/v1/item-batches/:id/assign-preview
-  POST   /api/v1/item-batches/:id/assign                    # {reviewerIds,confirmerId,reviewDays,confirmDays}
+  POST   /api/v1/item-batches/:id/assign                    # giao việc theo từng câu (⚠ chờ xác nhận body: danh sách câu + reviewerId, confirmerId, hạn từng vòng; trước 03/11: {reviewerIds,confirmerId,reviewDays,confirmDays})
   POST   /api/v1/item-batches/:id/reassign
-  PATCH  /api/v1/item-batches/:id/deadlines
-  POST   /api/v1/item-packages/:id/force-send
+  PATCH  /api/v1/item-batches/:id/deadlines                 # ⚠ chờ xác nhận: chỉnh hạn theo câu (dueAt từng vòng)
 
 KIỂM TRA VÀ IMPORT CUỐI (ADMIN)  [đề xuất]
   POST   /api/v1/item-batches/:id/final-check               # chạy C3
@@ -1176,13 +1161,12 @@ CHẶNG A (GV vai A)  [đề xuất]
   GET    /api/v1/me/review-tasks
   PATCH  /api/v1/items/:id                                  # sửa nội dung/đáp án/giải thích (câu của mình, DRAFT)
   POST   /api/v1/items/:id/approve | reject
-  POST   /api/v1/item-packages/mine/send                    # Gửi cho B
 
 CHẶNG B (GV vai B)  [đề xuất]
-  GET    /api/v1/me/confirm-packages
+  GET    /api/v1/me/confirm-tasks                           # ⚠ chờ xác nhận tên (cũ: confirm-packages)
   POST   /api/v1/items/:id/confirm
   POST   /api/v1/items/:id/remove
-  POST   /api/v1/item-packages/:id/confirm-all              # xác nhận tất cả câu còn lại
+  POST   /api/v1/item-batches/:id/confirm-all               # xác nhận tất cả câu còn lại của B (⚠ chờ xác nhận tên và phạm vi; cũ: /item-packages/:id/confirm-all)
 
 REPORTING
   GET    /api/v1/reports/class-distribution  # ?examRoundId= (TEACHER, ADMIN)
@@ -1303,7 +1287,7 @@ Ghi chú v3.0: GET /sessions/active trả thêm expiresAt và thông tin kỳ. C
 | R14 | OTP 6 số quên mật khẩu dễ bị dò (brute force) (DC-21) | 🟡 TB | OTP lưu bản băm trong Redis, TTL 10 phút, dùng 1 lần, tối đa 5 lần nhập sai rồi hủy; rate limit theo email + IP (RATE_LIMITED); forgot-password luôn trả 202 |
 | R15 | Phạm vi tăng: ai-question-generator (F-11) kéo từ Khóa luận vào Tiểu luận — thêm lô, giao việc, ba điểm AI check, lọc trùng T1–T3, embedding, G5 (DC-27, DC-35) | 🔴 Cao | Cập nhật COMMITMENT_BASELINE.md trước khi ký (gate G1, hết Tuần 6); thử một lô nhỏ trước khi code đầy đủ; nếu trễ thì hỏi nhóm quyết định cắt phần nào, không tự cắt; xem Q-11 |
 | R16 | Chi phí và hạn mức API (sinh dư, embedding T3, G5, giải thích) chưa đo; mô hình embedding và hạn mức Gemini chưa kiểm chứng (Q-9) | 🟡 TB | Trần lời gọi/token mỗi lô (BATCH_BUDGET_EXCEEDED); cache theo hash prompt; tầng rẻ chạy trước; gộp nhiều câu mỗi lời gọi; LLM Gateway dự phòng; đo chi phí và độ trễ thật ở lần thử đầu, không ghi số khi chưa đo |
-| R17 | Admin và GV vai B là điểm tập trung: mọi lô qua Admin (giao việc, kiểm tra, import) và một GV B mỗi lô; B vắng hoặc trễ làm chậm cả lô | 🟡 TB | Hạn + nhắc trước 24 giờ; Admin chỉnh hạn, giao lại, ép gửi gói (FORCE_SEND); item_review_events truy vết; Admin không sửa nội dung nên không phá tính độc lập |
+| R17 | Admin và GV vai B là điểm tập trung: mọi lô qua Admin (giao việc, kiểm tra, import) và các GV B được giao câu; B vắng hoặc trễ làm chậm các câu được giao cho B | 🟡 TB | Hạn + nhắc trước 24 giờ; Admin chỉnh hạn, giao lại; item_review_events truy vết; Admin không sửa nội dung nên không phá tính độc lập |
 | R18 | Bấm "Xác nhận tất cả câu còn lại" làm B bỏ qua cờ mềm và dấu "A đã sửa" (DC-33) | 🟡 TB | Ghi log hành động hàng loạt (CONFIRM_ALL); C3 kiểm lại luật cứng, trùng và G5 cho câu A sửa trước khi import; Admin quyết lỗi mềm; hiển thị số cờ còn lại trước khi xác nhận (đề xuất giao diện) |
 | R19 | Khoảng irt_b hợp lệ [−4, +4] (DC-34) khác CLAUDE.md [−2.5, +1.5] và khác vùng phủ hiện tại của Item Bank; irt_b gợi ý của AI chưa hiệu chỉnh | 🟡 TB | Sửa CLAUDE.md (đề xuất tại DE_XUAT_SUA_CLAUDE_MD.md); kiểm test CAT (Q-12); câu mới calibrated = false; khoảng này là tham số cấu hình |
 | R20 | Lọc trùng sai: ngưỡng T2/T3 chưa hiệu chỉnh (loại nhầm hoặc lọt); pg_trgm có thể không bật được (Q-7, Q-10) | 🟡 TB | Cờ mềm giữa hai ngưỡng, loại cứng chỉ ở ngưỡng cao; thống kê tỷ lệ loại theo tầng để hiệu chỉnh; nếu không có pg_trgm thì tính T2 trong ứng dụng |
@@ -1378,7 +1362,7 @@ Ghi chú v3.0: GET /sessions/active trả thêm expiresAt và thông tin kỳ. C
 | **Role** | **Quyền** | **Ghi chú** |
 | --- | --- | --- |
 | STUDENT | Chỉ xem Profile của chính mình (student_id phải khớp JWT sub) | Không xem được Profile của SV khác |
-| TEACHER | Xem Profile của bất kỳ SV nào; xem báo cáo lớp (lọc theo kỳ); với lô được giao: vai A sửa/duyệt/từ chối câu của mình và gửi gói, vai B xác nhận/loại câu trong gói gửi cho mình; không import, không tạo lô, không ghi ngoài phạm vi được giao | GV thường chỉ xem kết quả (DC-18) ngoài việc được giao (DC-40); API câu hỏi kiểm phân công (NOT_ASSIGNED, 403); hệ thống đơn trường nên không còn phạm vi theo trường |
+| TEACHER | Xem Profile của bất kỳ SV nào; xem báo cáo lớp (lọc theo kỳ); với lô được giao: vai A sửa/duyệt/từ chối câu của mình, vai B xác nhận/loại câu được giao cho mình; không import, không tạo lô, không ghi ngoài phạm vi được giao | GV thường chỉ xem kết quả (DC-18) ngoài việc được giao (DC-40); API câu hỏi kiểm phân công (NOT_ASSIGNED, 403); hệ thống đơn trường nên không còn phạm vi theo trường |
 | ADMIN | Siêu tập của TEACHER + toàn bộ chức năng quản trị: lô câu hỏi (tạo, import, giao việc, kiểm tra, import cuối), kỳ thi, import, tài khoản SV/GV, nâng/thu hồi Admin; không sửa và không duyệt nội dung câu (DC-29) | Không thu hồi được Admin cuối cùng (BR-18); Admin đầu tiên tạo bằng seed |
 | EduZ System (M2M) | Service Account với API Key riêng (không phải JWT) | Chỉ GET, không POST/DELETE |
 
@@ -1394,7 +1378,7 @@ async getProfile(@Param('studentId') studentId: string, @CurrentUser() user: Use
 }
 ```
 
-**[NOTE]** v3.0: phân quyền các endpoint quản trị mới (import, kỳ thi, tài khoản, ghi câu hỏi) dùng RolesGuard dùng chung theo role; TEACHER gọi các endpoint này nhận 403. Ma trận chức năng theo role: xem Mục 9b.2. Vòng 3: endpoint chặng A và chặng B (Mục X) dùng RolesGuard (TEACHER) cộng thêm kiểm phân công đúng người (A của câu, B của gói); việc không được giao ⇒ 403 NOT_ASSIGNED.
+**[NOTE]** v3.0: phân quyền các endpoint quản trị mới (import, kỳ thi, tài khoản, ghi câu hỏi) dùng RolesGuard dùng chung theo role; TEACHER gọi các endpoint này nhận 403. Ma trận chức năng theo role: xem Mục 9b.2. Vòng 3: endpoint chặng A và chặng B (Mục X) dùng RolesGuard (TEACHER) cộng thêm kiểm phân công đúng người (A hoặc B của câu); việc không được giao ⇒ 403 NOT_ASSIGNED.
 
 ### 15.5. Chống Race Condition API (Redis State Machine)
 
@@ -1494,6 +1478,7 @@ Hiện tại (TL): 1 trường duy nhất. Muốn đa trường ⇒ Khóa luận
 | v3.0 (vòng 2) | 13/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Phiên 23 (DC-24..DC-26, #99..#101): Admin tạo tài khoản SV và GV từng người hoặc import file (UCADM08 mở rộng, tạo từng người gộp UCADM09; API POST /students, POST /teachers, tham số kind); exam_rounds.duration_minutes NOT NULL DEFAULT 45; sửa mô tả EAP thành lưới đều 41 điểm [−4, +4] bước 0.2 (không phải Gaussian–Hermite; không đổi thuật toán); toàn bộ công thức chuyển sang phương trình Word gốc (OMML); xuất thêm bản Markdown SRS_TLCN_v3.0.md |
 | v3.0 (vòng 3) | 14/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Phiên 25 (DC-27 đến DC-45, #110 đến #113): luồng Admin tạo lô bằng AI hoặc import ⇒ AI check C1/C2/C3 ⇒ giao việc ⇒ GV A duyệt ⇒ gói ⇒ GV B confirm ⇒ Admin kiểm tra và import cuối; ItemStatus mới (FIRST_APPROVED, SECOND_APPROVED, FINAL_APPROVED, AI_REJECTED), ItemSource AI_GENERATED/IMPORTED; GV không import, Admin không sửa nội dung; giải thích AI sinh cùng lúc; khoảng irt_b [−4, +4]; F-23 đến F-28; Mục III (item-generation, ItemCheckService, ItemDuplicateChecker, LLM Gateway, BullMQ); DDL 6.2 và 6.2b; IXb 9b.9 đến 9b.18; API Mục X; Risk R15 đến R21; Q-7 đến Q-10 còn chờ chốt |
 | v3.0 (vòng 4) | 16/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Chốt đồng bộ: Item không còn source (nguồn ở item_batches.source, enum ItemBatchSource); items.batch_id NOT NULL kèm các lô seed theo bộ nguồn; gói ItemPackage tạo lúc giao việc (OPEN → SENT → DONE); thông báo chỉ email nhắc việc + Hộp việc (không chuông thời gian thực); bổ sung nghiệp vụ ép gửi và xử lý câu chưa xử lý sau hạn; GV xem ngân hàng ở /teacher/item-bank (chỉ xem); mã UCADM15–17 cho kỳ thi |
+| v3.0 (sửa theo họp GVHD 03/11/2026) | 03/11/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Chưa phát hành số phiên bản mới. Bỏ gói duyệt (ItemPackage, PackageStatus, Gửi gói, ép gửi gói, DC-42); giao việc và duyệt theo từng câu: items.reviewer_id, confirmer_id (khóa ngoại), first_review, second_review (JSON), first_reminder_sent, second_reminder_sent; bỏ items.package_id, items.original_snapshot (vào first_review), bảng item_packages, item_review_assignments, item_batch_assignments; ReviewAction bỏ EXTEND, FORCE_SEND, thêm ASSIGN; ExamRound ◆ TestSession (Composition, DB Restrict). Nhiều chi tiết còn đánh dấu "⚠ chờ xác nhận" (xem các Mục 9b.13–9b.18, BR-22…BR-26, API Mục X) |
 
 *SRS v2.5 — 10/09/2026 | Bản nhận xét GVHD được tích hợp đầy đủ. Changelog v2.4: (1) Viết đầy đủ thuật toán Randomized Top-5 tại Mục 4.4 kèm bảng ước lượng exposure rate; (2) Viết đầy đủ Outlier Early Stop tại Mục 4.5 kèm pseudocode phát hiện deadlock; (3) Sửa NFR 15.2: "near-zero loss" thay vì "0% tuyệt đối", giải thích rõ điều kiện Redis AOF; (4) Bổ sung State Machine Recovery sau reconstruct từ PostgreSQL tại Mục 15.5; (5) Điều chỉnh Risk R5 về 🟡 TB (Randomized Top-5 giảm nhưng không triệt tiêu exposure); (6) Thêm R11 (SRS spec vượt trước implementation); (7) Bảng phân tầng Must-Have TL vs Spec KL.*
 
@@ -1537,5 +1522,6 @@ Hiện tại (TL): 1 trường duy nhất. Muốn đa trường ⇒ Khóa luận
 | XV | 15.1 Partial Index; 15.3 thêm hàng gọi LLM và khóa API; 15.4 RBAC TEACHER/ADMIN thêm vai A/B | DC-29, DC-40 |
 | XVII | Thêm dòng v3.0 (vòng 3); chỉnh chú thích dòng v2.2 | — |
 | VI (6.2) | DDL items: thêm cột original_snapshot JSONB nullable (bản gốc trước khi GV A sửa lần đầu), phương án (2) của khoảng trống thiết kế ghi nhận 01/11/2026 | Tuần 7 (chờ ghi DECISIONS_LOG) |
+| VI (6.2, 6.2b), IXb (9b.9–9b.18, BR-22…BR-28), IX (F-25…F-27), X, XIV (R17), XV (15.4) | Họp GVHD 03/11/2026: bỏ gói duyệt; DDL items thêm reviewer_id, confirmer_id, first_review, second_review, first_reminder_sent, second_reminder_sent, bỏ package_id và original_snapshot (nay trong first_review); bỏ ba bảng giao việc/gói; ReviewAction thêm ASSIGN, bỏ EXTEND, FORCE_SEND; API bỏ item-packages; các điểm chưa rõ đánh dấu "⚠ chờ xác nhận" | Họp GVHD 03/11/2026 |
 
 Chưa thực hiện trong bản này: Mục XII (lộ trình) chưa cập nhật tuần cho khối lượng mới (tạo tài khoản GV, kỳ thi, lưới tạm); sơ đồ thành phần/triển khai; hấp thụ các đề xuất v2.7 ngoài phạm vi trên. Các mục đó được ghi nợ đồng bộ tài liệu ở tracking. Vòng 3 chưa thực hiện thêm: cập nhật COMMITMENT_BASELINE.md cho phạm vi tăng (Q-11); sửa CLAUDE.md theo khoảng irt_b (Q-12); đổi tên trạng thái đã duyệt cũ trong mã backend và seed; Mục XII (lộ trình) chưa cập nhật tuần cho khối lượng sinh/duyệt đề; Class Diagram, Sequence, đặc tả Use Case và màn hình từ S26 do các tài liệu khác đảm nhiệm; Q-7 đến Q-10 còn chờ chốt.

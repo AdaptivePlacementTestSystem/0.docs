@@ -4,7 +4,8 @@
 > Bản mô tả cũ (47 lớp, theo `Trang-1` một trang) và sơ đồ cũ đã chuyển vào `_ARCHIVE_20261026/design/class/`.
 > Ảnh PNG dựng bằng script (đường thẳng, có chỗ cắt qua hộp); **ảnh cuối cần xuất lại từ draw.io** sau khi chỉnh đường nối.
 > Cập nhật 27/10: giữ lại `Item.irtA = 1.0`, `TestMetadata` (4 trường) và method của Admin/Teacher; xem `DECISIONS_LOG` #132. Đánh giá `schema.prisma`: `Tuan7/DANH_GIA_PRISMA_SAU_CHINH_LUOC_DO.md`.
-> Bản gọn **không vẽ** một số cột vẫn tồn tại trong DB/`schema.prisma`: `User.isActive/mustChangePassword/createdAt`, `Item.contentHash/timesUsed/calibrated/irtC`, `ItemBatch.createdAt/createdById/skill/cefrTarget/requestedCount`, và các bảng lưu trữ `ExamRoundParticipant`, `ItemBatchAssignment`, `ItemReviewAssignment`, `ItemEmbedding`.
+> Bản gọn **không vẽ** một số cột vẫn tồn tại trong DB/`schema.prisma`: `User.isActive/mustChangePassword/createdAt`, `Item.contentHash/timesUsed/calibrated/irtC`, `Item.firstReminderSent/secondReminderSent`, `ItemBatch.createdAt/createdById/skill/cefrTarget/requestedCount`, và các bảng lưu trữ `ExamRoundParticipant`, `ItemEmbedding`.
+> Cập nhật 03/11: theo họp với GVHD, bỏ `ItemPackage`/`PackageStatus`, duyệt trực tiếp theo từng câu (`Item.firstReview`, `Item.secondReview`), `ExamRound ◆ TestSession` là Composition; chi tiết ở `20261103_QUYET_DINH_THAY_DOI_THIET_KE_CLASS_DIAGRAM.md` và `DECISIONS_LOG`. Bảng `ItemBatchAssignment`, `ItemReviewAssignment` cũng bỏ khỏi schema.
 > Lý do từng chỗ sửa: `Tuan7/PHAN_TICH_DANH_GIA_CLASS_DIAGRAM_GON.md`. Quyết định: `DECISIONS_LOG` #128–#131.
 
 ## Lịch sử phiên bản
@@ -15,6 +16,7 @@
 | 2026-10-26 | Thay bằng bản gọn 3 trang và bảng mô tả theo từng lược đồ |
 | 2026-10-27 | Thêm lại `irtA`, `TestMetadata`, method Admin/Teacher; bỏ `ItemBatch.createdAt`; thêm Mục 8–12 (quy tắc nghiệp vụ, đối chiếu `schema.prisma`, dữ liệu minh họa, module, tệp sinh tự động); sinh lại `ClassDiagram.puml/.mmd`; `schema.prisma` thêm khóa ngoại `ItemReviewEvent.packageId` |
 | 2026-11-02 | Đăng xếp lại vị trí và đường nối trên draw.io, bỏ ký hiệu `?` (dùng `{nullable}`); thêm `Item.originalSnapshot` và `TestSession.responses`; `schema.prisma` thêm `Item.originalSnapshot`; sinh lại `ClassDiagram.puml/.mmd`; ảnh PNG dựng lại bằng script |
+| 2026-11-03 | Theo họp GVHD: bỏ `ItemPackage`, `PackageStatus`; thêm `Item.reviewerId/confirmerId` (cột khóa ngoại) và `Item.firstReview/secondReview` (JSON, kiểu `FirstReviewDetail`/`SecondReviewDetail`); `originalSnapshot` chuyển vào `FirstReviewDetail`; `ReviewAction` bỏ `EXTEND`/`FORCE_SEND`, thêm `ASSIGN`; `Teacher` có `reviewItem`/`confirmItem`, bỏ `submitPackage`; `ExamRound ◆ TestSession` (Composition); `schema.prisma` bỏ ba model giao việc/gói; sinh lại `ClassDiagram.puml/.mmd` |
 
 ---
 # BẢNG MÔ TẢ 3 CLASS DIAGRAM (bản đề xuất đã rút gọn — Tuần 7)
@@ -69,10 +71,10 @@ Lớp cha của mọi tài khoản (hệ thống đơn trường, 3 role). Khôn
 
 | Phương thức | Làm gì |
 |---|---|
-| `+ reviewItem(item, action): void` | GV A duyệt hoặc từ chối một câu được giao (ghi `ItemReviewEvent` `APPROVE`/`REJECT`) |
-| `+ submitPackage(pkg): void` | GV A gửi gói đã duyệt xong cho GV B xác nhận |
+| `+ reviewItem(item, action, comment): void` | GV A duyệt hoặc từ chối một câu được giao (`APPROVE`/`REJECT`); ghi vào `Item.firstReview` và `ItemReviewEvent` |
+| `+ confirmItem(item, action, comment): void` | GV B xác nhận hoặc loại một câu được giao (`CONFIRM`/`REMOVE`); ghi vào `Item.secondReview` và `ItemReviewEvent` |
 
-Khi Admin giao việc, giảng viên làm **GV A** (sửa, duyệt/từ chối, gửi gói) hoặc **GV B** (xác nhận/loại). Hai phương thức trên là hành vi đại diện của vai A; việc GV B xác nhận gói nằm ở `ItemPackage`/`Item` (chủ ý không vẽ thêm để lớp gọn).
+Khi Admin giao việc, giảng viên làm **GV A** (sửa, duyệt/từ chối từng câu) hoặc **GV B** (xác nhận/loại từng câu). Không còn gói: mỗi câu được giao riêng cho một GV A và một GV B (`Item.reviewerId`, `Item.confirmerId`); Thời điểm GV B thấy câu để xác nhận (ngay khi được giao hay sau khi A duyệt câu đó) ⚠ chờ xác nhận.
 
 ### 1.4 `Admin` (kế thừa `User`) — quản trị viên trường
 Không có thuộc tính riêng: Admin chỉ khác ở **quyền**. Admin **không sửa nội dung câu hỏi**.
@@ -83,7 +85,7 @@ Không có thuộc tính riêng: Admin chỉ khác ở **quyền**. Admin **khô
 | `+ importBatch(batch): void` | Import cuối: kiểm C3 rồi chuyển các câu đã qua hai chặng duyệt sang `FINAL_APPROVED` |
 | `+ createExamRound(): ExamRound` | Tạo kỳ thi |
 
-Các việc còn lại của Admin (giao việc, giao lại, chỉnh hạn, ép gửi gói, quản lý tài khoản) chạy qua service, chưa vẽ thành method.
+Các việc còn lại của Admin (giao việc, giao lại, chỉnh hạn, quản lý tài khoản) chạy qua service, chưa vẽ thành method.
 
 ### 1.5 `ExamRound` — kỳ thi
 Một đợt thi có cửa sổ thời gian, danh sách sinh viên được thi và thời lượng làm bài.
@@ -227,15 +229,19 @@ Kết quả cuối của một phiên, là dữ liệu xuất cho EduZ (JSON Pro
 | `irtB: float` | Độ khó b theo mô hình Rasch (khoảng hợp lệ −4…+4, cấu hình được) |
 | `irtA: float = 1.0 {Rasch}` | Độ phân biệt a, **cố định 1,0 cho mọi câu**: đây là điều kiện để mô hình là Rasch (1PL); nếu a thay đổi theo câu thì thành 2PL. `irtC` (đoán mò) không vẽ, thuộc Khóa luận |
 | `status: ItemStatus` | Vòng đời một chiều (xem 3.8); **chỉ `FINAL_APPROVED` được CAT chọn** |
-| `originalSnapshot: Json {nullable}` | Bản gốc của câu (nội dung, lựa chọn, đáp án, giải thích) chụp trước khi GV A sửa lần đầu; rỗng nếu chưa sửa. Dùng dựng "bản gốc so với bản A đã sửa" cho GV B và Admin (UCGV15, C3). Ở DB là cột `original_snapshot` |
+| `reviewerId: UUID {nullable}` | GV A được giao duyệt câu này; rỗng khi câu chưa được giao. Ở DB là **cột khóa ngoại** `reviewer_id` (`onDelete: Restrict`: không xóa được GV đang có việc) |
+| `confirmerId: UUID {nullable}` | GV B được giao xác nhận câu này; rỗng khi chưa giao. Cột khóa ngoại `confirmer_id` |
+| `firstReview: FirstReviewDetail {nullable}` | Kết quả vòng 1 của GV A (xem 3.4); rỗng khi chưa giao. Ở DB là cột JSON `first_review` |
+| `secondReview: SecondReviewDetail {nullable}` | Kết quả vòng 2 của GV B (xem 3.4). Cột JSON `second_review` |
 
 | Phương thức | Làm gì |
 |---|---|
 | `+ probability(θ): float` | Xác suất làm đúng theo Rasch: 1 / (1 + e^−(θ − b)) |
 | `+ fisherInformation(θ): float` | Lượng thông tin của câu tại θ: P·(1 − P); lớn nhất khi b ≈ θ |
 | `+ transitionTo(next): void` | Chuyển trạng thái duyệt, chỉ cho phép đi một chiều theo vòng đời |
+| `+ isOverdue(round: int, at: DateTime): boolean` | Quá hạn ở vòng `round` (1 hoặc 2) tại thời điểm `at`: quá `dueAt` của vòng đó mà chưa có `action` |
 
-*(Trang 3 chỉ vẽ `transitionTo`; hai phương thức Rasch chỉ ở trang 1–2 vì thuộc miền thi.)*
+*(Trang 3 chỉ vẽ `transitionTo` và `isOverdue`; hai phương thức Rasch chỉ ở trang 1–2 vì thuộc miền thi. Trang 1 không vẽ hai kiểu `FirstReviewDetail`/`SecondReviewDetail`, chỉ thể hiện qua thuộc tính của `Item`; hai kiểu này vẽ ở trang 3.)*
 
 ### 3.2 `Explanation` — lời giải thích
 `content` (nội dung giải thích), `generatedAt` (lúc sinh). **Một lần cho mỗi câu**, dùng chung cho mọi sinh viên, sinh cùng lúc sinh câu hỏi; câu import thiếu giải thích thì sinh bổ sung.
@@ -255,22 +261,29 @@ Gom câu hỏi theo nguồn để kiểm và duyệt cùng nhau. Nguồn của c
 |---|---|
 | `+ transitionTo(next): void` | Chuyển trạng thái lô hợp lệ |
 | `+ canAssign(): boolean` | Lô đã qua kiểm C1/C2 và ở `READY_TO_ASSIGN` nên Admin giao việc được (kế hoạch Mục 3) |
-| `+ canFinalize(): boolean` | Lô ở `READY_TO_FINALIZE`: mọi gói đã `DONE` **hoặc** mọi hạn đã qua; chỉ khi đó Admin mới chạy kiểm C3 và import (DC-44) |
+| `+ canFinalize(): boolean` | Lô ở `READY_TO_FINALIZE`: mọi câu đã xong vòng 2 (`SECOND_APPROVED` hoặc `REJECTED`) **hoặc** các câu còn lại đã quá hạn; chỉ khi đó Admin mới chạy kiểm C3 và import (DC-44) |
 
-### 3.4 `ItemPackage` — gói duyệt
-Mỗi GV A có **một gói** trong một lô, tạo lúc Admin giao việc. A duyệt xong thì **gửi** gói cho GV B xác nhận.
+### 3.4 `FirstReviewDetail` và `SecondReviewDetail` — kết quả hai vòng duyệt
+Hai kiểu giá trị (`<<DataType>>`, Value Object), không có danh tính riêng, **thuộc về một `Item`** (Composition `0..1`) và lưu thành cột JSON của `items`. Thay cho `ItemPackage` đã bỏ (họp GVHD 03/11/2026): Admin giao **từng câu** cho GV A và GV B, mỗi vòng có hạn riêng.
 
+**`FirstReviewDetail`** (vòng 1, GV A: biên tập, duyệt hoặc từ chối)
 | Thuộc tính | Ý nghĩa |
 |---|---|
-| `reviewerId` | GV A (người duyệt/sửa) |
-| `confirmerId` | GV B (người xác nhận) |
-| `status: PackageStatus` | `OPEN` → `SENT` → `DONE` |
-| `sentAt: DateTime {nullable}`, `dueAt: DateTime {nullable}` | Ngày gửi và hạn xác nhận; rỗng khi gói còn `OPEN` |
+| `dueAt: DateTime` | Hạn hoàn thành vòng 1 cho câu này |
+| `action: ReviewAction {nullable}` | `APPROVE` hoặc `REJECT`; rỗng khi chưa duyệt |
+| `reviewedAt: DateTime {nullable}` | Lúc GV A duyệt |
+| `comment: String {nullable}` | Ghi chú, lý do sửa hoặc từ chối |
+| `originalSnapshot: Json {nullable}` | Bản gốc của câu (nội dung, lựa chọn, đáp án, giải thích) chụp trước khi GV A sửa lần đầu; rỗng nếu chưa sửa. **Ghi một lần**. Dùng dựng "bản gốc so với bản A đã sửa" cho GV B và Admin (UCGV15, C3). Trước 03/11 là thuộc tính của `Item` |
 
-| Phương thức | Làm gì |
+**`SecondReviewDetail`** (vòng 2, GV B: thẩm định, xác nhận hoặc loại)
+| Thuộc tính | Ý nghĩa |
 |---|---|
-| `+ canSend(): boolean` | Gói đủ điều kiện để A gửi cho B: A đã duyệt xong phần của mình, gửi một lần (DC-42); điều kiện chi tiết xem kế hoạch |
-| `+ isOverdue(at): boolean` | Quá hạn tại thời điểm `at` (quá `dueAt` mà chưa `DONE`) |
+| `dueAt: DateTime` | Hạn hoàn thành vòng 2 cho câu này |
+| `action: ReviewAction {nullable}` | `CONFIRM` hoặc `REMOVE`; rỗng khi chưa xác nhận |
+| `confirmedAt: DateTime {nullable}` | Lúc GV B xác nhận hoặc loại |
+| `comment: String {nullable}` | Nhận xét của GV B |
+
+`reviewerId` và `confirmerId` **không nằm trong hai kiểu này mà nằm trên `Item`** (quyết định chọn sau họp GVHD: ID người duyệt là cột khóa ngoại để DB chặn xóa GV đang có việc và truy vấn "hộp việc" dùng index thường).
 
 ### 3.5 `ItemCheckResult` — kết quả AI kiểm một câu
 Một dòng cho mỗi lần kiểm một câu ở một điểm kiểm.
@@ -293,7 +306,7 @@ Mỗi thao tác duyệt/giao việc để lại một dòng (truy vết, phục 
 | Thuộc tính | Ý nghĩa |
 |---|---|
 | `batchId` | Lô liên quan |
-| `itemId` | Câu liên quan (có thể rỗng); rỗng với thao tác tác động nhiều câu/gói (`CONFIRM_ALL`, `REASSIGN`, `EXTEND`, `FORCE_SEND`) |
+| `itemId` | Câu liên quan (có thể rỗng); rỗng với thao tác tác động nhiều câu (`CONFIRM_ALL`). Giao việc (`ASSIGN`) và giao lại (`REASSIGN`) ghi **một dòng cho mỗi câu**, `actorId` là Admin |
 | `actorId` | Người thực hiện |
 | `action: ReviewAction` | Hành động |
 | `createdAt` | Lúc xảy ra |
@@ -303,10 +316,9 @@ Mỗi thao tác duyệt/giao việc để lại một dòng (truy vết, phục 
 |---|---|---|
 | `ItemBatchSource` | AI_GENERATED, IMPORTED | Lô do AI sinh / import từ file |
 | `ItemBatchStatus` | GENERATING / IMPORTING → CHECKING → READY_TO_ASSIGN → IN_REVIEW → READY_TO_FINALIZE → FINAL_CHECKED → DONE; FAILED, PARTIAL | Đang sinh hoặc đang import → AI đang kiểm → chờ giao việc → đang duyệt → chờ import cuối → đã kiểm C3 → xong; lỗi; xong một phần |
-| `PackageStatus` | OPEN, SENT, DONE | Gói đang soạn / A đã gửi B / B đã xác nhận xong |
 | `CheckPoint` | C1, C2, C3 | Ba điểm kiểm AI |
 | `CheckLevel` | PASS, SOFT, HARD | Đạt / cảnh báo / lỗi nặng |
-| `ReviewAction` | APPROVE, REJECT, CONFIRM, REMOVE, CONFIRM_ALL, IMPORT, REASSIGN, EXTEND, FORCE_SEND, ACCEPT_FLAG | A duyệt / A từ chối / B xác nhận / B loại / B xác nhận cả gói / Admin import / giao lại / gia hạn / ép gửi gói / chấp nhận cảnh báo |
+| `ReviewAction` | APPROVE, REJECT, CONFIRM, REMOVE, CONFIRM_ALL, IMPORT, ASSIGN, REASSIGN, ACCEPT_FLAG | A duyệt / A từ chối / B xác nhận / B loại / B xác nhận hàng loạt / Admin import / Admin giao câu / giao lại / chấp nhận cảnh báo |
 
 ### 3.8 `ItemStatus` — vòng đời câu hỏi
 | Giá trị | Ý nghĩa |
@@ -325,14 +337,14 @@ Mỗi thao tác duyệt/giao việc để lại một dòng (truy vết, phục 
 ## 4. Trang 1 — Lược đồ tổng thể
 
 **Thể hiện:** toàn bộ miền nghiệp vụ TL trên một trang: người dùng, kỳ thi, phiên thi + CAT, hồ sơ năng lực, ngân hàng câu hỏi và quy trình soạn–duyệt.
-**Thực thể (21 lớp):** User, Student, Teacher, Admin, ExamRound, TestSession, SessionResponse, SessionCacheState, EAPComputationState, CATEngine, AbilityEstimate, LanguageProfile, SkillProfile, ErrorPattern, TestMetadata, Item, Explanation, ItemCheckResult, ItemBatch, ItemPackage, ItemReviewEvent. **15 enum** nằm cạnh lớp dùng chúng (không vẽ mũi tên từ lớp tới enum; kiểu thuộc tính đã cho biết).
+**Thực thể (20 lớp):** User, Student, Teacher, Admin, ExamRound, TestSession, SessionResponse, SessionCacheState, EAPComputationState, CATEngine, AbilityEstimate, LanguageProfile, SkillProfile, ErrorPattern, TestMetadata, Item, Explanation, ItemCheckResult, ItemBatch, ItemReviewEvent. **14 enum** nằm cạnh lớp dùng chúng (không vẽ mũi tên từ lớp tới enum; kiểu thuộc tính đã cho biết).
 
 | Quan hệ | Loại / bội số | Ý nghĩa |
 |---|---|---|
 | Student, Teacher, Admin ▷ User | Kế thừa | Ba loại người dùng chung thuộc tính tài khoản |
 | Admin — ExamRound | Association | Admin tạo/công bố/đóng kỳ thi |
 | ExamRound — Student | Association (N–N) | Danh sách sinh viên được thi trong kỳ |
-| ExamRound → TestSession | `0..*` | Một kỳ thi có nhiều phiên (mới tạo thì chưa có) |
+| ExamRound ◆ TestSession | Composition `0..*` | Một kỳ thi sở hữu các phiên thi của nó (mới tạo thì chưa có); phiên chỉ phục vụ đúng một kỳ, không chuyển sang kỳ khác. Ở DB là `onDelete: Restrict`: kỳ đã có sinh viên làm bài thì không xóa được, để giữ lịch sử thi |
 | Student — TestSession | Association | Sinh viên làm các phiên thi |
 | TestSession ◆ SessionResponse | Composition `1..*` | Phiên gồm các câu trả lời; xoá phiên thì mất câu trả lời |
 | SessionResponse — Item | Association | Mỗi câu trả lời tham chiếu đúng một câu hỏi |
@@ -346,8 +358,6 @@ Mỗi thao tác duyệt/giao việc để lại một dòng (truy vết, phục 
 | Explanation ◆→ Item | Composition `0..1` | Mỗi câu có tối đa một giải thích |
 | Item ◆ ItemCheckResult | Composition `0..*` | Câu có nhiều lần kiểm (C1, C2, C3) |
 | ItemBatch ◆ Item | Composition `1..*` | Mọi câu thuộc đúng một lô |
-| ItemBatch ◆ ItemPackage | Composition `1..*` | Lô được chia thành các gói (mỗi GV A một gói) |
-| ItemPackage → Item | Association `0..*` | Gói chứa các câu A đã gửi (câu A loại không vào gói) |
 
 *ItemReviewEvent không nối cạnh ở trang này (xem trang 3).*
 
@@ -363,7 +373,7 @@ Trên trang này `Item` chỉ có phần phục vụ thi (`probability`, `fisher
 |---|---|---|
 | Student/Teacher/Admin ▷ User | — | Kế thừa |
 | Student → TestSession | `0..*` | Sinh viên có nhiều phiên theo thời gian |
-| ExamRound → TestSession | `0..*` | Kỳ thi có nhiều phiên |
+| ExamRound ◆ TestSession | Composition `0..*` | Kỳ thi sở hữu các phiên của nó |
 | ExamRound → Student | `0..*` | Sinh viên đăng ký thi (bảng lưu trữ `ExamRoundParticipant`) |
 | TestSession ◆ SessionResponse | `1..*` | Các câu trả lời của phiên |
 | SessionResponse → Item | `1` | Câu trả lời ứng với một câu hỏi |
@@ -385,31 +395,30 @@ Ghi chú trên trang: `ExamRoundParticipant` là bảng lưu trữ của quan h�
 
 ## 6. Trang 3 — `Item_Authoring_Review_Workflow`: soạn và duyệt câu hỏi
 
-**Thể hiện:** vòng đời một câu hỏi từ khi sinh/import đến khi dùng được: Admin tạo **lô** (AI sinh hoặc import file) → AI kiểm C1/C2 → Admin giao việc, hệ thống tạo **gói** cho từng GV A → A duyệt/sửa rồi gửi gói → GV B xác nhận → Admin kiểm C3 và import cuối (`FINAL_APPROVED`). Mọi thao tác ghi vào nhật ký.
-**Thực thể (8 lớp):** Item, Explanation, ItemCheckResult, ItemBatch, ItemPackage, ItemReviewEvent, Admin, Teacher. **7 enum**: ItemStatus, CheckPoint, CheckLevel, ItemBatchSource, ItemBatchStatus, PackageStatus, ReviewAction.
+**Thể hiện:** vòng đời một câu hỏi từ khi sinh/import đến khi dùng được: Admin tạo **lô** (AI sinh hoặc import file) → AI kiểm C1/C2 → Admin giao việc **từng câu** cho GV A và GV B (mỗi vòng có hạn riêng) → A duyệt/sửa (ghi vào `firstReview`) → B xác nhận hoặc loại (ghi vào `secondReview`) → Admin kiểm C3 và import cuối (`FINAL_APPROVED`). Mọi thao tác ghi vào nhật ký.
+**Thực thể (9 lớp):** Item, Explanation, ItemCheckResult, ItemBatch, FirstReviewDetail, SecondReviewDetail, ItemReviewEvent, Admin, Teacher. **6 enum**: ItemStatus, CheckPoint, CheckLevel, ItemBatchSource, ItemBatchStatus, ReviewAction.
 
 | Quan hệ | Bội số | Ý nghĩa |
 |---|---|---|
 | ItemBatch ◆ Item | `1..*` | Lô gồm các câu |
-| ItemBatch ◆ ItemPackage | `1..*` | Lô chia thành các gói giao cho từng GV A |
-| ItemPackage → Item | `0..*` | Gói chứa các câu A gửi lên B |
+| Item ◆ FirstReviewDetail | `0..1` | Kết quả vòng 1 (GV A) của câu |
+| Item ◆ SecondReviewDetail | `0..1` | Kết quả vòng 2 (GV B) của câu |
 | Item ◆ Explanation | `0..1` | Giải thích của câu |
 | Item ◆ ItemCheckResult | `0..*` | Các lần AI kiểm của câu |
 | Item → ItemReviewEvent | `0..*` | Lịch sử thao tác trên câu |
-| ItemPackage → ItemReviewEvent | `0..*` | Thao tác ở mức gói (gửi, ép gửi, gia hạn…) |
 | Admin → ItemBatch | «creates» | Admin tạo lô (AI sinh hoặc import) |
-| Teacher → ItemPackage | «reviews» | Giảng viên duyệt (GV A) hoặc xác nhận (GV B) gói được giao |
+| Teacher → Item | «reviews / confirms» | Giảng viên duyệt (GV A) hoặc xác nhận (GV B) câu được giao |
 
-Ghi chú trên trang: `ItemBatchAssignment` và `ItemReviewAssignment` (giao việc) và `ItemEmbedding` (vector lọc trùng) chỉ có ở schema, không vẽ ở đây vì là chi tiết lưu trữ.
+Ghi chú trên trang: `ItemEmbedding` (vector lọc trùng) và hai cột cờ nhắc hạn `firstReminderSent`, `secondReminderSent` của `Item` chỉ có ở schema, không vẽ ở đây vì là chi tiết lưu trữ.
 
-**Vai trò theo quy trình** (để đọc cạnh «creates»/«reviews»): Admin tạo lô, giao việc, kiểm C3, import cuối, **không sửa nội dung câu**. GV A sửa nội dung/đáp án/giải thích, duyệt hoặc từ chối, gửi gói. GV B xác nhận hoặc loại câu trong gói, **không sửa**, không trả về A. GV không import đề.
+**Vai trò theo quy trình** (để đọc cạnh «creates»/«reviews»): Admin tạo lô, giao việc, kiểm C3, import cuối, **không sửa nội dung câu**. GV A sửa nội dung/đáp án/giải thích, duyệt hoặc từ chối câu được giao. GV B xác nhận hoặc loại câu được giao, **không sửa**, không trả về A. GV không import đề.
 
 ---
 
 ## 7. Hai điểm cần lưu ý khi dùng bảng này
 
 1. **Đây là mô tả bản đề xuất rút gọn**, khác bản mô tả hiện hành `Mo_ta_So_do_Lop_ClassDiagram.md` ở chỗ: bỏ `ErrorSeverity`, hằng số trong `CATEngine`, thuộc tính danh sách của Admin/Teacher, một số trường KL và trường kiểm toán (`createdAt` của `User`/`ItemBatch`...). Đã **giữ lại** `Item.irtA = 1.0`, `TestMetadata` và 2–3 method của Admin/Teacher theo yêu cầu 27/10. Nếu nhóm không chấp nhận bản đề xuất thì bảng này cần chỉnh lại.
-2. `canAssign`, `canFinalize`, `canSend` đã đối chiếu với `KE_HOACH_SINH_VA_DUYET_DE_AI.md` (Mục 2.3, DC-42, DC-44). Riêng `ItemCheckResult.isPassed()` vẫn là *suy ra*: kế hoạch chỉ nêu ba mức PASS/SOFT/HARD, chưa đọc được quy tắc "đạt" chính xác (SOFT có tính đạt không); cần xác nhận trước khi đưa vào báo cáo.
+2. `canAssign`, `canFinalize` đã đối chiếu với `KE_HOACH_SINH_VA_DUYET_DE_AI.md` (Mục 2.3, DC-44); `canSend` và DC-42 (gửi gói) không còn áp dụng sau quyết định 03/11. Riêng `ItemCheckResult.isPassed()` vẫn là *suy ra*: kế hoạch chỉ nêu ba mức PASS/SOFT/HARD, chưa đọc được quy tắc "đạt" chính xác (SOFT có tính đạt không); cần xác nhận trước khi đưa vào báo cáo.
 
 
 ---
@@ -424,12 +433,12 @@ Các quy tắc dưới đây lấy từ SRS v3.0, `CLAUDE.md` và kế hoạch s
 | `Admin` | Có toàn bộ quyền của `TEACHER` thông qua phân quyền (không phải kế thừa lớp). **Không sửa nội dung câu và không gõ câu bằng form**. Không thu hồi được Admin cuối cùng. Admin đầu tiên tạo bằng script cài đặt | CLAUDE.md, DC-29 |
 | `Teacher` | Chỉ làm GV A hoặc GV B khi Admin giao việc; Admin không làm GV A/B (danh sách chọn chỉ lấy role `TEACHER`). GV không import đề | #120 |
 | `ExamRound` | `durationMinutes` mặc định 45, hợp lệ 5–180; `opensAt` < `closesAt`; trạng thái chuyển **lazy** (tính khi truy cập): `DRAFT` → `SCHEDULED` → `OPEN` → `CLOSED` | SRS, DC-07…DC-10 |
-| `TestSession` | `expiresAt = min(startedAt + durationMinutes, closesAt)`, tính **một lần** lúc bắt đầu phiên. Hết hạn: từ 8 câu trở lên thì `COMPLETED` + `TIMEOUT`, ít hơn thì `ABANDONED`. Mỗi sinh viên chỉ có một phiên đang chạy (mã lỗi `SESSION_IN_PROGRESS`). Sinh viên phải nằm trong danh sách của kỳ thi | DC-20, #122 |
+| `TestSession` | Thuộc sở hữu của `ExamRound` (Composition; DB dùng `Restrict`, không xóa kỳ đã có phiên). `expiresAt = min(startedAt + durationMinutes, closesAt)`, tính **một lần** lúc bắt đầu phiên. Hết hạn: từ 8 câu trở lên thì `COMPLETED` + `TIMEOUT`, ít hơn thì `ABANDONED`. Mỗi sinh viên chỉ có một phiên đang chạy (mã lỗi `SESSION_IN_PROGRESS`). Sinh viên phải nằm trong danh sách của kỳ thi | DC-20, #122 |
 | `CATEngine` | Không giữ trạng thái. Tham số **cấu hình, không hardcode**: θ₀ = −0,5; ngưỡng SE 0,35; tối đa 25 câu; tối thiểu 8 câu trước khi Early Stop có hiệu lực; lưới EAP 41 điểm trên [−4, +4] bước 0,2; prior N(0, 1). Thứ tự dừng: SE → đủ câu → Early Stop → hết hạn | CLAUDE.md, SRS 4.x |
 | `Item` | Chỉ `FINAL_APPROVED` được CAT chọn, **lọc ở tầng Repository**. `irtA` cố định 1,0 (Rasch). `irtB` nằm trong [−4, +4]. Mọi câu thuộc đúng một `ItemBatch` (`batchId` bắt buộc). Câu `FINAL_APPROVED` cấm sửa. Vòng đời một chiều, không quay lại | SRS 6.x, #64, DC-34 |
 | `ItemBatch` | Trạng thái đi một chiều `GENERATING`/`IMPORTING` → `CHECKING` → `READY_TO_ASSIGN` → `IN_REVIEW` → `READY_TO_FINALIZE` → `FINAL_CHECKED` → `DONE`; nhánh lỗi `FAILED`, `PARTIAL`. Lô seed của từng bộ nguồn là lô `IMPORTED`/`DONE` | KE_HOACH_SINH_VA_DUYET_DE_AI |
-| `ItemPackage` | Một gói cho mỗi GV A trong một lô (unique `batchId` + `reviewerId`). `OPEN` → `SENT` → `DONE`. Gói `SENT` không trả về A | DC-42 |
-| `ItemReviewEvent` | Chỉ ghi thêm, không sửa hay xóa. Hành động cấp lô hoặc gói (`CONFIRM_ALL`, `REASSIGN`, `EXTEND`, `FORCE_SEND`) có `itemId` rỗng | SRS 6.2b |
+| `FirstReviewDetail` / `SecondReviewDetail` | Mỗi vòng có hạn `dueAt` riêng. `originalSnapshot` ghi một lần, không sửa lại. GV B không trả câu về A. Giao việc theo từng câu (không còn gói) | Họp GVHD 03/11/2026 |
+| `ItemReviewEvent` | Chỉ ghi thêm, không sửa hay xóa. Hành động tác động nhiều câu (`CONFIRM_ALL`) có `itemId` rỗng; `ASSIGN`/`REASSIGN` ghi một dòng cho mỗi câu | SRS 6.2b |
 | `LanguageProfile` | Mỗi phiên hoàn thành tạo tối đa một hồ sơ (`testSessionId` duy nhất). Xuất cho EduZ ở dạng JSON Profile v1 qua `exportForEduZ()` | SRS Mục IX |
 
 ## 9. Đối chiếu với `schema.prisma`: cột có ở DB nhưng không vẽ
@@ -457,7 +466,10 @@ Lược đồ gọn là tập con của schema (quyết định #128, #130, #132
 | | `calibrated` | Đã hiệu chuẩn `irtB` bằng dữ liệu thật chưa |
 | | `contentHash` | Mã băm nội dung chuẩn hóa, dùng phát hiện trùng (kiểm C1) và tái dùng kết quả kiểm |
 | | `approvedById`, `approvedAt` | Admin bấm Import; người duyệt thật nằm ở `ItemReviewEvent` |
-| | `batchId`, `packageId` | Khóa ngoại tới lô (bắt buộc) và gói (rỗng tới khi A gửi gói) |
+| | `batchId` | Khóa ngoại tới lô (bắt buộc) |
+| | `reviewerId`, `confirmerId` | Cột khóa ngoại tới `users` (`Restrict`), có trên sơ đồ; `index (reviewerId, status)`, `(confirmerId, status)` cho hộp việc |
+| | `firstReview`, `secondReview` | Cột JSON của `FirstReviewDetail`/`SecondReviewDetail` (có trên sơ đồ qua kiểu thuộc tính) |
+| | `firstReminderSent`, `secondReminderSent` | Cờ kỹ thuật cho job nhắc hạn: đã gửi email nhắc GV A/B chưa. Cột riêng để job không ghi đè JSON kết quả duyệt |
 | | `createdAt`, `updatedAt` | Mốc kiểm toán |
 | `Explanation` (`explanations`) | `itemId` | Khóa ngoại (một-một với `Item`) |
 | `ItemEmbedding` (`item_embeddings`) | cả bảng | Vector `Float[]` của câu để lọc trùng; cosine tính trong ứng dụng, không dùng pgvector |
@@ -465,11 +477,8 @@ Lược đồ gọn là tập con của schema (quyết định #128, #130, #132
 | `ItemBatch` (`item_batches`) | `createdById` | Admin tạo lô |
 | | `skill`, `cefrTarget`, `topicTag`, `requestedCount` | Đích và số lượng yêu cầu; **chỉ lô AI sinh có**, lô import để trống |
 | | `createdAt`, `updatedAt` | Mốc kiểm toán |
-| `ItemBatchAssignment` (`item_batch_assignments`) | cả bảng | Cấu hình giao việc của lô: GV B xác nhận, số ngày duyệt/xác nhận, người giao |
-| `ItemReviewAssignment` (`item_review_assignments`) | cả bảng | Giao từng câu cho GV A: người nhận, hạn, đã nhắc chưa |
-| `ItemPackage` (`item_packages`) | `batchId` | Khóa ngoại tới lô |
 | | `reminderSent` | Đã gửi email nhắc chưa |
-| `ItemReviewEvent` (`item_review_events`) | `packageId` | Gói liên quan; khóa ngoại được bổ sung trong schema 27/10/2026 (cần migration) |
+| `ItemReviewEvent` (`item_review_events`) | — | Không còn cột `packageId` (đã bỏ cùng `ItemPackage`) |
 
 ## 10. Dữ liệu minh họa
 
@@ -503,7 +512,7 @@ Tên module theo `CLAUDE.md`; các tên đánh dấu *(chờ duyệt)* là đề
 | `LanguageProfile`, `SkillProfile`, `ErrorPattern`, `TestMetadata` | `language-profile`, `reporting` |
 | `Item`, `ItemCheckResult` | `item-bank` |
 | `Explanation` | `ai-explainer` |
-| `ItemBatch`, `ItemPackage`, `ItemReviewEvent` | `item-generation` *(chờ duyệt)* |
+| `ItemBatch`, `ItemReviewEvent` (và kiểu giá trị `FirstReviewDetail`, `SecondReviewDetail` của `Item`) | `item-generation` *(chờ duyệt)* |
 
 ## 12. Tệp liên quan và cách sinh lại
 
@@ -511,7 +520,7 @@ Tên module theo `CLAUDE.md`; các tên đánh dấu *(chờ duyệt)* là đề
 |---|---|
 | `TLCN.drawio.xml` | **Nguồn chính**, 3 trang. Sửa ở đây trước |
 | `TLCN-Trang-1.png`…`TLCN-Trang-3.png` | Ảnh xem trước dựng bằng script (đường thẳng, có chỗ cắt qua hộp); cần xuất lại từ draw.io |
-| `ClassDiagram.puml`, `ClassDiagram.mmd` | Sinh tự động từ `TLCN.drawio.xml` bằng `Tuan7/scripts/gen_uml.py`, gộp 3 trang thành một mô hình (36 khối: 21 lớp và 15 enum, 29 quan hệ). **Không sửa tay**. Chưa được dựng thử bằng PlantUML hoặc Mermaid |
+| `ClassDiagram.puml`, `ClassDiagram.mmd` | Sinh tự động từ `TLCN.drawio.xml` bằng `Tuan7/scripts/gen_uml.py`, gộp 3 trang thành một mô hình (36 khối: 22 lớp và 14 enum, 28 quan hệ). **Không sửa tay**. Chưa được dựng thử bằng PlantUML hoặc Mermaid |
 | `schema.prisma` | Bản tham chiếu của schema; bản thật ở `backend/backend/prisma` |
 
 Sinh lại: `python -I Tuan7/scripts/gen_uml.py docs-repo/design/class/TLCN.drawio.xml docs-repo/design/class/ClassDiagram.puml docs-repo/design/class/ClassDiagram.mmd`.

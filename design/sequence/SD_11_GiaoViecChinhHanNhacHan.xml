@@ -205,7 +205,7 @@
 										<UML:TaggedValue tag="$ea_xref_property" value="$XREFPROP=$XID={1C52AA30-3E8E-4805-9C26-528E76A7B2C6}$XID;$NAM=Stereotypes$NAM;$TYP=element property$TYP;$VIS=Public$VIS;$PAR=0$PAR;$DES=@STEREO;Name=entity;FQName=EAUML::entity;@ENDSTEREO;$DES;$CLT={01DC4876-CC1F-478A-992C-7E15FF714819}$CLT;$SUP=&lt;none&gt;$SUP;$ENDXREF;"/>
 									</UML:ModelElement.taggedValue>
 								</UML:ClassifierRole>
-								<UML:ClassifierRole name="ItemReviewAssignment" xmi.id="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968" visibility="public" base="EAID_11111111_5487_4080_A7F4_41526CB0AA00">
+								<UML:ClassifierRole name="Item (reviewer_id, confirmer_id, first_review, second_review)" xmi.id="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968" visibility="public" base="EAID_11111111_5487_4080_A7F4_41526CB0AA00">
 									<UML:ModelElement.stereotype>
 										<UML:Stereotype name="entity"/>
 									</UML:ModelElement.stereotype>
@@ -707,7 +707,7 @@
 												<UML:TaggedValue tag="mt" value="assign(batchId, reviewerIds, confirmerId, reviewDays, confirmDays) - POST /item-batches/:id/assign"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="save item_batch_assignments (reviewDays, confirmDays, confirmerId); updateStatus(IN_REVIEW)" xmi.id="EAID_50E2BCC6_7A23_4060_8202_6E3EC744845E" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_4F45258A_60B9_42FE_9CC3_E984A7D62E0D">
+										<UML:Message name="updateStatus(IN_REVIEW) [cho xac nhan: reviewDays/confirmDays chi la tham so tinh dueAt, khong con luu item_batch_assignments]" xmi.id="EAID_50E2BCC6_7A23_4060_8202_6E3EC744845E" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_4F45258A_60B9_42FE_9CC3_E984A7D62E0D">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -748,7 +748,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-600;PtEndX=0;PtEndY=-600;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="save item_batch_assignments (reviewDays, confirmDays, confirmerId); updateStatus(IN_REVIEW)"/>
+												<UML:TaggedValue tag="mt" value="updateStatus(IN_REVIEW) [cho xac nhan: reviewDays/confirmDays chi la tham so tinh dueAt, khong con luu item_batch_assignments]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_0C631ED3_F286_48E4_80E7_7B59F5EADE86" visibility="public" sender="EAID_4F45258A_60B9_42FE_9CC3_E984A7D62E0D" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
@@ -795,7 +795,7 @@
 												<UML:TaggedValue tag="mt" value="Xac nhan cap nhat()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="createAll(itemId, assigneeId, assigned_at, due_at = 23:59:59 gio VN cua ngay giao + reviewDays) trong 1 transaction" xmi.id="EAID_EDC8B894_56F9_41F2_B62F_00D85AC00D63" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968">
+										<UML:Message name="assignAll(itemId, reviewerId, confirmerId, first_review.dueAt = 23:59:59 gio VN cua ngay giao + reviewDays, second_review.dueAt) trong 1 transaction; ghi item_review_events ASSIGN moi cau [cho xac nhan: cach tinh second_review.dueAt]" xmi.id="EAID_EDC8B894_56F9_41F2_B62F_00D85AC00D63" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -812,7 +812,7 @@
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="13"/>
 												<UML:TaggedValue tag="ea_sourceName" value="ReviewDistributionService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_targetName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_sourceID" value="6"/>
@@ -836,7 +836,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-700;PtEndX=0;PtEndY=-700;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="createAll(itemId, assigneeId, assigned_at, due_at = 23:59:59 gio VN cua ngay giao + reviewDays) trong 1 transaction"/>
+												<UML:TaggedValue tag="mt" value="assignAll(itemId, reviewerId, confirmerId, first_review.dueAt = 23:59:59 gio VN cua ngay giao + reviewDays, second_review.dueAt) trong 1 transaction; ghi item_review_events ASSIGN moi cau [cho xac nhan: cach tinh second_review.dueAt]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan transaction thanh cong()" xmi.id="EAID_E47D5AF2_9536_4D21_BD8E_EB95BE20BA3A" visibility="public" sender="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
@@ -855,7 +855,7 @@
 												<UML:TaggedValue tag="privatedata3" value="Call"/>
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="14"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_sourceName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_targetName" value="ReviewDistributionService"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
@@ -1279,7 +1279,7 @@
 												<UML:TaggedValue tag="mt" value="updateDeadlines(batchId, reviewDays, confirmDays) - PATCH /item-batches/:id/deadlines"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Tinh lai due_at cho viec chua xu ly; ghi item_review_events EXTEND" xmi.id="EAID_141C993E_BD64_4C0E_95E3_EF5425A4A096" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968">
+										<UML:Message name="Tinh lai first_review.dueAt / second_review.dueAt cho cau chua xu ly [cho xac nhan: ghi nhat ky chinh han bang action nao, EXTEND da bo khoi ReviewAction]" xmi.id="EAID_141C993E_BD64_4C0E_95E3_EF5425A4A096" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1296,7 +1296,7 @@
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="24"/>
 												<UML:TaggedValue tag="ea_sourceName" value="ReviewDistributionService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_targetName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_sourceID" value="6"/>
@@ -1320,7 +1320,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1250;PtEndX=0;PtEndY=-1250;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="Tinh lai due_at cho viec chua xu ly; ghi item_review_events EXTEND"/>
+												<UML:TaggedValue tag="mt" value="Tinh lai first_review.dueAt / second_review.dueAt cho cau chua xu ly [cho xac nhan: ghi nhat ky chinh han bang action nao, EXTEND da bo khoi ReviewAction]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_0E04C067_DEF3_43F3_9289_1ECEE64CED0F" visibility="public" sender="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
@@ -1339,7 +1339,7 @@
 												<UML:TaggedValue tag="privatedata3" value="Call"/>
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="25"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_sourceName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_targetName" value="ReviewDistributionService"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
@@ -1675,7 +1675,7 @@
 												<UML:TaggedValue tag="mt" value="reassign(batchId, fromAssigneeId, toAssigneeId) - POST /item-batches/:id/reassign"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Chuyen cac cau chua xu ly sang GV moi; due_at tinh lai tu ngay giao lai; ghi REASSIGN" xmi.id="EAID_5848550F_7149_4DA8_AA96_B1F765A2B318" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968">
+										<UML:Message name="Doi reviewer_id sang GV moi cho cac cau chua xu ly; first_review.dueAt tinh lai tu ngay giao lai; ghi item_review_events REASSIGN moi cau" xmi.id="EAID_5848550F_7149_4DA8_AA96_B1F765A2B318" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1692,7 +1692,7 @@
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="33"/>
 												<UML:TaggedValue tag="ea_sourceName" value="ReviewDistributionService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_targetName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_sourceID" value="6"/>
@@ -1716,7 +1716,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1700;PtEndX=0;PtEndY=-1700;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="Chuyen cac cau chua xu ly sang GV moi; due_at tinh lai tu ngay giao lai; ghi REASSIGN"/>
+												<UML:TaggedValue tag="mt" value="Doi reviewer_id sang GV moi cho cac cau chua xu ly; first_review.dueAt tinh lai tu ngay giao lai; ghi item_review_events REASSIGN moi cau"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_69281F30_1A99_440D_8014_BB9FAA5FB82B" visibility="public" sender="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
@@ -1735,7 +1735,7 @@
 												<UML:TaggedValue tag="privatedata3" value="Call"/>
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="34"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_sourceName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_targetName" value="ReviewDistributionService"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
@@ -1868,7 +1868,7 @@
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="37"/>
 												<UML:TaggedValue tag="ea_sourceName" value="DeadlineReminderService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_targetName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_sourceID" value="7"/>
@@ -1911,7 +1911,7 @@
 												<UML:TaggedValue tag="privatedata3" value="Call"/>
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="38"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_sourceName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_targetName" value="DeadlineReminderService"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
@@ -2027,7 +2027,7 @@
 												<UML:TaggedValue tag="mt" value="Nhan email nhac han()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="markReminderSent(assigneeId, batchId)" xmi.id="EAID_B2C43A85_2E09_458E_99A1_C9249E0B47AC" visibility="public" sender="EAID_2D368B30_A54F_4521_A135_88CCF7573DA4" receiver="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968">
+										<UML:Message name="markReminderSent(itemIds): dat items.first_reminder_sent / second_reminder_sent = true (khong ghi vao JSON first_review / second_review)" xmi.id="EAID_B2C43A85_2E09_458E_99A1_C9249E0B47AC" visibility="public" sender="EAID_2D368B30_A54F_4521_A135_88CCF7573DA4" receiver="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2044,7 +2044,7 @@
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="41"/>
 												<UML:TaggedValue tag="ea_sourceName" value="DeadlineReminderService"/>
-												<UML:TaggedValue tag="ea_targetName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_targetName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_sourceID" value="7"/>
@@ -2068,7 +2068,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2100;PtEndX=0;PtEndY=-2100;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="markReminderSent(assigneeId, batchId)"/>
+												<UML:TaggedValue tag="mt" value="markReminderSent(itemIds): dat items.first_reminder_sent / second_reminder_sent = true (khong ghi vao JSON first_review / second_review)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_704F1627_40A4_452F_A8EB_FC08BD2067AD" visibility="public" sender="EAID_E9C6E870_770C_4291_9B3A_2185E93BD968" receiver="EAID_2D368B30_A54F_4521_A135_88CCF7573DA4">
@@ -2087,7 +2087,7 @@
 												<UML:TaggedValue tag="privatedata3" value="Call"/>
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="42"/>
-												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewAssignment"/>
+												<UML:TaggedValue tag="ea_sourceName" value="Item (reviewer_id, confirmer_id, first_review, second_review)"/>
 												<UML:TaggedValue tag="ea_targetName" value="DeadlineReminderService"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
