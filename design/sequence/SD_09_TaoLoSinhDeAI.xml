@@ -1572,7 +1572,7 @@
 												<UML:TaggedValue tag="mt" value="G6 neu con thieu so voi N: sinh them chi phan thieu (lap G2 va C1), toi da R vong; het R vong: PARTIAL, bao thieu x cau()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="G7 cat ve N cau; irt_b khoi tao = trung binh irt_b cua k mau, calibrated=false, source=AI_GENERATED()" xmi.id="EAID_6B3AE2E8_5BFB_4DB8_928B_8F6ACF402ED0" visibility="public" sender="EAID_D73825FB_43E0_494B_AD6E_CD876A95CDD5" receiver="EAID_D73825FB_43E0_494B_AD6E_CD876A95CDD5">
+										<UML:Message name="G7 cat ve N cau; irt_b khoi tao = trung binh irt_b cua k mau, calibrated=false (nguon cau hoi nam o ItemBatch.source=AI_GENERATED)()" xmi.id="EAID_6B3AE2E8_5BFB_4DB8_928B_8F6ACF402ED0" visibility="public" sender="EAID_D73825FB_43E0_494B_AD6E_CD876A95CDD5" receiver="EAID_D73825FB_43E0_494B_AD6E_CD876A95CDD5">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1613,7 +1613,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1550;PtEndX=0;PtEndY=-1550;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_7F702116_E493_4CAB_9068_EE13D47261C2"/>
-												<UML:TaggedValue tag="mt" value="G7 cat ve N cau; irt_b khoi tao = trung binh irt_b cua k mau, calibrated=false, source=AI_GENERATED()"/>
+												<UML:TaggedValue tag="mt" value="G7 cat ve N cau; irt_b khoi tao = trung binh irt_b cua k mau, calibrated=false (nguon cau hoi nam o ItemBatch.source=AI_GENERATED)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="save Explanation cho tung cau (sinh cung luc voi cau hoi, luu bang explanations)" xmi.id="EAID_7BBDEAD0_BA0F_4402_8CA1_3E40943EDECE" visibility="public" sender="EAID_D73825FB_43E0_494B_AD6E_CD876A95CDD5" receiver="EAID_45429ED7_027E_4541_8195_C43ADA59A9C4">

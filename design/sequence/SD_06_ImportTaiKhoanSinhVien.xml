@@ -986,7 +986,7 @@
 												<UML:TaggedValue tag="mt" value="Tra ve grid (het han: IMPORT_GRID_EXPIRED; rong: IMPORT_GRID_EMPTY)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Sinh mat khau tam 12 ky tu (crypto.randomInt), bam argon2, mustChangePassword=true()" xmi.id="EAID_8ACACE82_0896_4914_B64B_B53AEAE4FC82" visibility="public" sender="EAID_F681F75B_367F_4C44_8612_5D98037B956A" receiver="EAID_F681F75B_367F_4C44_8612_5D98037B956A">
+										<UML:Message name="Sinh mat khau tam 12 ky tu du chu thuong, chu hoa, so, ky tu dac biet (crypto.randomInt), bam argon2, mustChangePassword=true()" xmi.id="EAID_8ACACE82_0896_4914_B64B_B53AEAE4FC82" visibility="public" sender="EAID_F681F75B_367F_4C44_8612_5D98037B956A" receiver="EAID_F681F75B_367F_4C44_8612_5D98037B956A">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1027,7 +1027,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-950;PtEndX=0;PtEndY=-950;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_77FD8485_1DCD_41DF_93EC_7C42E6C177E3"/>
-												<UML:TaggedValue tag="mt" value="Sinh mat khau tam 12 ky tu (crypto.randomInt), bam argon2, mustChangePassword=true()"/>
+												<UML:TaggedValue tag="mt" value="Sinh mat khau tam 12 ky tu du chu thuong, chu hoa, so, ky tu dac biet (crypto.randomInt), bam argon2, mustChangePassword=true()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Tao tai khoan STUDENT hoac TEACHER theo kind (authProvider=LOCAL) trong 1 transaction" xmi.id="EAID_ABA3492F_A8C6_40EF_8C31_719BEB0E58A1" visibility="public" sender="EAID_F681F75B_367F_4C44_8612_5D98037B956A" receiver="EAID_707F46B1_2E26_4F13_9C57_D5ED017F0411">

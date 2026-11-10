@@ -326,7 +326,7 @@
 												<UML:TaggedValue tag="mt" value="request(email) - POST /auth/forgot-password"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Rate limit: forgot theo email 3/gio, reset theo IP 20/phut (RATE_LIMITED)()" xmi.id="EAID_CB7FDB87_B713_439C_B3FA_B9499A651428" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D">
+										<UML:Message name="Rate limit forgot-password theo email: 3 lan/gio (RATE_LIMITED)()" xmi.id="EAID_CB7FDB87_B713_439C_B3FA_B9499A651428" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -367,7 +367,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-200;PtEndX=0;PtEndY=-200;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_ED9A356C_20F3_42CE_B04D_2458A2E9C424"/>
-												<UML:TaggedValue tag="mt" value="Rate limit: forgot theo email 3/gio, reset theo IP 20/phut (RATE_LIMITED)()"/>
+												<UML:TaggedValue tag="mt" value="Rate limit forgot-password theo email: 3 lan/gio (RATE_LIMITED)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="findByEmail(email)" xmi.id="EAID_2F568649_02BF_4B36_98FD_3E2D28394E17" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_779E2D3A_5F76_4223_85B3_CB91894BA934">
@@ -766,7 +766,7 @@
 												<UML:TaggedValue tag="mt" value="Nhap email, ma OTP 6 so, mat khau moi va Click Dat lai()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="reset(email, otp, newPassword) - POST /auth/reset-password" xmi.id="EAID_5B451A67_DE15_463B_B67E_79F7529267B1" visibility="public" sender="EAID_9ADAF136_51AF_40E0_ABDB_6F2424062F98" receiver="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D">
+										<UML:Message name="reset(email, otp, newPassword) - POST /auth/reset-password [429 RATE_LIMITED: 20 lan/phut/IP]" xmi.id="EAID_5B451A67_DE15_463B_B67E_79F7529267B1" visibility="public" sender="EAID_9ADAF136_51AF_40E0_ABDB_6F2424062F98" receiver="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -807,7 +807,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-700;PtEndX=0;PtEndY=-700;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_ED9A356C_20F3_42CE_B04D_2458A2E9C424"/>
-												<UML:TaggedValue tag="mt" value="reset(email, otp, newPassword) - POST /auth/reset-password"/>
+												<UML:TaggedValue tag="mt" value="reset(email, otp, newPassword) - POST /auth/reset-password [429 RATE_LIMITED: 20 lan/phut/IP]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Lay ban bam OTP va so lan sai" xmi.id="EAID_B654A950_6B16_4556_8C16_D4FC722B99B8" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_96779777_35F4_4C84_9D37_60D750924883">

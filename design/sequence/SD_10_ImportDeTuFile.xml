@@ -1191,7 +1191,7 @@
 												<UML:TaggedValue tag="mt" value="Tra ve batchId()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="save cac dong (status=DRAFT, source=IMPORTED, content_hash) trong 1 transaction" xmi.id="EAID_F3F4429D_1451_4A17_A1FB_DEFDCB08DD07" visibility="public" sender="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9" receiver="EAID_7EF835D7_EF4C_482B_B1EA_5CBB1E28839E">
+										<UML:Message name="save cac dong (status=DRAFT, batchId, content_hash; nguon nam o ItemBatch.source=IMPORTED) trong 1 transaction" xmi.id="EAID_F3F4429D_1451_4A17_A1FB_DEFDCB08DD07" visibility="public" sender="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9" receiver="EAID_7EF835D7_EF4C_482B_B1EA_5CBB1E28839E">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1232,7 +1232,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1150;PtEndX=0;PtEndY=-1150;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_713C10B4_BE18_40CB_928E_44E40393A5B8"/>
-												<UML:TaggedValue tag="mt" value="save cac dong (status=DRAFT, source=IMPORTED, content_hash) trong 1 transaction"/>
+												<UML:TaggedValue tag="mt" value="save cac dong (status=DRAFT, batchId, content_hash; nguon nam o ItemBatch.source=IMPORTED) trong 1 transaction"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan transaction thanh cong()" xmi.id="EAID_33892E0C_9243_4405_9CFB_5A39A3A46163" visibility="public" sender="EAID_7EF835D7_EF4C_482B_B1EA_5CBB1E28839E" receiver="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9">

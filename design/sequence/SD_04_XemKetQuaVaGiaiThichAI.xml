@@ -532,7 +532,7 @@
 												<UML:TaggedValue tag="mt" value="explain(item)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="findByItemId(item.id) - kiem tra cache()" xmi.id="EAID_846C9A0E_45A9_4DD0_B3CF_ADAAE27463B7" visibility="public" sender="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86" receiver="EAID_F06E5CE4_2A1C_4159_B4AB_31FD550109EB">
+										<UML:Message name="findByItemId(item.id) - lay giai thich da luu cung luc sinh cau hoi (DC-31)()" xmi.id="EAID_846C9A0E_45A9_4DD0_B3CF_ADAAE27463B7" visibility="public" sender="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86" receiver="EAID_F06E5CE4_2A1C_4159_B4AB_31FD550109EB">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -573,10 +573,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-500;PtEndX=0;PtEndY=-500;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_F290A3C4_C0C1_4425_BCF9_EBE019F45CBF"/>
-												<UML:TaggedValue tag="mt" value="findByItemId(item.id) - kiem tra cache()"/>
+												<UML:TaggedValue tag="mt" value="findByItemId(item.id) - lay giai thich da luu cung luc sinh cau hoi (DC-31)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Tra ve null (chua co)" xmi.id="EAID_1616A8E7_8141_46CC_8D4A_42BF5C36473D" visibility="public" sender="EAID_F06E5CE4_2A1C_4159_B4AB_31FD550109EB" receiver="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86">
+										<UML:Message name="Tra ve giai thich da luu (dung chung cho moi sinh vien, 1 lan/Item)" xmi.id="EAID_1616A8E7_8141_46CC_8D4A_42BF5C36473D" visibility="public" sender="EAID_F06E5CE4_2A1C_4159_B4AB_31FD550109EB" receiver="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -617,183 +617,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-550;PtEndX=0;PtEndY=-550;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_F290A3C4_C0C1_4425_BCF9_EBE019F45CBF"/>
-												<UML:TaggedValue tag="mt" value="Tra ve null (chua co)"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Tra ve trang thai Dang tao giai thich()" xmi.id="EAID_F9416A20_1F74_446C_93EB_3155ED5094AF" visibility="public" sender="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86" receiver="EAID_2BA995EC_CC04_4B4F_A579_EE82862D47C3">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="11"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="11"/>
-												<UML:TaggedValue tag="ea_sourceName" value="AIExplainerService"/>
-												<UML:TaggedValue tag="ea_targetName" value="Trang Ket qua"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="6"/>
-												<UML:TaggedValue tag="ea_targetID" value="4"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-600;PtEndX=0;PtEndY=-600;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_F290A3C4_C0C1_4425_BCF9_EBE019F45CBF"/>
-												<UML:TaggedValue tag="mt" value="Tra ve trang thai Dang tao giai thich()"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Goi Gemini Flash sinh noi dung giai thich()" xmi.id="EAID_8F5686DE_B168_4E9A_B416_73B70F96F262" visibility="public" sender="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86" receiver="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="12"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="12"/>
-												<UML:TaggedValue tag="ea_sourceName" value="AIExplainerService"/>
-												<UML:TaggedValue tag="ea_targetName" value="AIExplainerService"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="6"/>
-												<UML:TaggedValue tag="ea_targetID" value="6"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-650;PtEndX=0;PtEndY=-650;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_F290A3C4_C0C1_4425_BCF9_EBE019F45CBF"/>
-												<UML:TaggedValue tag="mt" value="Goi Gemini Flash sinh noi dung giai thich()"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="save(content, itemId)" xmi.id="EAID_5F2D8175_3B82_464C_A735_3FDDADBF541B" visibility="public" sender="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86" receiver="EAID_F06E5CE4_2A1C_4159_B4AB_31FD550109EB">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="13"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="13"/>
-												<UML:TaggedValue tag="ea_sourceName" value="AIExplainerService"/>
-												<UML:TaggedValue tag="ea_targetName" value="Explanation"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="6"/>
-												<UML:TaggedValue tag="ea_targetID" value="7"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-700;PtEndX=0;PtEndY=-700;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_F290A3C4_C0C1_4425_BCF9_EBE019F45CBF"/>
-												<UML:TaggedValue tag="mt" value="save(content, itemId)"/>
-											</UML:ModelElement.taggedValue>
-										</UML:Message>
-										<UML:Message name="Xac nhan da luu (cache 1 lan/Item)" xmi.id="EAID_572AB7B7_38A0_4FA3_8840_A9222C391CB5" visibility="public" sender="EAID_F06E5CE4_2A1C_4159_B4AB_31FD550109EB" receiver="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86">
-											<UML:ModelElement.taggedValue>
-												<UML:TaggedValue tag="style" value="1"/>
-												<UML:TaggedValue tag="ea_type" value="Sequence"/>
-												<UML:TaggedValue tag="direction" value="Source -&gt; Destination"/>
-												<UML:TaggedValue tag="linemode" value="1"/>
-												<UML:TaggedValue tag="linecolor" value="-1"/>
-												<UML:TaggedValue tag="linewidth" value="0"/>
-												<UML:TaggedValue tag="seqno" value="14"/>
-												<UML:TaggedValue tag="headStyle" value="0"/>
-												<UML:TaggedValue tag="lineStyle" value="0"/>
-												<UML:TaggedValue tag="privatedata1" value="Synchronous"/>
-												<UML:TaggedValue tag="privatedata2" value="retval=void;"/>
-												<UML:TaggedValue tag="privatedata3" value="Call"/>
-												<UML:TaggedValue tag="privatedata4" value="1"/>
-												<UML:TaggedValue tag="ea_localid" value="14"/>
-												<UML:TaggedValue tag="ea_sourceName" value="Explanation"/>
-												<UML:TaggedValue tag="ea_targetName" value="AIExplainerService"/>
-												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
-												<UML:TaggedValue tag="ea_sourceID" value="7"/>
-												<UML:TaggedValue tag="ea_targetID" value="6"/>
-												<UML:TaggedValue tag="src_visibility" value="Public"/>
-												<UML:TaggedValue tag="src_isOrdered" value="false"/>
-												<UML:TaggedValue tag="src_targetScope" value="instance"/>
-												<UML:TaggedValue tag="src_changeable" value="none"/>
-												<UML:TaggedValue tag="src_isNavigable" value="false"/>
-												<UML:TaggedValue tag="src_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="src_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Non-Navigable;"/>
-												<UML:TaggedValue tag="dst_visibility" value="Public"/>
-												<UML:TaggedValue tag="dst_aggregation" value="0"/>
-												<UML:TaggedValue tag="dst_isOrdered" value="false"/>
-												<UML:TaggedValue tag="dst_targetScope" value="instance"/>
-												<UML:TaggedValue tag="dst_changeable" value="none"/>
-												<UML:TaggedValue tag="dst_isNavigable" value="true"/>
-												<UML:TaggedValue tag="dst_containment" value="Unspecified"/>
-												<UML:TaggedValue tag="dst_style" value="Union=0;Derived=0;AllowDuplicates=0;Owned=0;Navigable=Navigable;"/>
-												<UML:TaggedValue tag="privatedata5" value="SX=0;SY=-12;EX=0;EY=0;$LLB=;LLT=;LMT=;LMB=;LRT=;LRB=;IRHS=;ILHS=;"/>
-												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-750;PtEndX=0;PtEndY=-750;"/>
-												<UML:TaggedValue tag="virtualInheritance" value="0"/>
-												<UML:TaggedValue tag="diagram" value="EAID_F290A3C4_C0C1_4425_BCF9_EBE019F45CBF"/>
-												<UML:TaggedValue tag="mt" value="Xac nhan da luu (cache 1 lan/Item)"/>
+												<UML:TaggedValue tag="mt" value="Tra ve giai thich da luu (dung chung cho moi sinh vien, 1 lan/Item)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Tra ve noi dung giai thich()" xmi.id="EAID_FBDE4C43_5036_4836_8F01_92EE406967B0" visibility="public" sender="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86" receiver="EAID_2BA995EC_CC04_4B4F_A579_EE82862D47C3">
@@ -972,7 +796,7 @@
 												<UML:TaggedValue tag="mt" value="Tra ve giai thich da co san (khong goi lai Gemini)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Tra ve giai thich (tuc thi, tu cache)" xmi.id="EAID_4CA89A93_F34C_4DC4_8383_790A7A58FEDC" visibility="public" sender="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86" receiver="EAID_2BA995EC_CC04_4B4F_A579_EE82862D47C3">
+										<UML:Message name="Tra ve giai thich (tuc thi, dung chung 1 lan/Item)" xmi.id="EAID_4CA89A93_F34C_4DC4_8383_790A7A58FEDC" visibility="public" sender="EAID_AB281729_87C7_4C2C_8F58_6979F0A90D86" receiver="EAID_2BA995EC_CC04_4B4F_A579_EE82862D47C3">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1013,7 +837,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1000;PtEndX=0;PtEndY=-1000;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_F290A3C4_C0C1_4425_BCF9_EBE019F45CBF"/>
-												<UML:TaggedValue tag="mt" value="Tra ve giai thich (tuc thi, tu cache)"/>
+												<UML:TaggedValue tag="mt" value="Tra ve giai thich (tuc thi, dung chung 1 lan/Item)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 									</UML:Interaction.message>
@@ -1078,10 +902,6 @@
 				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_65A33A01_12E1_4FFB_BF44_B136817C8EBB" style=";Hidden=0;"/>
 				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_846C9A0E_45A9_4DD0_B3CF_ADAAE27463B7" style=";Hidden=0;"/>
 				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_1616A8E7_8141_46CC_8D4A_42BF5C36473D" style=";Hidden=0;"/>
-				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_F9416A20_1F74_446C_93EB_3155ED5094AF" style=";Hidden=0;"/>
-				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_8F5686DE_B168_4E9A_B416_73B70F96F262" style=";Hidden=0;"/>
-				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_5F2D8175_3B82_464C_A735_3FDDADBF541B" style=";Hidden=0;"/>
-				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_572AB7B7_38A0_4FA3_8840_A9222C391CB5" style=";Hidden=0;"/>
 				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_FBDE4C43_5036_4836_8F01_92EE406967B0" style=";Hidden=0;"/>
 				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_D254795F_22B8_4E78_851F_4C5A048D5E17" style=";Hidden=0;"/>
 				<UML:DiagramElement geometry="SX=0;SY=0;EX=0;EY=0;Path=;" subject="EAID_8C3BC2E3_B360_43AE_926B_76180C46D410" style=";Hidden=0;"/>
