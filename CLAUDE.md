@@ -86,7 +86,7 @@ Bộ tài liệu chuẩn nằm trong `` (bản mới nhất duy nhất). Chưa c
 | `requirements/20261016_MoHinhHoaYeuCau.docx` | Đặc tả 30 Use Case (mã kỳ thi UCADM15–17) |
 | `design/usecase/AdaptivePlacementTest.xml` | Use Case Diagram (XMI text, sửa bằng script được) |
 | `design/class/` | Class Diagram: `TLCN.drawio.xml` + `.png` (bản gọn), `ClassDiagram.puml/.mmd`, `Mo_ta_So_do_Lop_ClassDiagram.md`, `schema.prisma` (bản tham chiếu; bản thật ở `backend/backend/prisma`) |
-| `design/sequence/SD_01…SD_12.xml` | Sequence Diagram (SD_03, SD_04 còn cần cập nhật) |
+| `design/sequence/SD_01…SD_12.xml` | Sequence Diagram (XMI Enterprise Architect) kèm ảnh `.png` dựng bằng `design/sequence/_tools/render_sd.py` (ảnh dựng từ XML, không phải ảnh xuất từ EA); đã đồng bộ 11/11/2026, còn một số ghi chú `[cho xac nhan]` ở SD_03 và SD_11 |
 | `design/component-deployment/` | Component và Deployment Diagram + mô tả |
 | `design/structure/` | Cấu trúc dự án đích và cấu trúc thực tế backend/frontend |
 | `design/ui/` | Mô tả luồng theo role và màn hình chi tiết cho AI sinh UI; danh sách màn hình |
