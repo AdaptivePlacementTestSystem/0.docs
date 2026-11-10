@@ -326,7 +326,7 @@
 												<UML:TaggedValue tag="mt" value="request(email) - POST /auth/forgot-password"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Rate limit theo email + IP (RATE_LIMITED)()" xmi.id="EAID_CB7FDB87_B713_439C_B3FA_B9499A651428" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D">
+										<UML:Message name="Rate limit: forgot theo email 3/gio, reset theo IP 20/phut (RATE_LIMITED)()" xmi.id="EAID_CB7FDB87_B713_439C_B3FA_B9499A651428" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -367,7 +367,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-200;PtEndX=0;PtEndY=-200;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_ED9A356C_20F3_42CE_B04D_2458A2E9C424"/>
-												<UML:TaggedValue tag="mt" value="Rate limit theo email + IP (RATE_LIMITED)()"/>
+												<UML:TaggedValue tag="mt" value="Rate limit: forgot theo email 3/gio, reset theo IP 20/phut (RATE_LIMITED)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="findByEmail(email)" xmi.id="EAID_2F568649_02BF_4B36_98FD_3E2D28394E17" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_779E2D3A_5F76_4223_85B3_CB91894BA934">
@@ -546,7 +546,7 @@
 												<UML:TaggedValue tag="mt" value="Luu ban bam OTP, TTL 10 phut, bo dem so lan sai = 0"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="enqueue job gui email OTP" xmi.id="EAID_C536564F_5BAD_4D36_94AE_C83F5609543A" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_61139F20_30A6_4139_99AF_0B7EC9AF1635">
+										<UML:Message name="enqueue job gui email OTP (hien tai gui truc tiep trong request, no ky thuat BullMQ)" xmi.id="EAID_C536564F_5BAD_4D36_94AE_C83F5609543A" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_61139F20_30A6_4139_99AF_0B7EC9AF1635">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -587,10 +587,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-450;PtEndX=0;PtEndY=-450;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_ED9A356C_20F3_42CE_B04D_2458A2E9C424"/>
-												<UML:TaggedValue tag="mt" value="enqueue job gui email OTP"/>
+												<UML:TaggedValue tag="mt" value="enqueue job gui email OTP (hien tai gui truc tiep trong request, no ky thuat BullMQ)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Tra ve 202 (phan hoi luon giong nhau, ke ca khi email khong ton tai)()" xmi.id="EAID_8A7BA2BE_95D4_4391_926F_097A291926A1" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_8629AED1_E554_471A_8D7B_D4D85F7D6FDB">
+										<UML:Message name="Tra ve 202 (phan hoi luon giong nhau, ke ca khi email khong ton tai hoac Redis/SMTP loi)()" xmi.id="EAID_8A7BA2BE_95D4_4391_926F_097A291926A1" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_8629AED1_E554_471A_8D7B_D4D85F7D6FDB">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -631,7 +631,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-500;PtEndX=0;PtEndY=-500;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_ED9A356C_20F3_42CE_B04D_2458A2E9C424"/>
-												<UML:TaggedValue tag="mt" value="Tra ve 202 (phan hoi luon giong nhau, ke ca khi email khong ton tai)()"/>
+												<UML:TaggedValue tag="mt" value="Tra ve 202 (phan hoi luon giong nhau, ke ca khi email khong ton tai hoac Redis/SMTP loi)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Hien thi thong bao trung tinh va chuyen sang man hinh Dat lai mat khau()" xmi.id="EAID_1C4B0E10_E42D_45AF_9579_186DDF23CA79" visibility="public" sender="EAID_8629AED1_E554_471A_8D7B_D4D85F7D6FDB" receiver="EAID_3675D3E1_796A_4506_A5C2_401E2CE6E9CC">
@@ -898,7 +898,7 @@
 												<UML:TaggedValue tag="mt" value="Tra ve ban bam OTP (hoac het han / da huy)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="So khop OTP; sai thi tang bo dem, sai qua 5 lan thi huy ma (INVALID_RESET_OTP)()" xmi.id="EAID_E27CC121_3398_42EB_A54B_28EFAA2FA3F6" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D">
+										<UML:Message name="Tang bo dem (INCR) truoc roi so khop OTP; toi da 5 lan nhap, qua 5 lan huy ma (INVALID_RESET_OTP)()" xmi.id="EAID_E27CC121_3398_42EB_A54B_28EFAA2FA3F6" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -939,10 +939,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-850;PtEndX=0;PtEndY=-850;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_ED9A356C_20F3_42CE_B04D_2458A2E9C424"/>
-												<UML:TaggedValue tag="mt" value="So khop OTP; sai thi tang bo dem, sai qua 5 lan thi huy ma (INVALID_RESET_OTP)()"/>
+												<UML:TaggedValue tag="mt" value="Tang bo dem (INCR) truoc roi so khop OTP; toi da 5 lan nhap, qua 5 lan huy ma (INVALID_RESET_OTP)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="updatePassword(newPasswordHash): mustChangePassword=false, passwordChangedAt=now" xmi.id="EAID_B33F9C33_87C6_421A_AA8D_BAE49C1DD799" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_779E2D3A_5F76_4223_85B3_CB91894BA934">
+										<UML:Message name="Kiem tra isActive; updatePassword(newPasswordHash): mustChangePassword=false, passwordChangedAt=now (mat khau moi toi thieu 8 ky tu, du chu thuong, chu hoa, so, ky tu dac biet)" xmi.id="EAID_B33F9C33_87C6_421A_AA8D_BAE49C1DD799" visibility="public" sender="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D" receiver="EAID_779E2D3A_5F76_4223_85B3_CB91894BA934">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -983,7 +983,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-900;PtEndX=0;PtEndY=-900;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_ED9A356C_20F3_42CE_B04D_2458A2E9C424"/>
-												<UML:TaggedValue tag="mt" value="updatePassword(newPasswordHash): mustChangePassword=false, passwordChangedAt=now"/>
+												<UML:TaggedValue tag="mt" value="Kiem tra isActive; updatePassword(newPasswordHash): mustChangePassword=false, passwordChangedAt=now (mat khau moi toi thieu 8 ky tu, du chu thuong, chu hoa, so, ky tu dac biet)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan da cap nhat()" xmi.id="EAID_7334487D_B606_4F04_A071_7153D7D6DAF9" visibility="public" sender="EAID_779E2D3A_5F76_4223_85B3_CB91894BA934" receiver="EAID_D3C35EC8_360B_4C74_A8ED_509E304FBE7D">
