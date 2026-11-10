@@ -25,7 +25,7 @@ File này hướng dẫn Claude Code (và mọi AI Agent khác) khi làm việc 
 | Database | PostgreSQL | Source of Truth |
 | Cache / State | Redis | State machine chống race-condition khi làm bài thi + L1 cache; lưới tạm import (TTL ~30 phút); OTP; ghi async qua BullMQ |
 | Email | `MailPort` + SMTP (nodemailer), đẩy qua hàng đợi BullMQ có retry | Mật khẩu tạm, OTP quên mật khẩu, email nhắc việc duyệt/xác nhận. Tiểu luận **không** làm chuông thông báo thời gian thực (chỉ email + Hộp việc). Nhà cung cấp SMTP chưa chọn (Q-5) |
-| Mật khẩu / đăng nhập | argon2; mật khẩu tạm 12 ký tự; bắt buộc đổi lần đầu; đăng nhập chỉ email + mật khẩu (SSO thuộc Khóa luận) | Độ dài tối thiểu 8 (đề xuất, chờ chốt Q-4) |
+| Mật khẩu / đăng nhập | argon2; mật khẩu tạm 12 ký tự; bắt buộc đổi lần đầu; đăng nhập chỉ email + mật khẩu (SSO thuộc Khóa luận) | Mật khẩu mới tối thiểu 8 ký tự, bắt buộc chữ thường, chữ hoa, chữ số, ký tự đặc biệt (đã chốt 09/11/2026, Q-4) |
 | AI | Gemini Flash (qua LLM Gateway có dự phòng) | Sinh câu hỏi + giải thích (cùng lời gọi), kiểm đáp án độc lập, embedding cho lọc trùng (mô hình chưa chốt, Q-9); xem `plans/KE_HOACH_SINH_VA_DUYET_DE_AI.md` |
 | Calibration (offline, KHÔNG chạy trong request path) | py-irt hoặc catR API | Docker sidecar riêng |
 | Gateway | Nginx | |

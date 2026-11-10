@@ -813,7 +813,7 @@ STUDENT chỉ truy cập dữ liệu của chính mình, thi, đổi/quên mật
 
 **L1b — Admin tạo từng tài khoản (gộp vào UCADM09, đề xuất):** Admin mở form tạo tài khoản, chọn SV hoặc GV, nhập SV: MSSV, họ tên, email; GV: Mã GV (teacherCode), họ tên, email ⇒ POST /students hoặc POST /teachers ⇒ BE kiểm trùng email/MSSV/teacherCode (trùng ⇒ 409, báo lỗi) ⇒ tạo tài khoản role STUDENT/TEACHER, sinh mật khẩu tạm 12 ký tự, băm argon2, mustChangePassword = true ⇒ đẩy job email vào BullMQ sau khi lưu ⇒ trả tài khoản vừa tạo (không kèm mật khẩu).
 
-**L2 — Đăng nhập lần đầu:** SV nhập email + mật khẩu tạm ⇒ POST /auth/login trả token kèm mustChangePassword = true ⇒ FE chuyển đến màn đổi mật khẩu ⇒ guard chặn mọi route khác (403 PASSWORD_CHANGE_REQUIRED) ⇒ POST /auth/change-password ⇒ cờ về false.
+**L2 — Đăng nhập lần đầu:** SV nhập email + mật khẩu tạm ⇒ POST /auth/login trả token kèm mustChangePassword = true ⇒ FE chuyển đến màn đổi mật khẩu ⇒ guard chặn mọi route khác (403 PASSWORD_CHANGE_REQUIRED) ⇒ POST /auth/change-password ⇒ cờ về false. Đăng nhập sai mật khẩu luôn trả 401 (INVALID_CREDENTIALS), kể cả khi email không tồn tại; chỉ khi mật khẩu đúng mà tài khoản bị khóa mới trả 403 (ACCOUNT_LOCKED), để người nhập bừa không dò được tài khoản nào đang bị khóa.
 
 **L3 — Admin tạo kỳ và danh sách thi (UCADM15, UCADM16):** Admin tạo kỳ (DRAFT) ⇒ import danh sách thi bằng cùng cơ chế lưới tạm (MSSV lạ hoặc đã có trong kỳ bị loại kèm popup; bấm Lưu mới ghi) ⇒ Công bố (SCHEDULED) ⇒ tới opensAt trạng thái hiệu lực là OPEN (lazy) ⇒ tới closesAt là CLOSED.
 
@@ -863,7 +863,7 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 | BR-03 | Dòng import tài khoản hợp lệ khi MSSV (file SV) hoặc Mã GV (file GV), Họ tên, Email không rỗng; email đúng định dạng; không trùng trong lưới hiện có; không trùng trong cơ sở dữ liệu. Dòng không hợp lệ bị loại khỏi lưới và báo qua popup. |
 | BR-04 | Lưu theo lưới: nút Lưu ghi mọi dòng đang có trong lưới trong một transaction; dòng lỗi/đã tồn tại không vào lưới nên không chặn Lưu; Lưu khi lưới rỗng bị từ chối. |
 | BR-05 | Tài khoản mới: role = STUDENT (file/form SV) hoặc TEACHER (file/form GV), authProvider = LOCAL, mustChangePassword = true. Email chỉ gửi sau khi bấm Lưu (import) hoặc sau khi tạo thành công (tạo từng người); gửi thất bại sau retry ⇒ ghi trạng thái "chưa gửi" để Admin xem được, không rollback tài khoản. |
-| BR-06 | Đổi mật khẩu: mật khẩu mới khác mật khẩu hiện tại; độ dài tối thiểu 8 ký tự (đề xuất — chờ chốt Q-4); sau thành công mustChangePassword = false và cấp lại token. |
+| BR-06 | Đổi mật khẩu: mật khẩu mới khác mật khẩu hiện tại; mật khẩu mới tối thiểu 8 ký tự, gồm chữ thường, chữ hoa, chữ số và ký tự đặc biệt (chốt 09/11/2026, Quyết định #134 D4; áp dụng cả khi đặt lại mật khẩu); sau thành công mustChangePassword = false và cấp lại token. |
 | BR-07 | Chỉ Admin tạo/sửa/công bố/đóng kỳ và import danh sách thi; GV thường chỉ xem kết quả (và xử lý các câu hỏi được giao, BR-21 đến BR-30). |
 | BR-08 | opensAt < closesAt; kỳ DRAFT sửa tự do; sau SCHEDULED chỉ cho sửa tên và kéo dài closesAt (đề xuất — chờ chốt); không sửa kỳ CLOSED. |
 | BR-09 | Danh sách thi của một kỳ chỉ gồm tài khoản role = STUDENT đã tồn tại. |
@@ -871,7 +871,7 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 | BR-11 | expires_at tính một lần lúc bắt đầu phiên theo DC-20. Quá expires_at ⇒ luật K5/#77 (≥ 8 câu ⇒ COMPLETED + TIMEOUT; ít hơn ⇒ ABANDONED). |
 | BR-12 | Admin đóng thủ công kỳ khi còn phiên đang chạy: phiên đang chạy vẫn theo expires_at, chỉ chặn phiên mới (đề xuất — chờ chốt Q-2). |
 | BR-13 | Báo cáo lớp (UCGV07/08, UCADM05) lọc được theo kỳ; mặc định hiển thị toàn hệ thống. |
-| BR-14 | Quên mật khẩu: phản hồi luôn như nhau dù email có tồn tại hay không; rate limit theo email + IP; OTP dùng một lần, hiệu lực 10 phút, tối đa 5 lần nhập sai (DC-21). |
+| BR-14 | Quên mật khẩu: phản hồi luôn như nhau dù email có tồn tại hay không; rate limit (quên mật khẩu theo email, đặt lại mật khẩu theo IP); vẫn phản hồi 202 khi Redis hoặc SMTP lỗi; OTP dùng một lần, hiệu lực 10 phút, tối đa 5 lần nhập sai (DC-21). |
 | BR-15 | Mọi import ghi nhật ký kiểm toán tối thiểu: ai, khi nào, số dòng, kết quả (không ghi mật khẩu). |
 | BR-16 | Phân quyền theo role và theo phân công: TEACHER xem báo cáo lớp và hồ sơ SV, và chỉ xử lý câu được giao cho mình (vai A hoặc B); ADMIN làm mọi chức năng quản trị (không sửa nội dung câu) và chức năng xem của Teacher; STUDENT chỉ dữ liệu của mình. Không đủ quyền ⇒ 403 (NOT_ASSIGNED với việc không được giao). |
 | BR-17 | Admin quản lý tài khoản giảng viên: tạo, sửa, khóa/mở khóa; nâng TEACHER → ADMIN và thu hồi ADMIN → TEACHER. Admin không tự thu hồi quyền của chính mình. |
@@ -902,7 +902,7 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 | IMPORT_GRID_EMPTY | 422 | Bấm Lưu khi lưới rỗng |
 | IMPORT_FILE_INVALID | 400 / 413 | File sai định dạng, quá dung lượng hoặc quá số dòng |
 | INVALID_RESET_OTP | 400 | OTP sai, hết hạn hoặc đã bị hủy sau 5 lần sai |
-| RATE_LIMITED | 429 | Vượt giới hạn tần suất (quên mật khẩu, v.v.) |
+| RATE_LIMITED | 429 | Vượt giới hạn tần suất (đăng nhập, quên mật khẩu, đặt lại mật khẩu) |
 
 Định dạng lỗi hiện tại ({statusCode, message, error, timestamp, path}) chưa có mã ổn định; trường code là việc của backend, SRS chỉ dùng các mã trên. Mã lỗi nghiệp vụ của phần câu hỏi (vòng 3): xem Mục 9b.18.
 
@@ -910,7 +910,7 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 
 - Q-2: Admin đóng thủ công kỳ khi còn phiên đang chạy — cắt ngay hay để chạy tới expires_at (đề xuất: để chạy; BR-12).
 
-- Q-4: độ dài mật khẩu tối thiểu và chính sách mật khẩu (đề xuất 8 ký tự; BR-06; Mục 15.3).
+- Q-4 (đã chốt 09/11/2026, Quyết định #134 D4): mật khẩu tối thiểu 8 ký tự, bắt buộc chữ thường, chữ hoa, chữ số và ký tự đặc biệt (BR-06; Mục 15.3).
 
 - Q-5: nhà cung cấp SMTP cụ thể (hạn mức gửi email chưa kiểm chứng).
 
@@ -1118,7 +1118,7 @@ AUTH
   POST   /api/v1/auth/refresh
   POST   /api/v1/auth/logout
   POST   /api/v1/auth/change-password        # {currentPassword,newPassword}; cho phép khi mustChangePassword
-  POST   /api/v1/auth/forgot-password        # {email} -> luôn 202; rate limit
+  POST   /api/v1/auth/forgot-password        # {email} -> luôn 202; rate limit theo email
   POST   /api/v1/auth/reset-password         # {email,otp,newPassword}
 
 TEST SESSION
@@ -1284,7 +1284,7 @@ Ghi chú v3.0: GET /sessions/active trả thêm expiresAt và thông tin kỳ. C
 | R11 | SRS spec vượt trước implementation | 🔴 Cao | Phân tầng rõ ràng Must-Have TL vs Spec KL (xem Bảng cuối Mục XIV). Kiểm chứng code tương ứng mỗi mục trước khi bảo vệ. |
 | R12 | Chất lượng câu hỏi khi Admin không sửa nội dung và việc duyệt phụ thuộc hai GV (thay R12 cũ "Admin tự duyệt", DC-18; nay theo DC-29, DC-40) | 🟡 TB | Duyệt hai vòng độc lập (A sửa/duyệt, B xác nhận, B không thuộc nhóm A); AI check C1/C2/C3; approved_by/approved_at ghi Admin bấm Import, item_review_events truy vết; GV Ngoại ngữ review mẫu trước khi import (Mục 6.1) |
 | R13 | Hệ thống đơn trường: muốn phục vụ nhiều trường phải làm lại schema (DC-19) | 🟡 TB | Đa trường là phạm vi Khóa luận; TL không giữ cột khóa tenant; ghi rõ trong Mục XVI để hội đồng không hiểu nhầm là thiếu sót |
-| R14 | OTP 6 số quên mật khẩu dễ bị dò (brute force) (DC-21) | 🟡 TB | OTP lưu bản băm trong Redis, TTL 10 phút, dùng 1 lần, tối đa 5 lần nhập sai rồi hủy; rate limit theo email + IP (RATE_LIMITED); forgot-password luôn trả 202 |
+| R14 | OTP 6 số quên mật khẩu dễ bị dò (brute force) (DC-21) | 🟡 TB | OTP lưu bản băm trong Redis, TTL 10 phút, dùng 1 lần, tối đa 5 lần nhập sai rồi hủy; rate limit (quên mật khẩu theo email, đặt lại mật khẩu theo IP; RATE_LIMITED); forgot-password luôn trả 202 |
 | R15 | Phạm vi tăng: ai-question-generator (F-11) kéo từ Khóa luận vào Tiểu luận — thêm lô, giao việc, ba điểm AI check, lọc trùng T1–T3, embedding, G5 (DC-27, DC-35) | 🔴 Cao | Cập nhật COMMITMENT_BASELINE.md trước khi ký (gate G1, hết Tuần 6); thử một lô nhỏ trước khi code đầy đủ; nếu trễ thì hỏi nhóm quyết định cắt phần nào, không tự cắt; xem Q-11 |
 | R16 | Chi phí và hạn mức API (sinh dư, embedding T3, G5, giải thích) chưa đo; mô hình embedding và hạn mức Gemini chưa kiểm chứng (Q-9) | 🟡 TB | Trần lời gọi/token mỗi lô (BATCH_BUDGET_EXCEEDED); cache theo hash prompt; tầng rẻ chạy trước; gộp nhiều câu mỗi lời gọi; LLM Gateway dự phòng; đo chi phí và độ trễ thật ở lần thử đầu, không ghi số khi chưa đo |
 | R17 | Admin và GV vai B là điểm tập trung: mọi lô qua Admin (giao việc, kiểm tra, import) và các GV B được giao câu; B vắng hoặc trễ làm chậm các câu được giao cho B | 🟡 TB | Hạn + nhắc trước 24 giờ; Admin chỉnh hạn, giao lại; item_review_events truy vết; Admin không sửa nội dung nên không phá tính độc lập |
@@ -1346,9 +1346,9 @@ Ghi chú v3.0: GET /sessions/active trả thêm expiresAt và thông tin kỳ. C
 | **Yêu cầu** | **Triển khai** |
 | --- | --- |
 | Auth | JWT Bearer token, refresh token rotation; đăng nhập chỉ bằng email + mật khẩu |
-| Băm mật khẩu | argon2 (Quyết định #62); mật khẩu tạm 12 ký tự từ crypto.randomInt, bắt buộc đổi lần đầu (mustChangePassword); không ghi mật khẩu vào log/tài liệu; độ dài tối thiểu khi đổi: 8 ký tự (đề xuất — chờ chốt Q-4) |
-| Quên mật khẩu | OTP 6 số, lưu bản băm trong Redis TTL 10 phút, dùng 1 lần, tối đa 5 lần sai; phản hồi forgot-password luôn 202 (không lộ email tồn tại) |
-| Rate limit | Giới hạn tần suất theo email + IP cho forgot/reset password (mã RATE_LIMITED, 429); ngưỡng cụ thể chưa đo, chốt khi triển khai |
+| Băm mật khẩu | argon2 (Quyết định #62); mật khẩu tạm 12 ký tự từ crypto.randomInt, bắt buộc đổi lần đầu (mustChangePassword); không ghi mật khẩu vào log/tài liệu; mật khẩu mới tối thiểu 8 ký tự, gồm chữ thường, chữ hoa, chữ số và ký tự đặc biệt (chốt 09/11/2026); mật khẩu tạm 12 ký tự phải sinh đủ 4 nhóm ký tự này |
+| Quên mật khẩu | OTP 6 số, lưu bản băm trong Redis TTL 10 phút, dùng 1 lần, tối đa 5 lần nhập (bộ đếm tăng nguyên tử trước khi so khớp); phản hồi forgot-password luôn 202 (không lộ email tồn tại, kể cả khi Redis/SMTP lỗi); reset-password từ chối tài khoản bị khóa |
+| Rate limit | Đăng nhập: 5 lần/phút theo (IP + email) và 100 lần đăng nhập sai/10 phút theo IP (chỉ đếm lần thất bại, để không chặn nhầm phòng thi tập trung dùng chung IP); quên mật khẩu: 3 lần/giờ theo email; đặt lại mật khẩu: 20 lần/phút theo IP (mã RATE_LIMITED, 429); ngưỡng cấu hình qua env, chưa đo trên tải thật; backend cấu hình trust proxy theo số tầng reverse proxy (Quyết định #134, #135) |
 | Upload import | Import tài khoản, danh sách thi và đề: chỉ .xlsx, tối đa 2 MB và 1000 dòng; chỉ đọc giá trị, bỏ công thức; xuất CSV vô hiệu hóa ô bắt đầu bằng = + - @ (chống CSV injection) |
 | Gọi LLM và khóa API | Khóa API chỉ ở backend; mọi lời gọi đi qua LLM Gateway; trần lời gọi/token mỗi lô; ghi tên và phiên bản mô hình thật (TC2.3); câu chưa FINAL_APPROVED và đáp án đúng không trả về SV; mã lý do AI_REJECTED chỉ Admin xem (đề xuất) |
 | HTTPS | TLS 1.2+ qua Nginx |

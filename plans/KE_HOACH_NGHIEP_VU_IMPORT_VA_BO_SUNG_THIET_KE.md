@@ -576,7 +576,7 @@ W2.1 ∥ W2.2 ─► W2.3 ∥ W2.4 ─► W2.5 ─► W2.6                      
 | **Q-1** | ✅ **ĐÃ CHỐT (DC-22, #98):** lưới tạm, dòng lỗi loại khỏi grid, bấm Lưu mới ghi DB; áp dụng cả hai loại import | — | — |
 | **Q-2** | GV **đóng thủ công** kỳ giữa lúc có phiên đang chạy: cắt ngay hay để chạy tới `expires_at`? (đề xuất: để chạy) | — | Hỏi ở W0.1 |
 | **Q-3** | Định dạng sơ đồ mới: draw.io (đề xuất) hay EA XMI (cần file mẫu)? | — | Hỏi ở W0.1 |
-| **Q-4** | Ngưỡng độ dài mật khẩu và chính sách mật khẩu (đề xuất ≥8 ký tự; SRS chưa quy định) | — | Chốt ở W1.4 qua `AskUserQuestion` nếu SRS 15.3 không có |
+| **Q-4** | Ngưỡng độ dài mật khẩu và chính sách mật khẩu (đề xuất ≥8 ký tự; SRS chưa quy định) | — | Chốt ở W1.4 qua `AskUserQuestion` nếu SRS 15.3 không có. **Đã chốt 09/11/2026 (Quyết định #134 D4):** ≥8 ký tự, bắt buộc chữ thường, chữ hoa, chữ số, ký tự đặc biệt |
 | **Q-6** | GV-QTV (`role=ADMIN`) có giữ `teacher_profiles` (`teacherCode`) khi được nâng quyền không? Đề xuất: **giữ** dòng cũ, `Admin` không bắt buộc có hồ sơ (không thêm cột/dòng) | — | Hỏi ở W0.1 | ⛔ **ĐÓNG theo DC-19.**
 | **Q-7** | Chặn thu hồi GV-QTV cuối cùng của một trường? (đề xuất cũ: không chặn) | — | Hỏi ở W0.1 | ⛔ **ĐÓNG theo DC-19** (BR-18 mới: chặn thu hồi Admin cuối).
 | **Q-8** | ✅ **ĐÃ CHỐT (DC-23, #98):** `users.is_active BOOLEAN NOT NULL DEFAULT true` | — | — |

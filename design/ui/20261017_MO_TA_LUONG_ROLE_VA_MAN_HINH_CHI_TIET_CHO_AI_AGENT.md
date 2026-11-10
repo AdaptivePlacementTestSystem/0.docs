@@ -403,7 +403,7 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 | BR-03 | Dòng import hợp lệ khi đủ cột bắt buộc, email đúng, không trùng lưới/CSDL | S19, S23, S27 | Dòng sai bị loại khỏi lưới + popup "Dòng {n} — {lý do}" |
 | BR-04 | Lưu = một transaction mọi dòng trong lưới; lưới rỗng bị từ chối | S19, S23, S27 | Nút Lưu bật khi lưới không rỗng; `IMPORT_GRID_EMPTY` |
 | BR-05 | Tài khoản mới có role, `mustChangePassword = true`; email gửi sau khi Lưu/tạo; gửi lỗi không rollback | S19, S24 | Sau Lưu: "Đã tạo {n} tài khoản, {m} email đã xếp hàng gửi"; không hiện mật khẩu; `🔶 BR-05` nơi hiển thị lỗi gửi (Mục 9) |
-| BR-06 | Đổi mật khẩu: khác mật khẩu cũ, ≥ 8 ký tự (Q-4) | S16, S18 | Kiểm tra form; sau thành công cấp lại token |
+| BR-06 | Đổi mật khẩu: khác mật khẩu cũ, ≥ 8 ký tự gồm chữ thường, chữ hoa, chữ số, ký tự đặc biệt (Q-4 đã chốt 09/11/2026) | S16, S18 | Kiểm tra form; sau thành công cấp lại token |
 | BR-07 | Chỉ Admin tạo/sửa/công bố/đóng kỳ và import danh sách thi | S20–S23 | Menu và route chỉ có ở Admin; GV/SV vào → 403 |
 | BR-08 | `opensAt < closesAt`; DRAFT sửa tự do; SCHEDULED chỉ sửa tên và kéo dài giờ đóng; CLOSED không sửa `🔶` | S21 | Ô bị khóa theo trạng thái; CLOSED chỉ xem |
 | BR-09 | Danh sách thi chỉ gồm tài khoản STUDENT đã tồn tại | S23 | MSSV không tồn tại → bị loại + popup |
@@ -515,7 +515,7 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 │ để tiếp tục.                          │
 │ Mật khẩu hiện tại *   [__________][Hiện]│
 │ Mật khẩu mới *        [__________][Hiện]│
-│   gợi ý: khác mật khẩu cũ; tối thiểu 8 │
+│   gợi ý: ≥8, thường+hoa+số+đặc biệt   │
 │ Nhập lại mật khẩu mới *[_________][Hiện]│
 │ [        Đổi mật khẩu        ]         │
 └──────────────────────────────────────┘
@@ -529,7 +529,7 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 | 4 | Nhập lại mật khẩu mới | `cp-confirm` | Phải trùng ô 3: "Mật khẩu nhập lại không khớp." |
 | 5 | Nút chính "Đổi mật khẩu" | `cp-submit` | Vô hiệu khi còn ô trống / không khớp |
 | 6 | Nút chữ "Hủy" (chỉ khi đổi tự nguyện, không bị buộc) `⚠️ ĐX` | `cp-cancel` | Quay lại trang trước |
-**(d)** Bấm → `POST /auth/change-password`: OK → toast "Đã đổi mật khẩu." → trang chủ theo role (token được cấp lại, `mustChangePassword=false`). Lỗi: "Mật khẩu hiện tại không đúng." · "Mật khẩu mới phải khác mật khẩu hiện tại." · "Mật khẩu mới chưa đạt yêu cầu (tối thiểu 8 ký tự)."
+**(d)** Bấm → `POST /auth/change-password`: OK → toast "Đã đổi mật khẩu." → trang chủ theo role (token được cấp lại, `mustChangePassword=false`). Lỗi: "Mật khẩu hiện tại không đúng." · "Mật khẩu mới phải khác mật khẩu hiện tại." · "Mật khẩu mới phải có ít nhất 8 ký tự, gồm chữ thường, chữ hoa, chữ số và ký tự đặc biệt."
 **(e)** Mọi route khác trả `403 PASSWORD_CHANGE_REQUIRED` → FE chuyển về đây.
 **(g)** AC: không thể rời màn khi bị buộc (trừ Đăng xuất); sau đổi thành công không còn bị chặn.
 
@@ -545,7 +545,7 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 | 3 | Nút chính "Gửi mã xác nhận" | `fp-submit` | Vô hiệu khi trống/sai định dạng; sau khi gửi khóa 30 giây `[D]` |
 | 4 | Nút chữ "Quay lại đăng nhập" | `fp-back` | → `/login` |
 | 5 | Khối kết quả (sau khi gửi) | `fp-sent` | Thông điệp **trung tính y hệt** dù email có tồn tại: "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi mã xác nhận 6 chữ số (hiệu lực 10 phút)." + nút "Nhập mã xác nhận" → `/reset-password` (mang `?email=`) |
-**(d/e)** 429 `RATE_LIMITED` → "Bạn thao tác quá nhanh, vui lòng thử lại sau." (giới hạn theo email + IP). Không bao giờ tiết lộ email có tồn tại hay không (BR-14).
+**(d/e)** 429 `RATE_LIMITED` → "Bạn thao tác quá nhanh, vui lòng thử lại sau." (giới hạn: đăng nhập theo IP + email và theo IP khi sai nhiều lần; quên mật khẩu theo email; đặt lại mật khẩu theo IP). Không bao giờ tiết lộ email có tồn tại hay không (BR-14).
 **(g)** AC: thông điệp giống nhau với email tồn tại/không tồn tại.
 
 ---
