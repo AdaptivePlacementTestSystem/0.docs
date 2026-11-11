@@ -661,7 +661,7 @@ Câu 8  (tối đa 25)                                   ⏱ 18:42
 |---|---|---|---|
 | 1 | **Tóm tắt** | `cefr-badge` | Huy hiệu CEFR rất lớn (nền theo thang CEFR) + "Độ tin cậy: Cao/Vừa/Thấp" + một câu lý do dừng (nhãn `stoppingReason`, Mục 2.2) |
 | 2 | **Năng lực** | `theta-value`, `se-value`, `ci-value` | Dải ngang chia 6 đoạn Pre-A1…C1+ theo màu CEFR, một chấm đánh dấu vị trí; 3 số nhỏ: θ = -0,28 · SE = 0,31 · KTC 95% = [-0,89 ; 0,33]; biểu tượng (i): "θ là thước đo năng lực; càng cao càng giỏi." |
-| 3 | **Theo kỹ năng** | `skill-vocab`, `skill-grammar` | **2 thanh ngang** (không radar): "Từ vựng 68% (ước lượng B1, 9/14 đúng)", "Ngữ pháp 52% (ước lượng A2, 6/11 đúng)". Thiếu dữ liệu → "Đang cập nhật" (không bịa số) |
+| 3 | **Theo kỹ năng** | `skill-vocab`, `skill-grammar` | **2 thanh ngang** (không radar): "Từ vựng 68% (9/14 đúng)", "Ngữ pháp 52% (6/11 đúng)". Thiếu dữ liệu → "Đang cập nhật" (không bịa số) |
 | 4 | **Chủ đề cần cải thiện** | `error-patterns` | Bảng gọn: chủ đề, kỹ năng, đúng/đã làm, tỉ lệ, mức nghiêm trọng (Nhẹ/Trung bình/Nghiêm trọng, huy hiệu chữ); sắp nghiêm trọng nhất trước |
 | 5 | **Gợi ý học tập (AI)** | `recommendations` | 2–3 gạch đầu dòng, ví dụ "Ưu tiên luyện Past Simple và Past Continuous trước."; rỗng → ẩn khối |
 | 6 | **Thông tin bài thi** | `exam-info` | Số câu, thời gian làm |
