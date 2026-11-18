@@ -6,7 +6,7 @@
 | requirements | `SRS_TLCN_v3.0.md` / `.docx`; `20261016_MoHinhHoaYeuCau.docx` | SRS bản chuẩn; đặc tả 30 Use Case |
 | design/usecase | `AdaptivePlacementTest.xml` | Use Case Diagram (XMI) |
 | design/class | `TLCN.drawio.xml` + `.png`, `ClassDiagram.puml/.mmd`, `Mo_ta_So_do_Lop_ClassDiagram.md`, `schema.prisma` | Class Diagram và mô tả; schema tham chiếu |
-| design/sequence | `SD_01`…`SD_12.xml` | Sequence Diagram |
+| design/sequence | `SD_01`…`SD_15.xml` | Sequence Diagram (SD_13 đến SD_15 thêm 14/11/2026) |
 | design/component-deployment | draw.io, 2 ảnh, mô tả | Component và Deployment Diagram |
 | design/structure | `KE_HOACH_CAU_TRUC_DU_AN.md`, `CAU_TRUC_BACKEND_FRONTEND.md` | Cấu trúc dự án đích và thực tế |
 | design/ui | mô tả luồng/màn hình cho AI, danh sách màn hình | Giao diện theo role |

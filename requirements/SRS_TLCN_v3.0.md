@@ -309,6 +309,8 @@ if (itemCount >= 8 && (theta > 1.5 || theta < -2.5)) {
 
 - Hiển thị cho SV: *"Hệ thống đánh giá bạn thuộc nhóm [Pre-A1/C1+] — kết quả ở vùng biên có thể kém chính xác hơn. Vui lòng liên hệ Giảng viên."*
 
+**Giá trị và nhãn CEFR (chốt 14/11/2026):** mã trong cơ sở dữ liệu, API và mã nguồn dùng đúng tên enum `CEFRLevel` (`PRE_A1`, `A1`, `A2`, `B1`, `B2`, `C1_PLUS`); nhãn hiển thị lấy từ một bảng ánh xạ duy nhất `CEFR_LABELS` (`PRE_A1` → "Pre-A1", `C1_PLUS` → "C1+", các mức còn lại giữ nguyên).
+
 **Hướng mở rộng (KL):** Bổ sung item Pre-A1 (b < −2.5) và B2+ (b > +1.5).
 
 ### 4.8. Item Exposure Control — Rủi ro cần ghi nhận
@@ -751,6 +753,7 @@ Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tư�
 | F-26 | GV vai A: duyệt câu được giao | Hộp việc chỉ chứa câu giao cho mình; sửa nội dung/đáp án/giải thích, Duyệt (FIRST_APPROVED) hoặc Từ chối (REJECTED, không lý do); sau mỗi lần sửa kiểm lại luật cứng + T1–T2; quyết định ghi vào first_review, không còn bước Gửi gói (UCGV14; DC-33, DC-43) | P0 (đề xuất) |
 | F-27 | GV vai B: confirm câu được giao | Chỉ đọc; Xác nhận (SECOND_APPROVED) hoặc Loại bỏ (REJECTED) từng câu, hoặc "Xác nhận tất cả câu còn lại" (⚠ chờ xác nhận phạm vi sau khi bỏ gói); quyết định ghi vào second_review; không sửa, không trả về A (UCGV15; DC-33, DC-40) | P0 (đề xuất) |
 | F-28 | Kiểm tra cuối (C3) và Import vào ngân hàng | Khi lô READY_TO_FINALIZE, Admin bấm Kiểm tra (C3 chạy theo delta), xử lý lỗi cứng/mềm, rồi Import ⇒ FINAL_APPROVED; Import bị khóa khi chưa có báo cáo C3 còn hiệu lực (UCADM14; DC-44, DC-45) | P0 (đề xuất) |
+| F-29 | Tổng quan hệ thống (Admin) | Trang trang chủ Admin (S36): 4 số (SV đã thi, câu vào ngân hàng, lô cần xử lý, kỳ đang mở), phân phối CEFR, thống kê 6 trạng thái câu, bảng kỳ thi đang mở; lọc theo kỳ thi (BR-13); API `GET /reports/overview` (UCADM05) | P1 (đề xuất, số F-ID chờ xác nhận) |
 
 **[NOTE]** F-18 đến F-22 là chức năng bổ sung của v3.0 (F-18 mở rộng ở vòng 2: tạo tài khoản cho cả SV và GV, tạo từng người gộp vào UCADM09 — đề xuất, ít UC mới nhất), đánh số tiếp sau F-17 vì F-11 đến F-17 đã thuộc phạm vi Khóa luận; mức ưu tiên ghi "đề xuất" chờ nhóm xác nhận. F-01 và F-02 được sửa theo DC-02, DC-18, DC-19. F-23 đến F-28 là chức năng bổ sung của vòng 3 (14/10/2026), kéo phần ai-question-generator (F-11) từ Khóa luận vào Tiểu luận; tên, mức ưu tiên và mã UC đều là đề xuất. Phạm vi tăng phải được ghi vào COMMITMENT_BASELINE.md trước khi ký (R15, Q-11). F-02 và F-05 được sửa theo DC-29, DC-31, DC-39.
 
@@ -809,7 +812,7 @@ STUDENT chỉ truy cập dữ liệu của chính mình, thi, đổi/quên mật
 
 **L0 — Nâng/thu hồi Admin (UCADM09):** Admin mở quản lý tài khoản GV, chọn GV, bấm Nâng lên Admin hoặc Thu hồi ⇒ PATCH /api/v1/users/:id/role ⇒ BE đổi role TEACHER ↔ ADMIN và ghi nhật ký kiểm toán.
 
-**L1 — Admin import tài khoản SV/GV (UCADM08, DC-24):** Admin chọn loại tài khoản (SV hoặc GV) và tải file .xlsx ⇒ POST /users/import/upload?kind=STUDENT|TEACHER ⇒ BE kiểm định dạng/giới hạn, đọc từng dòng, kiểm BR-03 ⇒ gộp vào lưới tạm trong Redis (khóa theo adminId + kind) ⇒ trả {grid[], rejected[{row, code, reason}], added, ignoredDuplicates} ⇒ FE hiện lưới và popup các dòng bị loại (trùng DB ⇒ "tài khoản đã tồn tại") ⇒ Admin tải thêm file hoặc xóa dòng ⇒ bấm Lưu ⇒ POST /users/import/save ⇒ BE tạo tài khoản trong một transaction, sinh mật khẩu tạm, băm argon2, đẩy job email vào BullMQ ⇒ trả {created, queued} (role = STUDENT hoặc TEACHER theo kind) ⇒ xóa lưới. Hết TTL ⇒ 410 IMPORT_GRID_EXPIRED.
+**L1 — Admin import tài khoản SV/GV (UCADM08, DC-24):** Admin chọn loại tài khoản (SV hoặc GV) và tải file .xlsx ⇒ POST /users/import/upload?kind=STUDENT|TEACHER ⇒ BE kiểm định dạng/giới hạn, đọc từng dòng, kiểm BR-03 ⇒ gộp vào lưới tạm trong Redis (khóa theo adminId + kind) ⇒ trả {grid[], rejected[{row, code, reason}], added, ignoredDuplicates} ⇒ FE hiện lưới và popup các dòng bị loại (trùng DB ⇒ "tài khoản đã tồn tại") ⇒ Admin tải thêm file hoặc xóa dòng ⇒ bấm Lưu ⇒ POST /users/import/save ⇒ BE trả ngay 202 {total} và chạy nền (băm 1000 tài khoản mất ~50 giây, vượt thời gian chờ của một request): kiểm trùng lại, sinh mật khẩu tạm, băm argon2 song song, tạo tài khoản trong MỘT transaction (tất cả hoặc không có gì; role = STUDENT hoặc TEACHER theo kind), xóa lưới, rồi xếp hàng email vào hàng đợi gửi thư (cổng IMailQueue, chạy trong tiến trình; thay được bằng BullMQ). FE theo dõi bằng GET /users/import/save-status ⇒ {status, total, processed, created, queued}. Trùng phát sinh lúc Lưu ⇒ job FAILED (CONFLICT, kèm dòng trùng), không tạo tài khoản nào và giữ lưới. Hết TTL ⇒ 410 IMPORT_GRID_EXPIRED.
 
 **L1b — Admin tạo từng tài khoản (gộp vào UCADM09, đề xuất):** Admin mở form tạo tài khoản, chọn SV hoặc GV, nhập SV: MSSV, họ tên, email; GV: Mã GV (teacherCode), họ tên, email ⇒ POST /students hoặc POST /teachers ⇒ BE kiểm trùng email/MSSV/teacherCode (trùng ⇒ 409, báo lỗi) ⇒ tạo tài khoản role STUDENT/TEACHER, sinh mật khẩu tạm 12 ký tự, băm argon2, mustChangePassword = true ⇒ đẩy job email vào BullMQ sau khi lưu ⇒ trả tài khoản vừa tạo (không kèm mật khẩu).
 
@@ -862,7 +865,7 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 | BR-02 | Email duy nhất toàn hệ thống (không phân biệt hoa thường); MSSV (student_code) và Mã GV (teacher_code) duy nhất toàn hệ thống. |
 | BR-03 | Dòng import tài khoản hợp lệ khi MSSV (file SV) hoặc Mã GV (file GV), Họ tên, Email không rỗng; email đúng định dạng; không trùng trong lưới hiện có; không trùng trong cơ sở dữ liệu. Dòng không hợp lệ bị loại khỏi lưới và báo qua popup. |
 | BR-04 | Lưu theo lưới: nút Lưu ghi mọi dòng đang có trong lưới trong một transaction; dòng lỗi/đã tồn tại không vào lưới nên không chặn Lưu; Lưu khi lưới rỗng bị từ chối. |
-| BR-05 | Tài khoản mới: role = STUDENT (file/form SV) hoặc TEACHER (file/form GV), authProvider = LOCAL, mustChangePassword = true. Email chỉ gửi sau khi bấm Lưu (import) hoặc sau khi tạo thành công (tạo từng người); gửi thất bại sau retry ⇒ ghi trạng thái "chưa gửi" để Admin xem được, không rollback tài khoản. |
+| BR-05 | Tài khoản mới: role = STUDENT (file/form SV) hoặc TEACHER (file/form GV), authProvider = LOCAL, mustChangePassword = true. Email chỉ gửi sau khi bấm Lưu (import) hoặc sau khi tạo thành công (tạo từng người); gửi thất bại sau retry ⇒ ghi log ứng dụng, không rollback tài khoản; hệ thống **không lưu** trạng thái gửi thư trên tài khoản (Quyết định #120, chốt lại 14/11/2026), Admin xử lý bằng "Gửi lại mật khẩu tạm" từng tài khoản. |
 | BR-06 | Đổi mật khẩu: mật khẩu mới khác mật khẩu hiện tại; mật khẩu mới tối thiểu 8 ký tự, gồm chữ thường, chữ hoa, chữ số và ký tự đặc biệt (chốt 09/11/2026, Quyết định #134 D4; áp dụng cả khi đặt lại mật khẩu); sau thành công mustChangePassword = false và cấp lại token. |
 | BR-07 | Chỉ Admin tạo/sửa/công bố/đóng kỳ và import danh sách thi; GV thường chỉ xem kết quả (và xử lý các câu hỏi được giao, BR-21 đến BR-30). |
 | BR-08 | opensAt < closesAt; kỳ DRAFT sửa tự do; sau SCHEDULED chỉ cho sửa tên và kéo dài closesAt (đề xuất — chờ chốt); không sửa kỳ CLOSED. |
@@ -874,9 +877,9 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 | BR-14 | Quên mật khẩu: phản hồi luôn như nhau dù email có tồn tại hay không; rate limit (quên mật khẩu theo email, đặt lại mật khẩu theo IP); vẫn phản hồi 202 khi Redis hoặc SMTP lỗi; OTP dùng một lần, hiệu lực 10 phút, tối đa 5 lần nhập sai (DC-21). |
 | BR-15 | Mọi import ghi nhật ký kiểm toán tối thiểu: ai, khi nào, số dòng, kết quả (không ghi mật khẩu). |
 | BR-16 | Phân quyền theo role và theo phân công: TEACHER xem báo cáo lớp và hồ sơ SV, và chỉ xử lý câu được giao cho mình (vai A hoặc B); ADMIN làm mọi chức năng quản trị (không sửa nội dung câu) và chức năng xem của Teacher; STUDENT chỉ dữ liệu của mình. Không đủ quyền ⇒ 403 (NOT_ASSIGNED với việc không được giao). |
-| BR-17 | Admin quản lý tài khoản giảng viên: tạo, sửa, khóa/mở khóa; nâng TEACHER → ADMIN và thu hồi ADMIN → TEACHER. Admin không tự thu hồi quyền của chính mình. |
-| BR-18 | Nâng/thu hồi Admin ghi nhật ký kiểm toán; không thu hồi nếu đó là Admin cuối cùng (đề xuất); token cũ của người bị đổi quyền phải mất hiệu lực quyền cũ. |
-| BR-19 | Quản lý tài khoản (SV và GV): khóa tài khoản ⇒ không đăng nhập được, phiên IN_PROGRESS xử lý theo K5; không xóa cứng tài khoản đã có phiên/hồ sơ (chỉ khóa). Gửi lại mật khẩu tạm ⇒ sinh mật khẩu mới, mustChangePassword = true. |
+| BR-17 | Admin quản lý tài khoản giảng viên: tạo, sửa, khóa/mở khóa; nâng TEACHER → ADMIN và thu hồi ADMIN → TEACHER. Danh sách giảng viên (`GET /teachers`) gồm cả tài khoản Admin và trả thêm `role` để giao diện hiện huy hiệu Admin và cho thu hồi quyền. Admin không tự thu hồi quyền của chính mình và không tự khóa chính mình; không khóa được tài khoản Admin khác (thu hồi quyền trước rồi mới khóa); chỉ đổi role giữa TEACHER và ADMIN, không áp dụng cho sinh viên (chốt 14/11/2026). |
+| BR-18 | Nâng/thu hồi Admin ghi nhật ký kiểm toán; không thu hồi nếu đó là Admin cuối cùng (đề xuất); token cũ của người bị đổi quyền phải mất hiệu lực quyền cũ: cơ chế là `JwtStrategy` tra tài khoản (role, isActive) từ cơ sở dữ liệu ở mỗi request, không tin `role` trong token (đã có ở nhánh `feat/auth-module`). Nhật ký kiểm toán: chưa có nơi lưu, hoãn (nợ đồng bộ 14/11/2026). |
+| BR-19 | Quản lý tài khoản (SV và GV): khóa tài khoản ⇒ không đăng nhập được và mọi request đang có token bị trả 401; phiên IN_PROGRESS không xử lý riêng, quá `expires_at` thì áp dụng K5, mở khóa khi phiên còn hạn thì làm tiếp được; Admin không tự khóa chính mình và không khóa tài khoản Admin; "Gửi lại mật khẩu tạm" áp dụng cho SV và GV kể cả khi đã đổi mật khẩu (mật khẩu mới thay thế, token cũ mất hiệu lực), không áp dụng cho Admin; không xóa cứng tài khoản đã có phiên/hồ sơ (chỉ khóa). Gửi lại mật khẩu tạm ⇒ sinh mật khẩu mới, mustChangePassword = true. |
 | BR-20 | Tạo từng tài khoản (UCADM09, đề xuất): SV nhập MSSV, họ tên, email; GV nhập Mã GV, họ tên, email; trùng email/MSSV/Mã GV ⇒ từ chối và báo lỗi (HTTP 409; mã lỗi cụ thể chờ chốt). Sinh mật khẩu tạm 12 ký tự, argon2, mustChangePassword = true, gửi email qua MailPort/BullMQ sau khi lưu — giống import. Import không cập nhật tài khoản có sẵn. |
 | BR-21 | Câu hỏi chỉ vào ngân hàng qua lô (AI sinh hoặc Admin import file). Không có form thêm từng câu; GV không import; Admin không sửa nội dung câu (DC-28, DC-29, DC-32). |
 | BR-22 | Giao việc: Admin giao từng câu cho một GV A (reviewerId) và một GV B (confirmerId), A khác B; mỗi vòng có hạn dueAt riêng; lô phải ở READY_TO_ASSIGN (DC-40, DC-41; sửa theo họp GVHD 03/11/2026). ⚠ chờ xác nhận: nhóm A ≥ 1 GV và mã lỗi 409 CONFIRMER_IN_REVIEW_GROUP còn dùng không; reviewDays/confirmDays còn là giá trị mặc định cho dueAt hay Admin nhập hạn từng câu. |
@@ -1110,6 +1113,23 @@ Ký hiệu: A = GV vai A, B = GV vai B, Ad = Admin, H = hệ thống.
 
 ---
 
+### 9b.19. Tổng quan hệ thống cho Admin (F-29, UCADM05) — đề xuất 14/11/2026
+
+API `GET /api/v1/reports/overview?examRoundId=` (chỉ ADMIN). Trả `studentsCompleted`, `finalApprovedItems`, `batchesNeedingAction`, `openExamRounds`, `cefrDistribution` (6 phần tử theo `CEFRLevel`), `itemStatusCounts` (6 phần tử theo `ItemStatus`), danh sách kỳ thi đang mở. Định nghĩa:
+
+| Chỉ số | Định nghĩa | Chịu ảnh hưởng của `examRoundId` |
+|---|---|---|
+| SV đã thi | Số SV khác nhau có ít nhất một `test_sessions` `COMPLETED` (gồm `TIMEOUT`, không gồm `ABANDONED`) | Có |
+| Câu vào ngân hàng | Số `items` có `status = FINAL_APPROVED` | Không |
+| Lô cần xử lý | Số `item_batches` ở `READY_TO_ASSIGN`, `READY_TO_FINALIZE`, `FAILED`, `PARTIAL` (đang chờ Admin; `IN_REVIEW` chờ GV nên không tính) | Không |
+| Kỳ đang mở | Số kỳ có `effectiveStatus = OPEN` (BR-10) | Không |
+| Phân phối CEFR | Mức CEFR của hồ sơ mới nhất của mỗi SV (mỗi SV một lần) | Có |
+| Thống kê trạng thái câu | Đếm `items` theo 6 giá trị `ItemStatus`; `AI_REJECTED` chỉ hiển thị cho Admin | Không |
+
+Bảng "Kỳ thi đang mở": mỗi dòng có tên, giờ mở/đóng, thời lượng, số SV của kỳ và ba số chưa thi / đang thi / hoàn thành (cộng lại bằng số SV; chưa thi = tổng − đang thi − hoàn thành, gồm cả SV bỏ dở vì được thi lại). `examRoundId` không tồn tại ⇒ 404 NOT_FOUND; không phải UUID ⇒ 400. Trạng thái kỳ tính bằng hàm `effectiveStatus` (mục 9b.5), không đọc cột `status`.
+
+Không có số so sánh với kỳ trước, không có nút xuất báo cáo tổng quan, không tự cập nhật (chỉ làm mới khi tải trang hoặc bấm nút) trong phạm vi Tiểu luận. Ngưỡng θ→CEFR trên biểu đồ phải theo mục 4.6 (không đặt ngưỡng riêng).
+
 ## X. API CONTRACT
 
 ```
@@ -1171,19 +1191,23 @@ CHẶNG B (GV vai B)  [đề xuất]
 REPORTING
   GET    /api/v1/reports/class-distribution  # ?examRoundId= (TEACHER, ADMIN)
   GET    /api/v1/reports/error-patterns
+  GET    /api/v1/reports/overview            # ?examRoundId= (ADMIN) — F-29; chỉ số định nghĩa ở 9b.19 [đề xuất]
 
 IMPORT TÀI KHOẢN SV/GV (ADMIN) — lưới tạm, khóa theo (adminId, kind)  [đề xuất]
   POST   /api/v1/users/import/upload?kind=STUDENT|TEACHER   # multipart "file"; gộp vào lưới
   GET    /api/v1/users/import/grid?kind=
   DELETE /api/v1/users/import/grid/:rowKey?kind=
   DELETE /api/v1/users/import/grid
-  POST   /api/v1/users/import/save?kind=     # -> {created, queued}
+  POST   /api/v1/users/import/save?kind=     # 202 {total}; chạy nền, tất cả hoặc không có gì
+  GET    /api/v1/users/import/save-status?kind=   # {status: NONE|PROCESSING|DONE|FAILED, total, processed, created?, queued?, error?{code, conflicts[]}}  [đề xuất]
+  GET    /api/v1/users/import/template?kind=      # tải file mẫu .xlsx (SV hoặc GV)  [đề xuất]
+  # upload trả {grid[], rejected[{row, code, reason}], existing[{row, field, value}], added, ignoredDuplicates}
 
 QUẢN LÝ TÀI KHOẢN (ADMIN)  [đề xuất]
   GET    /api/v1/students , /api/v1/teachers # tìm theo MSSV/email, phân trang
   POST   /api/v1/students , /api/v1/teachers          # tạo từng người: SV {studentCode,fullName,email}; GV {teacherCode,fullName,email}; trùng => 409
   PATCH  /api/v1/students/:id , /api/v1/teachers/:id   # {fullName,email}
-  POST   /api/v1/students/:id/lock | unlock | resend-temporary-password
+  POST   /api/v1/users/:id/lock | unlock | resend-temporary-password   # dùng chung SV và GV; Admin không tự khóa mình (BR-19)
   PATCH  /api/v1/users/:id/role              # {role} nâng/thu hồi Admin
 
 KỲ THI  [đề xuất]
@@ -1478,6 +1502,7 @@ Hiện tại (TL): 1 trường duy nhất. Muốn đa trường ⇒ Khóa luận
 | v3.0 (vòng 2) | 13/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Phiên 23 (DC-24..DC-26, #99..#101): Admin tạo tài khoản SV và GV từng người hoặc import file (UCADM08 mở rộng, tạo từng người gộp UCADM09; API POST /students, POST /teachers, tham số kind); exam_rounds.duration_minutes NOT NULL DEFAULT 45; sửa mô tả EAP thành lưới đều 41 điểm [−4, +4] bước 0.2 (không phải Gaussian–Hermite; không đổi thuật toán); toàn bộ công thức chuyển sang phương trình Word gốc (OMML); xuất thêm bản Markdown SRS_TLCN_v3.0.md |
 | v3.0 (vòng 3) | 14/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Phiên 25 (DC-27 đến DC-45, #110 đến #113): luồng Admin tạo lô bằng AI hoặc import ⇒ AI check C1/C2/C3 ⇒ giao việc ⇒ GV A duyệt ⇒ gói ⇒ GV B confirm ⇒ Admin kiểm tra và import cuối; ItemStatus mới (FIRST_APPROVED, SECOND_APPROVED, FINAL_APPROVED, AI_REJECTED), ItemSource AI_GENERATED/IMPORTED; GV không import, Admin không sửa nội dung; giải thích AI sinh cùng lúc; khoảng irt_b [−4, +4]; F-23 đến F-28; Mục III (item-generation, ItemCheckService, ItemDuplicateChecker, LLM Gateway, BullMQ); DDL 6.2 và 6.2b; IXb 9b.9 đến 9b.18; API Mục X; Risk R15 đến R21; Q-7 đến Q-10 còn chờ chốt |
 | v3.0 (vòng 4) | 16/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Chốt đồng bộ: Item không còn source (nguồn ở item_batches.source, enum ItemBatchSource); items.batch_id NOT NULL kèm các lô seed theo bộ nguồn; gói ItemPackage tạo lúc giao việc (OPEN → SENT → DONE); thông báo chỉ email nhắc việc + Hộp việc (không chuông thời gian thực); bổ sung nghiệp vụ ép gửi và xử lý câu chưa xử lý sau hạn; GV xem ngân hàng ở /teacher/item-bank (chỉ xem); mã UCADM15–17 cho kỳ thi |
+| v3.0 (vòng 5) | 14/11/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Admin Dashboard và quản lý tài khoản (Quyết định #136): thêm F-29 và mục 9b.19 (API `GET /reports/overview`, định nghĩa chỉ số); gộp thao tác khóa/mở khóa/gửi lại mật khẩu thành `/users/:id/...`; BR-05 bỏ "trạng thái chưa gửi" theo #120; BR-17/19 cấm Admin tự khóa mình, BR-19 làm rõ phiên đang làm, BR-18 ghi cơ chế tra DB mỗi request; ghi giá trị enum và nhãn hiển thị CEFR (mục 4.6). Chưa đồng bộ `.docx` (nợ) |
 | v3.0 (sửa theo họp GVHD 03/11/2026) | 03/11/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Chưa phát hành số phiên bản mới. Bỏ gói duyệt (ItemPackage, PackageStatus, Gửi gói, ép gửi gói, DC-42); giao việc và duyệt theo từng câu: items.reviewer_id, confirmer_id (khóa ngoại), first_review, second_review (JSON), first_reminder_sent, second_reminder_sent; bỏ items.package_id, items.original_snapshot (vào first_review), bảng item_packages, item_review_assignments, item_batch_assignments; ReviewAction bỏ EXTEND, FORCE_SEND, thêm ASSIGN; ExamRound ◆ TestSession (Composition, DB Restrict). Nhiều chi tiết còn đánh dấu "⚠ chờ xác nhận" (xem các Mục 9b.13–9b.18, BR-22…BR-26, API Mục X) |
 
 *SRS v2.5 — 10/09/2026 | Bản nhận xét GVHD được tích hợp đầy đủ. Changelog v2.4: (1) Viết đầy đủ thuật toán Randomized Top-5 tại Mục 4.4 kèm bảng ước lượng exposure rate; (2) Viết đầy đủ Outlier Early Stop tại Mục 4.5 kèm pseudocode phát hiện deadlock; (3) Sửa NFR 15.2: "near-zero loss" thay vì "0% tuyệt đối", giải thích rõ điều kiện Redis AOF; (4) Bổ sung State Machine Recovery sau reconstruct từ PostgreSQL tại Mục 15.5; (5) Điều chỉnh Risk R5 về 🟡 TB (Randomized Top-5 giảm nhưng không triệt tiêu exposure); (6) Thêm R11 (SRS spec vượt trước implementation); (7) Bảng phân tầng Must-Have TL vs Spec KL.*
