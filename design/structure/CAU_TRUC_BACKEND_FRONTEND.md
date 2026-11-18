@@ -80,7 +80,7 @@ Mỗi module đầy đủ theo 4 tầng: `presentation/` → `application/` (use
 
 | Nhóm | Route | File | Màn hình (theo `DANH_SACH_MAN_HINH_THEO_ROLE.md`) | Trạng thái |
 |---|---|---|---|---|
-| `(public)` | `/login` | `login/page.tsx` | S01 Đăng nhập | ✅ (chưa có link Quên mật khẩu) |
+| `(auth)` | `/login` | `login/page.tsx` | S01 Đăng nhập | ✅ (đã có link Quên mật khẩu; chuyển từ `(public)` ngày 29/10/2026) |
 | `(student)` | `/` | `page.tsx` | S02 Trang chủ SV | 🟡 chưa có "Kỳ thi của tôi", chưa gửi `examRoundId` |
 | `(student)` | `/history` | `history/page.tsx` | S07 Lịch sử | ✅ |
 | `(student)` | `/results/[sessionId]` | `results/[sessionId]/page.tsx` | S05 Kết quả | ✅ |
@@ -121,7 +121,7 @@ Mỗi module đầy đủ theo 4 tầng: `presentation/` → `application/` (use
 ```text
 frontend
 ├─ src/
-│  ├─ app/           (public) · (student) · (exam) · (teacher)/teacher · api/ · 403 · error · not-found
+│  ├─ app/           (auth) · (student) · (exam) · (teacher)/teacher · api/ · 403 · error · not-found
 │  ├─ features/      auth · exam · result · history · items · reports
 │  ├─ components/    layout · ui · providers.tsx
 │  ├─ lib/           api · auth · env*.ts · utils.ts
