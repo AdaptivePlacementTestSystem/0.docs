@@ -531,7 +531,7 @@
 												<UML:TaggedValue tag="mt" value="Tra ve ket qua truoc()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Luat cung va toan ven quy trinh tren moi cau SECOND_APPROVED (A khac B, goi du, moi cau co nguoi duyet va confirm)()" xmi.id="EAID_2F6B358F_3B36_40F9_9EF4_F6CF056D554C" visibility="public" sender="EAID_23A56A32_E22D_4BB7_8575_98218FC9B124" receiver="EAID_23A56A32_E22D_4BB7_8575_98218FC9B124">
+										<UML:Message name="Luat cung va toan ven quy trinh tren moi cau SECOND_APPROVED (A khac B, moi cau co nguoi duyet va confirm)()" xmi.id="EAID_2F6B358F_3B36_40F9_9EF4_F6CF056D554C" visibility="public" sender="EAID_23A56A32_E22D_4BB7_8575_98218FC9B124" receiver="EAID_23A56A32_E22D_4BB7_8575_98218FC9B124">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -572,7 +572,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-400;PtEndX=0;PtEndY=-400;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_E7721042_FD93_4A64_B139_F7ED70996815"/>
-												<UML:TaggedValue tag="mt" value="Luat cung va toan ven quy trinh tren moi cau SECOND_APPROVED (A khac B, goi du, moi cau co nguoi duyet va confirm)()"/>
+												<UML:TaggedValue tag="mt" value="Luat cung va toan ven quy trinh tren moi cau SECOND_APPROVED (A khac B, moi cau co nguoi duyet va confirm)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="T1-T2 so voi ngan hang hien tai (co the co cau moi tu lo khac) va cac cau cung lo" xmi.id="EAID_55A4902C_4D0F_4C46_9642_BF987ADAB3E6" visibility="public" sender="EAID_23A56A32_E22D_4BB7_8575_98218FC9B124" receiver="EAID_569B49E0_FBAA_4DC2_BEB1_385FE61EDE8F">
@@ -1015,7 +1015,7 @@
 												<UML:TaggedValue tag="mt" value="Xac nhan da luu()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Tra ve bao cao C3 (theo cau, theo goi, thong ke A sua va ty le A / B loai)()" xmi.id="EAID_DEF972A4_3834_40FC_B25D_DBEA25F05BEE" visibility="public" sender="EAID_23A56A32_E22D_4BB7_8575_98218FC9B124" receiver="EAID_737B5C35_ED32_4A9B_BE4F_0ED5AF80DC4C">
+										<UML:Message name="Tra ve bao cao C3 (theo cau, thong ke A sua va ty le A / B loai)()" xmi.id="EAID_DEF972A4_3834_40FC_B25D_DBEA25F05BEE" visibility="public" sender="EAID_23A56A32_E22D_4BB7_8575_98218FC9B124" receiver="EAID_737B5C35_ED32_4A9B_BE4F_0ED5AF80DC4C">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1056,7 +1056,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-950;PtEndX=0;PtEndY=-950;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_E7721042_FD93_4A64_B139_F7ED70996815"/>
-												<UML:TaggedValue tag="mt" value="Tra ve bao cao C3 (theo cau, theo goi, thong ke A sua va ty le A / B loai)()"/>
+												<UML:TaggedValue tag="mt" value="Tra ve bao cao C3 (theo cau, thong ke A sua va ty le A / B loai)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="updateStatus(FINAL_CHECKED)" xmi.id="EAID_4BB5C322_1170_408B_8506_FB995EAE6E44" visibility="public" sender="EAID_737B5C35_ED32_4A9B_BE4F_0ED5AF80DC4C" receiver="EAID_829F20ED_BC85_4C10_8CB1_17B3A4462084">

@@ -9,7 +9,7 @@
   3. Single-tenant (DC-19): Bỏ hoàn toàn `Institution` và các trường `institution_id`; 3 role người dùng chính: `STUDENT`, `TEACHER`, `ADMIN`.
   4. Xác thực & Tài khoản (DC-02, DC-03, DC-21, DC-23, DC-24): Đăng nhập Email + Mật khẩu (argon2), đổi mật khẩu lần đầu (`mustChangePassword`), quên mật khẩu OTP 6 số qua email (`MailPort` + BullMQ + Redis TTL 10m), khóa tài khoản `isActive`. Import tài khoản SV/GV theo cơ chế "lưới tạm" (Import Grid Redis TTL 30m).
   5. Kỳ thi & Phiên thi (DC-07..DC-10, DC-20): Bổ sung `ExamRound` (`DRAFT`, `SCHEDULED`, `OPEN`, `CLOSED`), import danh sách thi theo lưới tạm; thời hạn phiên thi `expires_at = min(startedAt + durationMinutes, closesAt)`.
-  6. Sinh & Duyệt đề AI (DC-27..DC-45): Kéo `item-generation` và `llm-gateway` từ Khóa luận vào Tiểu luận (F-23..F-28); quy trình duyệt 2 chặng: GV vai A (sửa/duyệt/từ chối, gửi gói) $\rightarrow$ GV vai B (confirm gói); kiểm tra AI 3 checkpoint (C1, C2, C3) với lọc trùng 3 tầng (T1 băm, T2 pg_trgm, T3 embedding) + G5 kiểm tra đáp án độc lập.
+  6. Sinh & Duyệt đề AI (DC-27..DC-45): Kéo `item-generation` và `llm-gateway` từ Khóa luận vào Tiểu luận (F-23..F-28); quy trình duyệt 2 chặng: GV vai A (sửa/duyệt/từ chối từng câu được giao) $\rightarrow$ GV vai B (xác nhận/loại từng câu được giao); không còn gói duyệt (bỏ `ItemPackage`, họp GVHD 03/11/2026); kiểm tra AI 3 checkpoint (C1, C2, C3) với lọc trùng 3 tầng (T1 băm, T2 pg_trgm, T3 embedding) + G5 kiểm tra đáp án độc lập.
   7. Lược bỏ `ItemSource` khỏi thực thể `Item` (nguồn gốc được quản lý theo Lô `ItemBatch.source`, enum đổi tên thành `ItemBatchSource`; `Item.batchId` bắt buộc, câu seed thuộc các lô seed); bỏ `WRITING` khỏi `Skill`.
   8. Mã hóa Use Case Kỳ thi: Đổi tiền tố thành `UCADM15` (Quản lý kỳ thi), `UCADM16` (Import danh sách thi), `UCADM17` (Theo dõi dự thi).
 - File theo dõi tiến độ đi kèm: `TRACKING_CAU_TRUC_DU_AN.md`.
@@ -27,7 +27,7 @@ Cấu trúc dự án được thiết kế tuân thủ nghiêm ngặt **Clean Ar
    - `user-admin`: Quản lý tài khoản SV/GV, tạo lẻ, khóa/mở khóa, cấp lại mật khẩu tạm, nâng/thu hồi quyền Admin (UCADM09).
    - `exam-round`: Quản lý kỳ thi, import danh sách thí sinh dự thi theo lưới tạm, theo dõi tiến độ thi thời gian thực (UCADM15, UCADM16, UCADM17).
    - `mail`: Module gửi email bất đồng bộ qua hàng đợi BullMQ, giao tiếp qua port `MailPort` và adapter `SmtpMailAdapter`.
-   - `item-generation`: Kéo từ Khóa luận vào Tiểu luận — điều phối tạo lô câu hỏi (AI sinh hoặc file import), bộ lọc AI 3 chặng C1/C2/C3, thuật toán chia đều câu hỏi cho nhóm GV A, quản lý đóng gói gửi GV B, nhắc hạn 24h, kiểm tra delta C3 và import vào ngân hàng (UCADM11..14, UCGV14..15).
+   - `item-generation`: Kéo từ Khóa luận vào Tiểu luận — điều phối tạo lô câu hỏi (AI sinh hoặc file import), bộ lọc AI 3 chặng C1/C2/C3, thuật toán chia đều câu hỏi cho nhóm GV A, giao từng câu cho GV A và GV B (`reviewer_id`, `confirmer_id`), nhắc hạn 24h (cờ `first_reminder_sent`/`second_reminder_sent` trên `items`), kiểm tra delta C3 và import vào ngân hàng (UCADM11..14, UCGV14..15).
    - `llm-gateway`: Cổng gọi LLM dùng chung có dự phòng nhà cung cấp, ghi nhận token/mô hình, cache prompt.
 2. **Loại bỏ hoàn toàn multi-tenant:**
    - Xóa bỏ mọi tham chiếu tới `Institution`, `institution_id`, `resolveScope`.
@@ -37,7 +37,7 @@ Cấu trúc dự án được thiết kế tuân thủ nghiêm ngặt **Clean Ar
    - `Item.batchId` bắt buộc (NOT NULL). Câu seed thuộc các lô seed (`source = IMPORTED`, `status = DONE`, `created_by` = Admin hệ thống tạo trước trong script cài đặt); mỗi bộ nguồn một lô, phân biệt bằng `ItemBatch.name` (CEFR-J, CLOTH, GV tự soạn). Quyết định 16/10/2026.
 4. **Cấu trúc Frontend Next.js App Router hoàn chỉnh theo 3 vai trò:**
    - Sinh viên: Trang làm bài có đồng hồ đếm ngược theo `expiresAt`, xem giải thích AI theo từng câu.
-   - Giảng viên: Hộp việc duyệt câu hỏi (vai A) và hộp việc xác nhận gói câu hỏi (vai B), tra cứu báo cáo lớp lọc theo kỳ thi.
+   - Giảng viên: Hộp việc duyệt câu hỏi (vai A) và hộp việc xác nhận câu hỏi được giao (vai B), tra cứu báo cáo lớp lọc theo kỳ thi.
    - Quản trị viên: Bộ màn hình quản lý tài khoản, quản lý kỳ thi (kèm import danh sách thí sinh), và quản lý các lô câu hỏi AI.
 
 ---
@@ -188,25 +188,24 @@ adaptive-placement-test/
 │   │   │   │   │
 │   │   │   │   ├── item-generation/            # UCADM11..14, UCGV14..15 — Sinh đề AI & Duyệt hai chặng A/B
 │   │   │   │   │   ├── domain/
-│   │   │   │   │   │   ├── entities/{item-batch,item-package,item-review-assignment,item-check-result}.entity.ts
-│   │   │   │   │   │   ├── enums/{item-batch-status,package-status,checkpoint,check-level}.enum.ts
+│   │   │   │   │   │   ├── entities/{item-batch,item-check-result}.entity.ts
+│   │   │   │   │   │   ├── value-objects/{first-review-detail,second-review-detail}.vo.ts   # ⚠ chờ xác nhận tên/vị trí (kiểu giá trị lưu JSON trong Item)
+│   │   │   │   │   │   ├── enums/{item-batch-status,checkpoint,check-level}.enum.ts
 │   │   │   │   │   │   ├── strategies/duplicate-check/{hash-t1,trgm-t2,embedding-t3}.strategy.ts
-│   │   │   │   │   │   └── repositories/{item-batch,item-package}.repository.interface.ts
+│   │   │   │   │   │   └── repositories/item-batch.repository.interface.ts
 │   │   │   │   │   ├── application/
 │   │   │   │   │   │   ├── use-cases/
 │   │   │   │   │   │   │   ├── create-ai-item-batch.use-case.ts       # UCADM11 (Admin)
 │   │   │   │   │   │   │   ├── upload-item-import-grid.use-case.ts    # UCADM12 (Admin)
 │   │   │   │   │   │   │   ├── save-imported-item-batch.use-case.ts   # UCADM12 (Admin)
-│   │   │   │   │   │   │   ├── assign-review-batch.use-case.ts        # UCADM13 (Admin chia đều nhóm A, chỉ định B)
+│   │   │   │   │   │   │   ├── assign-review-batch.use-case.ts        # UCADM13 (Admin chia đều nhóm A, chỉ định B; giao từng câu, ghi ASSIGN mỗi câu)
 │   │   │   │   │   │   │   ├── reassign-review.use-case.ts            # UCADM13 (Admin giao lại)
 │   │   │   │   │   │   │   ├── update-deadlines.use-case.ts           # UCADM13 (Admin chỉnh hạn)
-│   │   │   │   │   │   │   ├── force-send-package.use-case.ts         # UCADM13 (Admin ép gửi gói OPEN → SENT, ghi FORCE_SEND)
 │   │   │   │   │   │   │   ├── get-teacher-review-tasks.use-case.ts   # UCGV14 (GV vai A)
 │   │   │   │   │   │   │   ├── update-item-review-content.use-case.ts # UCGV14 (GV vai A sửa câu)
 │   │   │   │   │   │   │   ├── approve-item-step-a.use-case.ts        # UCGV14 (GV vai A duyệt)
 │   │   │   │   │   │   │   ├── reject-item-step-a.use-case.ts         # UCGV14 (GV vai A từ chối)
-│   │   │   │   │   │   │   ├── send-package-to-b.use-case.ts          # UCGV14 (GV vai A đóng gói gửi B)
-│   │   │   │   │   │   │   ├── get-teacher-confirm-packages.use-case.ts # UCGV15 (GV vai B)
+│   │   │   │   │   │   │   ├── get-teacher-confirm-tasks.use-case.ts    # UCGV15 (GV vai B; ⚠ chờ xác nhận tên)
 │   │   │   │   │   │   │   ├── confirm-item-step-b.use-case.ts        # UCGV15 (GV vai B xác nhận)
 │   │   │   │   │   │   │   ├── remove-item-step-b.use-case.ts         # UCGV15 (GV vai B loại bỏ)
 │   │   │   │   │   │   │   ├── confirm-all-remaining-step-b.use-case.ts # UCGV15 (GV vai B xác nhận tất cả)
@@ -221,9 +220,7 @@ adaptive-placement-test/
 │   │   │   │   │   │       └── deadline-reminder.service.ts           # Đặt lịch nhắc trước 24h
 │   │   │   │   │   ├── infrastructure/
 │   │   │   │   │   │   ├── persistence/
-│   │   │   │   │   │   │   ├── prisma-item-batch.repository.ts
-│   │   │   │   │   │   │   ├── prisma-item-package.repository.ts
-│   │   │   │   │   │   │   └── prisma-review-assignment.repository.ts
+│   │   │   │   │   │   │   └── prisma-item-batch.repository.ts
 │   │   │   │   │   │   └── processors/
 │   │   │   │   │   │       ├── batch-generation.processor.ts          # BullMQ sinh câu hỏi AI nền
 │   │   │   │   │   │       └── deadline-reminder.processor.ts         # BullMQ nhắc hạn
@@ -320,9 +317,9 @@ adaptive-placement-test/
 │       │   │   ├── item-bank/page.tsx          # UCGV02: Ngân hàng câu hỏi chế độ chỉ xem (câu được giao); chi tiết item-bank/[id]/page.tsx
 │       │   │   ├── tasks/
 │       │   │   │   ├── reviews/page.tsx        # Hộp việc GV vai A: danh sách câu hỏi được giao
-│       │   │   │   ├── reviews/[packageId]/page.tsx # Màn hình duyệt gói của GV A: sửa câu, Duyệt (FIRST_APPROVED), Từ chối, Gửi cho B
-│       │   │   │   ├── confirms/page.tsx       # Hộp việc GV vai B: danh sách các gói từ GV A
-│       │   │   │   └── confirms/[packageId]/page.tsx # Màn hình xem gói, Xác nhận / Loại từng câu hoặc Confirm-All
+│       │   │   │   ├── reviews/[itemId]/page.tsx # Màn hình duyệt một câu của GV A: sửa câu, Duyệt (FIRST_APPROVED), Từ chối (⚠ chờ xác nhận route theo từng câu)
+│       │   │   │   ├── confirms/page.tsx       # Hộp việc GV vai B: danh sách câu được giao xác nhận
+│       │   │   │   └── confirms/[itemId]/page.tsx # Màn hình xem một câu, Xác nhận / Loại hoặc Confirm-All (⚠ chờ xác nhận route và phạm vi Confirm-All)
 │       │   │
 │       │   ├── (admin)/                        # Màn hình dành cho Quản trị viên
 │       │   │   ├── dashboard/page.tsx          # Thống kê tổng quan hệ thống
@@ -377,10 +374,9 @@ adaptive-placement-test/
 │       │   │   ├── stopping-reason.enum.ts    # MAX_ITEMS_REACHED, SE_THRESHOLD, ITEM_BANK_BOUNDARY, TIMEOUT
 │       │   │   ├── item-batch-status.enum.ts  # GENERATING, IMPORTING, CHECKING, READY_TO_ASSIGN, IN_REVIEW, READY_TO_FINALIZE, FINAL_CHECKED, DONE, FAILED, PARTIAL
 │       │   │   ├── item-batch-source.enum.ts  # AI_GENERATED, IMPORTED (thay item-source.enum.ts)
-│       │   │   ├── package-status.enum.ts     # OPEN, SENT, DONE
 │       │   │   ├── check-level.enum.ts        # PASS, SOFT, HARD
 │       │   │   ├── check-point.enum.ts        # C1, C2, C3
-│       │   │   ├── review-action.enum.ts      # APPROVE, REJECT, CONFIRM, REMOVE, CONFIRM_ALL, IMPORT, REASSIGN, EXTEND, FORCE_SEND, ACCEPT_FLAG
+│       │   │   ├── review-action.enum.ts      # APPROVE, REJECT, CONFIRM, REMOVE, CONFIRM_ALL, IMPORT, ASSIGN, REASSIGN, ACCEPT_FLAG
 │       │   │   └── cefr-confidence.enum.ts    # LOW, MEDIUM, HIGH
 │       │   │   # ĐÃ LOẠI BỎ item-source.enum.ts (Item không còn source)
 │       │   ├── errors/
@@ -469,8 +465,8 @@ adaptive-placement-test/
 | F-23 | UCADM11 | Tạo lô câu hỏi bằng AI | Admin | `src/modules/item-generation/` | `/admin/item-batches/generate` |
 | F-24 | UCADM12 | Import đề thi từ file Excel | Admin | `src/modules/item-generation/` | `/admin/item-batches/import` |
 | F-25 | UCADM13 | Giao việc duyệt câu hỏi và theo dõi lô | Admin | `src/modules/item-generation/` | `/admin/item-batches/[id]/assign` |
-| F-26 | UCGV14 | Duyệt và gửi gói câu hỏi (GV vai A) | GV vai A | `src/modules/item-generation/` | `/teacher/tasks/reviews` |
-| F-27 | UCGV15 | Xác nhận gói câu hỏi (GV vai B) | GV vai B | `src/modules/item-generation/` | `/teacher/tasks/confirms` |
+| F-26 | UCGV14 | Duyệt câu hỏi được giao (GV vai A) | GV vai A | `src/modules/item-generation/` | `/teacher/tasks/reviews` |
+| F-27 | UCGV15 | Xác nhận câu hỏi được giao (GV vai B) | GV vai B | `src/modules/item-generation/` | `/teacher/tasks/confirms` |
 | F-28 | UCADM14 | Kiểm tra C3 và Import vào ngân hàng | Admin | `src/modules/item-generation/` | `/admin/item-batches/[id]/final-check` |
 | F-03 | UCSV02, UCSV03, UCSV07 | Làm bài thi thích ứng (CAT) | Sinh viên | `src/modules/test-session/`, `cat-engine/` | `/student/exams/[roundId]/take` |
 | F-05 | UCSV04, UCGV09, UCADM04 | Xem kết quả & Hồ sơ năng lực | SV, GV, Admin | `src/modules/language-profile/` | `/student/results/[id]`, `/teacher/students/[id]` |
@@ -478,7 +474,7 @@ adaptive-placement-test/
 | F-09 | UCGV07, UCGV08, UCADM05 | Báo cáo lớp học & Tổng thể (lọc kỳ) | GV, Admin | `src/modules/reporting/` | `/teacher/reports`, `/admin/dashboard` |
 | F-02 | UCGV02, UCADM06 | Xem ngân hàng câu hỏi (chỉ xem) | GV (câu được giao), Admin (mọi câu) | `src/modules/item-bank/` | `/teacher/item-bank`, `/admin/item-bank` |
 | F-08 | UCSV06 | Xem lịch sử bài thi | Sinh viên | `src/modules/language-profile/` | `/history` |
-| F-26 | UCGV04 | Chỉnh sửa câu hỏi (bước con của UCGV14, chỉ GV vai A, câu DRAFT) | GV vai A | `src/modules/item-generation/` | `/teacher/tasks/reviews/[packageId]` |
+| F-26 | UCGV04 | Chỉnh sửa câu hỏi (bước con của UCGV14, chỉ GV vai A, câu DRAFT) | GV vai A | `src/modules/item-generation/` | `/teacher/tasks/reviews/[itemId]` |
 
 ---
 

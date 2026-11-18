@@ -1,7 +1,7 @@
 classDiagram
   direction TB
   %% Sinh tu dong tu TLCN.drawio.xml (3 trang, ban gon 26-27/10/2026) bang Tuan7/scripts/gen_uml.py. KHONG sua tay: sua drawio roi sinh lai.
-  %% Khong ve: ExamRoundParticipant, ItemBatchAssignment, ItemReviewAssignment, ItemEmbedding (bang luu tru, xem schema.prisma).
+  %% Khong ve: ExamRoundParticipant, ItemEmbedding (bang luu tru, xem schema.prisma).
 
   %% ===== Người dùng & kỳ thi =====
   class User {
@@ -18,8 +18,8 @@ classDiagram
   }
   class Teacher {
     - teacherCode: String
-    +reviewItem(item, action) void
-    +submitPackage(pkg) void
+    +reviewItem(item, action, comment) void
+    +confirmItem(item, action, comment) void
   }
   class Admin {
     +createItemBatch(src) ItemBatch
@@ -44,11 +44,12 @@ classDiagram
     - student: Student
     - examRound: ExamRound
     - status: SessionStatus
-    - thetaFinal: float?
-    - seFinal: float?
-    - stoppingReason: StoppingReason?
+    - responses: List<SessionResponse>
+    - thetaFinal: float
+    - seFinal: float
+    - stoppingReason: StoppingReason
     - startedAt: DateTime
-    - completedAt: DateTime?
+    - completedAt: DateTime
     - expiresAt: DateTime
     +submitAnswer(itemId, ans) SessionResponse
     +computeResult() LanguageProfile
@@ -141,14 +142,19 @@ classDiagram
     - options: Json
     - correctAnswer: char
     - skill: Skill
-    - topicTag: String?
+    - topicTag: String
     - cefrTarget: CEFRLevel
     - irtB: float
     - irtA: float = 1.0
     - status: ItemStatus
+    - reviewerId: UUID
+    - confirmerId: UUID
+    - firstReview: FirstReviewDetail
+    - secondReview: SecondReviewDetail
     +probability(theta: float) float
     +fisherInformation(theta) float
     +transitionTo(next: ItemStatus) void
+    +isOverdue(round: int, at: DateTime) boolean
   }
   class Explanation {
     - id: UUID
@@ -172,19 +178,24 @@ classDiagram
     +canAssign() boolean
     +canFinalize() boolean
   }
-  class ItemPackage {
-    - id: UUID
-    - reviewerId: UUID
-    - confirmerId: UUID
-    - status: PackageStatus
-    - dueAt: DateTime?
-    - sentAt: DateTime?
-    +canSend() boolean
-    +isOverdue(at) boolean
+  class FirstReviewDetail {
+    <<DataType>>
+    - dueAt: DateTime
+    - action: ReviewAction
+    - reviewedAt: DateTime
+    - comment: String
+    - originalSnapshot: Json
+  }
+  class SecondReviewDetail {
+    <<DataType>>
+    - dueAt: DateTime
+    - action: ReviewAction
+    - confirmedAt: DateTime
+    - comment: String
   }
   class ItemReviewEvent {
     - id: UUID
-    - itemId: UUID?
+    - itemId: UUID
     - batchId: UUID
     - actorId: UUID
     - action: ReviewAction
@@ -253,12 +264,6 @@ classDiagram
     REJECTED
     AI_REJECTED
   }
-  class PackageStatus {
-    <<enumeration>>
-    OPEN
-    SENT
-    DONE
-  }
   class ReviewAction {
     <<enumeration>>
     APPROVE
@@ -267,9 +272,8 @@ classDiagram
     REMOVE
     CONFIRM_ALL
     IMPORT
+    ASSIGN
     REASSIGN
-    EXTEND
-    FORCE_SEND
     ACCEPT_FLAG
   }
   class SessionState {
@@ -307,7 +311,7 @@ classDiagram
   User <|-- Teacher
   User <|-- Admin
   ExamRound "0..*" -- "0..*" Student : registered
-  ExamRound "1" --> "0..*" TestSession
+  ExamRound "1" *-- "0..*" TestSession
   Student "1" --> "0..*" TestSession
   Admin --> ExamRound : creates
   TestSession "1" *-- "1..*" SessionResponse
@@ -326,9 +330,8 @@ classDiagram
   Item "1" *-- "0..1" Explanation
   Item "1" *-- "0..*" ItemCheckResult
   ItemBatch "1" *-- "1..*" Item
-  ItemBatch "1" *-- "1..*" ItemPackage
-  ItemPackage "0..1" --> "0..*" Item
-  ItemPackage "0..1" --> "0..*" ItemReviewEvent
+  Item "1" *-- "0..1" FirstReviewDetail
+  Item "1" *-- "0..1" SecondReviewDetail
   Item "0..1" --> "0..*" ItemReviewEvent
   Admin --> ItemBatch : creates
-  Teacher --> ItemPackage : reviews
+  Teacher --> Item : reviews / confirms
