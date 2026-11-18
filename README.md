@@ -9,11 +9,14 @@ Tài liệu thiết kế và hệ thống tracking của đồ án Tiểu luận
 ```
 docs/
 ├── README.md, INDEX.md, CLAUDE.md
-├── requirements/      SRS v2.6 Final và v3.0, đặc tả Use Case (24 UC cũ, v3.0)
-├── design/            Class Diagram, luồng CAT Engine, Use Case Diagram (.xml), draw.io
-├── process/           Hướng dẫn rubric + tracking, playbook, quy trình nhóm
-├── tracking/          AI_USAGE_LOG (nhật ký dùng AI), mẫu và hướng dẫn: GIT_CONVENTIONS, template, evidence-checklist
-└── devkit/            Git hook + CI + ruleset chặn push sai chuẩn rubric (xem devkit/README.md)
+├── requirements/   SRS v3.0, đặc tả Use Case
+├── design/         usecase, class, sequence, component-deployment, structure, ui, catengine
+├── plans/          kế hoạch nghiệp vụ, cicd/, item-bank-data/
+├── decisions/      bản chốt quyết định
+├── process/        hướng dẫn rubric + tracking, playbook, quy trình nhóm
+├── tracking/       mẫu, hướng dẫn, GIT_CONVENTIONS (log thật chỉ lưu máy)
+├── drafts/         tài liệu chưa chốt
+└── devkit/         git hook + CI + ruleset
 ```
 
 ## Không nằm trong repo (có chủ ý)
