@@ -9,7 +9,7 @@ Tài liệu thiết kế và hệ thống tracking của đồ án Tiểu luận
 ```
 docs/
 ├── README.md, INDEX.md, CLAUDE.md
-├── requirements/      SRS v2.6, đặc tả 24 Use Case
+├── requirements/      SRS v2.6 Final và v3.0, đặc tả Use Case (24 UC cũ, v3.0)
 ├── design/            Class Diagram, luồng CAT Engine, Use Case Diagram (.xml), draw.io
 ├── process/           Hướng dẫn rubric + tracking, playbook, quy trình nhóm
 ├── tracking/          AI_USAGE_LOG (nhật ký dùng AI), mẫu và hướng dẫn: GIT_CONVENTIONS, template, evidence-checklist
