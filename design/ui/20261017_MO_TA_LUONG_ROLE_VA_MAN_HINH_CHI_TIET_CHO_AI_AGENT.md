@@ -262,7 +262,7 @@ Trang chủ theo role sau đăng nhập: STUDENT → `/student/dashboard`; TEACH
 ### 3.4. Quản trị (`app/(admin)/admin/…`)
 | ID | URL | File Next.js | API chính | UC |
 |---|---|---|---|---|
-| S36 (cũ E2) | `/admin/dashboard` `🔶 R-5` | `dashboard/page.tsx` | `GET /reports/…` | UCADM05 |
+| S36 (cũ E2) | `/admin/dashboard` | `dashboard/page.tsx` | `GET /reports/overview` | UCADM05 (F-29) |
 | S08 | `/admin/item-bank` | `item-bank/page.tsx` | `GET /items` (mọi câu) | UCADM06 |
 | S10 | `/admin/item-bank/[id]` | `item-bank/[id]/page.tsx` | `GET /items/:id` | UCADM06 |
 | S28 | `/admin/item-batches` | `item-batches/page.tsx` | `GET /item-batches` | UCADM13 |
@@ -883,22 +883,23 @@ Lô cần xử lý (3) →                                                      
 
 > Layout mọi màn: **L-SIDEBAR** (menu ADMIN, Mục 2.4). Guard: chỉ `ADMIN`; TEACHER/STUDENT → 403. Admin **không sửa nội dung câu**, **không gõ câu bằng form**. S08/S10/S12–S14 xem ở Mục 6.
 
-### S36 — Tổng quan hệ thống `🔶 R-5` (màn từ Tuan4, chưa xác nhận giữ)
-**(a)** Route `/admin/dashboard` · API `GET /reports/…` · UC UCADM05.
+### S36 — Tổng quan hệ thống (chốt giữ 14/11/2026, F-29)
+**(a)** Route `/admin/dashboard` · API `GET /reports/overview?examRoundId=` (chỉ ADMIN; định nghĩa chỉ số: SRS 9b.19) · UC UCADM05.
 **(b)**
 ```
-Tổng quan
+Tổng quan                                   [Kỳ thi: Tất cả ▾]   [Làm mới]
 ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│ 1.240  │ │  235   │ │   3    │ │   4    │   ← 4 số lớn, nhãn xám nhỏ
+│ 1.240  │ │  486   │ │   3    │ │   2    │   ← 4 số lớn, nhãn xám nhỏ
 │ SV đã  │ │ Câu vào│ │ Lô cần │ │ Kỳ thi │
-│ thi    │ │ ngân   │ │ xử lý →│ │ đang mở│
+│ thi    │ │ ngân   │ │ xử lý →│ │ đang mở→│
 └────────┘ └────────┘ └────────┘ └────────┘
-Phân phối CEFR toàn hệ thống        Câu hỏi theo trạng thái
-[ biểu đồ cột 6 màu CEFR ]          [ 6 thanh ngang màu trạng thái ]
+Phân phối CEFR (6 mức)              Câu hỏi theo trạng thái (6 mức)
+[ 6 thanh ngang, 6 màu huy hiệu ]   [ 6 thanh ngang màu trạng thái ]
+Kỳ thi đang mở: bảng (tên, giờ mở–đóng, thời lượng, số SV chưa thi/đang thi/hoàn thành, nút "Vào quản lý")
 ```
-**(c)** `stat-students`, `stat-final-approved`, `stat-batches-open` (bấm → S28), `stat-open-rounds` (bấm → S20), `cefr-distribution`, `item-status-chart` (mỗi biểu đồ có chuyển "Biểu đồ | Bảng"). Rỗng: "Chưa có sinh viên nào hoàn thành bài thi." Số liệu là mock.
-
----
+**(c)** `round-filter` (chip "Kỳ thi", gửi `examRoundId`, BR-13; chỉ áp cho "SV đã thi" và phân phối CEFR, các số còn lại luôn toàn hệ thống), `stat-students`, `stat-final-approved` (nhãn "Đã vào ngân hàng chính thức", **không** ghi "đã hiệu chuẩn"), `stat-batches-open` (bấm → S28), `stat-open-rounds` (bấm → S20), `cefr-distribution` (nhãn lấy từ `CEFR_LABELS`: Pre-A1, A1, A2, B1, B2, C1+; ngưỡng θ theo SRS mục 4.6: B1 `[0,1)`, B2 `[1,2)`, C1+ `θ ≥ 2`), `item-status-chart` (6 giá trị `ItemStatus`, `AI_REJECTED` có mặt vì chỉ Admin xem), `open-rounds-table`; mỗi biểu đồ có chuyển "Biểu đồ | Bảng". Nút "Làm mới" gọi lại API; **không** tự cập nhật theo chu kỳ.
+**Không có (đã bỏ, quyết định 14/11/2026):** học kỳ/năm học, mã ca thi, phòng máy, số so với kỳ trước (+%), nút "Xuất báo cáo tổng quan", dòng nhận xét tự sinh (trung vị, "phân bổ Gaussian", SEM), phiên bản hệ thống, "Hỗ trợ kỹ thuật".
+**(e)** Rỗng: "Chưa có sinh viên nào hoàn thành bài thi." (biểu đồ CEFR), "Hiện không có kỳ thi nào đang mở." (bảng kỳ thi) · tải: skeleton · lỗi tải: thông báo + "Thử lại" · 403 nếu TEACHER mở.
 
 ### S28 — Danh sách lô câu hỏi
 **(a)** Route `/admin/item-batches` · API `GET /item-batches` · UC UCADM13.
@@ -1040,7 +1041,7 @@ Câu chưa quyết định (không được import): 3
 ---
 
 ### S24 — Quản lý tài khoản (Sinh viên | Giảng viên)
-**(a)** Route `/admin/users/students` và `/admin/users/teachers` (hai tab = hai route, dùng chung một component) · API `GET|POST|PATCH /students`, `/teachers`; `POST /students/:id/lock|unlock|resend-temporary-password`; `PATCH /users/:id/role` · UC UCADM09.
+**(a)** Route `/admin/users/students` và `/admin/users/teachers` (hai tab = hai route, dùng chung một component) · API `GET|POST|PATCH /students`, `/teachers`; `POST /users/:id/lock|unlock|resend-temporary-password` (dùng chung SV và GV); `PATCH /users/:id/role` · UC UCADM09.
 **(b)**
 ```
 Tài khoản     [ Sinh viên ]  [ Giảng viên ]            [ Thêm sinh viên ]  [ Import ]
@@ -1059,11 +1060,11 @@ Tài khoản     [ Sinh viên ]  [ Giảng viên ]            [ Thêm sinh viên
 | 5 | Bảng (C-TABLE, phân trang) | `accounts-table` | Cột: Họ tên · MSSV (SV) / Mã GV (GV) · Email · **Trạng thái** (Hoạt động / Đã khóa) · **Đã đổi mật khẩu** (Rồi / Chưa) · *(không có cột trạng thái email: #120 — schema chưa lưu trạng thái gửi; chỉ có nút "Gửi lại mật khẩu tạm" từng tài khoản)* |
 | 6 | Hành động cuối hàng (nút chữ) | — | "Sửa" (họ tên, email; modal); `lock-{id}` "Khóa"/"Mở khóa" (`is_active`); `resend-temp-{id}` "Gửi lại mật khẩu tạm" (sinh mật khẩu mới, buộc đổi lại; xác nhận); **tab GV:** `grant-admin-{id}` "Nâng lên Admin" / "Thu hồi Admin" (xác nhận) |
 **Form tạo từng người** (`account-form`, modal ≤ 480 px): SV: **MSSV \*, Họ tên \*, Email \***; GV: **Mã GV \*, Họ tên \*, Email \***. Nút chính "Lưu", chữ "Hủy". Trùng email/MSSV/Mã GV → lỗi ngay dưới ô trùng ("Email đã tồn tại.", "MSSV đã tồn tại.", "Mã GV đã tồn tại."). Lưu OK: sinh mật khẩu tạm 12 ký tự, xếp hàng email (**không hiển thị mật khẩu**), toast "Đã tạo tài khoản. Mật khẩu tạm đã được gửi qua email.", làm mới danh sách.
-**Quy tắc (BR-17/18/19):** Admin không tự thu hồi quyền của mình (nút ẩn/tắt ở hàng của mình, `title` giải thích); không thu hồi Admin cuối cùng (lỗi: "Không thể thu hồi quyền của quản trị viên cuối cùng."); tài khoản bị khóa không đăng nhập được; **không có nút Xóa** (chỉ khóa). Đổi role → token cũ mất quyền cũ.
+**Quy tắc (BR-17/18/19):** Admin không tự thu hồi quyền của mình và không tự khóa mình; không khóa được Admin khác (nút "Khóa" ẩn/tắt ở hàng của mọi Admin, `title` giải thích; muốn khóa phải "Thu hồi Admin" trước); "Nâng lên Admin / Thu hồi Admin" chỉ ở tab Giảng viên; "Gửi lại mật khẩu tạm" luôn hiện ở hàng SV/GV, kể cả đã đổi mật khẩu; không thu hồi Admin cuối cùng (lỗi: "Không thể thu hồi quyền của quản trị viên cuối cùng."); tài khoản bị khóa không đăng nhập được; **không có nút Xóa** (chỉ khóa). Đổi role → token cũ mất quyền cũ.
 **(e)** Rỗng: "Chưa có sinh viên." / "Chưa có giảng viên." · 403 nếu TEACHER mở · lỗi tải.
 
 ### S19 — Import tài khoản (SV, GV) — lưới tạm
-**(a)** Route `/admin/users/import` (`?kind=STUDENT|TEACHER`) · API `POST /users/import/upload?kind=`, `GET /users/import/grid?kind=`, `DELETE /users/import/grid[/:rowKey]?kind=`, `DELETE /users/import/grid`, `POST /users/import/save?kind=` · UC UCADM08.
+**(a)** Route `/admin/users/import` (`?kind=STUDENT|TEACHER`) · API `POST /users/import/upload?kind=`, `GET /users/import/grid?kind=`, `DELETE /users/import/grid[/:rowKey]?kind=`, `DELETE /users/import/grid`, `POST /users/import/save?kind=` (202, chạy nền), `GET /users/import/save-status?kind=` (theo dõi tiến độ, đề xuất), `GET /users/import/template?kind=` (tải mẫu, đề xuất) · UC UCADM08.
 **(b/c)** Dùng **C-IMPORT-GRID**; khác biệt:
 | # | Điểm | Quy tắc |
 |---|---|---|
@@ -1072,7 +1073,7 @@ Tài khoản     [ Sinh viên ]  [ Giảng viên ]            [ Thêm sinh viên
 | 3 | Popup dòng bị loại | `import-rejected-popup`: thiếu cột/trống · email sai định dạng · trùng trong file |
 | 4 | **Popup riêng "Tài khoản đã tồn tại"** | `import-existing-popup`: email, MSSV hoặc Mã GV đã có trong hệ thống. Dòng này **không vào lưới** nên không chặn Lưu. **Chỉ tạo mới; không cập nhật tài khoản có sẵn** |
 | 5 | Hai liên kết tải mẫu | `import-template-student`, `import-template-teacher` (file giả) |
-| 6 | Nút chính **"Lưu"** | `import-save`: tạo tài khoản (theo loại), sinh mật khẩu tạm, **chỉ sau Lưu mới xếp hàng email**; kết quả: "Đã tạo {N} tài khoản, {N} email đã xếp hàng." |
+| 6 | Nút chính **"Lưu"** | `import-save`: tạo tài khoản (theo loại), sinh mật khẩu tạm, **chỉ sau Lưu mới xếp hàng email**. **Chạy nền**: nút Lưu trả ngay, giao diện hiện thanh tiến độ ("Đã xử lý {a}/{b} tài khoản", `import-progress`) và khóa Lưu, Xóa, chọn file, đổi loại cho tới khi xong; kết quả: "Đã tạo {N} tài khoản, {N} email đã xếp hàng gửi." (`import-result`, có nút Ẩn). Kết quả của lần Lưu cũ còn trong Redis không hiện lại khi mới mở trang. Thất bại do trùng: hiện "chưa có tài khoản nào được tạo" kèm danh sách dòng trùng, giữ bảng (`import-failed`) |
 **(e)** Email gửi thất bại sau retry → **không rollback tài khoản**; UI **không** hiển thị trạng thái gửi (#120) `🔶 BR-05` (Mục 9), SMTP chưa chọn (Q-5); sau Lưu chỉ hiện "Đã tạo {n} tài khoản, {m} email đã xếp hàng gửi"; lưới rỗng → `IMPORT_GRID_EMPTY`; hết TTL → `IMPORT_GRID_EXPIRED`.
 
 ---
@@ -1120,7 +1121,7 @@ Sau mỗi lượt: đối chiếu AC (g) từng màn, đối chiếu "KHÔNG hi�
 | R-2 | Admin xem báo cáo/hồ sơ SV ở đâu: cấu trúc đích chỉ ghi `/teacher/reports` và `/admin/dashboard` | Admin dùng chung `/teacher/reports`, `/teacher/students[/…]` (guard cho phép ADMIN; sidebar dựng theo role) | S12–S14 |
 | ✅ R-3 | Menu GV 4 mục, có "Ngân hàng câu hỏi" → `/teacher/item-bank` | **Đã chốt 16/10 (#116)**; S08 với Teacher không có nút tạo lô/import | Mục 2.4, S08 |
 | R-4 | "Đổi mật khẩu" tự nguyện có mục trong menu avatar? | Có (SV) / đáy sidebar (GV, Admin) `⚠️ ĐX` | S16 |
-| R-5 | Giữ hay bỏ màn Tổng quan Admin (S36, cũ E2) | Giữ làm trang chủ Admin | S36 |
+| R-5 | Giữ hay bỏ màn Tổng quan Admin (S36, cũ E2) | **Đã chốt giữ (14/11/2026)**, làm trang chủ Admin | S36 |
 | R-6 | Tham số `[studentId]` của S14 là MSSV hay UUID user (API hiện tra theo MSSV) | MSSV | S13, S14 |
 | R-7 | S03 là route riêng `/student/exams/[roundId]` (cấu trúc đích chỉ có `take`) | Có route riêng | S02, S03, S04 |
 | P18-1 | Giới hạn số dòng tối đa khi xuất kết quả kỳ thi (S22) | Chưa đặt; không hiển thị con số | S22 |
