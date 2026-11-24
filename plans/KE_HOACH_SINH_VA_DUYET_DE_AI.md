@@ -171,7 +171,7 @@ Chọn **O2** vì: (1) giữ luồng một chiều như bạn đã chốt ở #1
 2. Với mỗi câu A được **sửa** nội dung/đáp án/giải thích, rồi chọn **Duyệt** (`FIRST_APPROVED`) hoặc **Từ chối** (`REJECTED`, không lưu lý do).
 3. Sau mỗi lần sửa, hệ thống chạy lại **luật cứng + T1–T2** trên bản sửa (rẻ); hỏng/trùng ⇒ chặn Duyệt, báo lý do.
 4. Kết quả vòng 1 ghi vào `first_review` của câu (`action`, `reviewedAt`, `comment`, `originalSnapshot` chụp lần sửa đầu, ghi một lần). **Không còn bước "Gửi cho B"**.
-5. ⚠ chờ xác nhận: sau khi A duyệt một câu, A còn sửa lại câu đó được không (trước đây khóa sau khi gửi gói); chưa có quy tắc thay thế.
+5. **Lệch tài liệu cần nhóm xác nhận:** SRS BR-25 và Mục 9b.13 hiện ghi A không sửa lại câu đã Duyệt hoặc Từ chối; bản kế hoạch trước đây để mở sau khi bỏ gói. Chưa được xem khác biệt này là một quyết định mới.
 
 ### 6.2. GV B confirm
 1. B mở "Hộp việc → Cần confirm": thấy **danh sách câu được giao cho mình** (câu `FIRST_APPROVED`, ⚠ chờ xác nhận về thời điểm như Mục 2.2), chỉ đọc. Mỗi câu hiện cờ và dấu **"A đã sửa"** kèm bản gốc so với bản sửa.
@@ -219,7 +219,7 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 **L-1. Tạo lô bằng AI (UCADM11).** Ad nhập skill, CEFR, topic, N ⇒ H kiểm giới hạn, tạo lô (`GENERATING`), đẩy job ⇒ Worker: G1 → G2 → **C1** → G6 → G7 ⇒ lô `READY_TO_ASSIGN` (hoặc `PARTIAL`/`FAILED`) ⇒ thông báo Ad. Mỗi lời gọi ghi mô hình, token.
 **L-2. Tạo lô bằng import file (UCADM12, đề xuất).** Ad tải một hoặc nhiều file vào lưới (C2 tầng 1–4 chạy ngay) ⇒ xem lưới/popup ⇒ **Lưu** ⇒ H tạo lô `IMPORTED`, chạy C2 tầng 5 ⇒ `READY_TO_ASSIGN`.
 **L-3. Xem kết quả và giao việc (UCADM13, đề xuất).** Ad xem số câu qua, danh sách AI đã loại, cờ ⇒ **Giao việc** (chọn A, B, `reviewDays`, `confirmDays`) ⇒ xem trước phân bổ ⇒ xác nhận ⇒ H ghi người duyệt/xác nhận và hạn vào từng câu, ghi `ASSIGN`, lô `IN_REVIEW`, thông báo và đặt lịch nhắc.
-**L-4. A duyệt câu (UCGV14).** A sửa/duyệt/từ chối từng câu (H kiểm lại cứng + T1–T2 sau sửa) ⇒ ghi `first_review`; câu `FIRST_APPROVED` chuyển sang hộp việc của B. Không có bước gửi gói.
+**L-4. A duyệt câu (UCGV14).** A sửa/duyệt/từ chối từng câu (H kiểm lại cứng + T1–T2 sau sửa) ⇒ ghi `first_review`; câu `FIRST_APPROVED` chờ B xác nhận. Không có bước gửi gói. ⚠ Thời điểm hiển thị câu cho B vẫn chờ xác nhận (Mục 2.2).
 **L-5. B confirm (UCGV15).** B mở danh sách câu được giao ⇒ xử lý từng câu hoặc "xác nhận tất cả còn lại" ⇒ ghi `second_review`.
 **L-6. Theo dõi, chỉnh hạn, giao lại.** Ad xem tiến độ theo GV/câu, chỉnh hạn, giao lại.
 **L-7. Kiểm tra và import (UCADM14, đề xuất).** Lô `READY_TO_FINALIZE` ⇒ Ad bấm **Kiểm tra** (C3) ⇒ xem báo cáo ⇒ quyết lỗi mềm ⇒ **Import** (H chạy lại T1–T2 nhanh) ⇒ `FINAL_APPROVED`.

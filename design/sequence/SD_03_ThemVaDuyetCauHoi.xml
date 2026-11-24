@@ -1602,7 +1602,7 @@
 												<UML:TaggedValue tag="mt" value="Guard RBAC: role TEACHER; chi tra ve cau duoc giao cho minh (confirmer_id), chi doc (NOT_ASSIGNED 403)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="findByConfirmer(confirmerId) - items.confirmer_id [cho xac nhan: dieu kien B thay cau, vd A da duyet cau do?]" xmi.id="EAID_3218E14E_8ABA_4ABF_8E0A_68A838C2B27B" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC">
+										<UML:Message name="findByConfirmer(confirmerId): FIRST_APPROVED required for confirmation [visibility timing pending]" xmi.id="EAID_3218E14E_8ABA_4ABF_8E0A_68A838C2B27B" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1643,7 +1643,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2200;PtEndX=0;PtEndY=-2200;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="findByConfirmer(confirmerId) - items.confirmer_id [cho xac nhan: dieu kien B thay cau, vd A da duyet cau do?]"/>
+												<UML:TaggedValue tag="mt" value="findByConfirmer(confirmerId): FIRST_APPROVED required for confirmation [visibility timing pending]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Tra ve cac cau duoc giao cho B()" xmi.id="EAID_138FEBFB_DC1B_4079_8C36_C5D8B6D698FD" visibility="public" sender="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">

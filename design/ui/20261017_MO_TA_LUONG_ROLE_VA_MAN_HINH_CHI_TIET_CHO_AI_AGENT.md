@@ -13,6 +13,8 @@
 > **Cập nhật 2026-11-03 (họp GVHD, bỏ gói):** không còn `ItemPackage`/`PackageStatus`/nút "Gửi cho B"/"Ép gửi gói"/`PACKAGE_INCOMPLETE`. Admin giao **từng câu** cho GV A và GV B; Hộp việc của GV là **danh sách câu được giao** (gom theo lô chỉ để hiển thị). Kết quả hai vòng ghi vào `Item.firstReview`/`secondReview`. `ReviewAction` bỏ `EXTEND`, `FORCE_SEND`, thêm `ASSIGN`. Nguồn: `D:\TLCN\20261103_QUYET_DINH_THAY_DOI_THIET_KE_CLASS_DIAGRAM.md`. Chỗ ghi **⚠ chờ xác nhận** là điểm quyết định chưa nói rõ (route mới, thời điểm B thấy câu, mốc hạn vòng 2, sửa lại sau khi Duyệt...), AI chỉ viết tạm. **Chưa cập nhật mã FE** (`tasks/reviews/[packageId]`, `tasks/confirms/[packageId]` còn theo mô hình cũ).
 > **Giới hạn trung thực:** chưa chạy FE; chưa sinh thử UI từ file này; mọi số liệu trong ví dụ là **dữ liệu mẫu (mock)**; tên màn/route/nhãn tiếng Việt mới là đề xuất cho tới khi nhóm duyệt W0.1.
 
+> **Đối chiếu 24/11/2026:** SRS BR-25 hiện ghi A không sửa lại câu đã Duyệt/Từ chối, còn kế hoạch cũ từng để mở; nhóm cần xác nhận sự khác biệt. Thời điểm B thấy câu, phạm vi xác nhận hàng loạt và route chi tiết vẫn chưa được tài liệu này chốt. Xem `drafts/20261124_RASOAT_DONGBO_USECASE_CLASS.md`.
+
 ---
 
 ## 0. CÁCH ĐỌC FILE NÀY (DÀNH CHO AI AGENT)
@@ -301,7 +303,7 @@ Trang chủ theo role sau đăng nhập: STUDENT → `/student/dashboard`; TEACH
 Tạo ────┤
         └─ qua ► DRAFT ──A Duyệt──► FIRST_APPROVED ──► [B Xác nhận] ► SECOND_APPROVED ──Admin Import──► FINAL_APPROVED
                   │                       │                                  │              │
-                  └──A Từ chối────────────┘ (A không sửa lại sau khi gửi)     └─B Loại bỏ──► REJECTED
+                  └──A Từ chối────────────┘ (không còn bước gửi gói)           └─B Loại bỏ──► REJECTED
                   └──► REJECTED                                                       C3 lỗi cứng ► AI_REJECTED ; lỗi mềm ► Admin: Chấp nhận (ACCEPT_FLAG→Import) | Loại (REJECTED)
 ```
 Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
@@ -340,7 +342,7 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 2. Bấm thẻ → **S11**: danh sách câu được giao trong lô đó + trình sửa/duyệt từng câu. Chỉ thấy **câu giao cho mình** (khác → 403).
 3. Với mỗi câu (đang `DRAFT`): có thể **sửa** nội dung, 4 phương án, đáp án đúng, giải thích (kỹ năng/CEFR/chủ đề/`irt_b` chỉ đọc `🔶 P25-3`); bấm **Lưu sửa** → server chạy lại **luật cứng + trùng T1–T2** trên bản sửa; lỗi/trùng → **chặn nút Duyệt** (`INVALID_AFTER_EDIT`/`DUPLICATE_AFTER_EDIT`).
 4. Chọn **Duyệt** (→ `FIRST_APPROVED`) hoặc **Từ chối** (→ `REJECTED`, **không có ô lý do**). Sau mỗi thao tác tự sang câu chưa quyết kế tiếp.
-5. **Không còn bước "Gửi cho B"**: sau khi A Duyệt một câu, câu đó thuộc hộp việc của B (⚠ chờ xác nhận về thời điểm). Câu A từ chối (`REJECTED`) không tới B. ⚠ chờ xác nhận: A có sửa lại được câu đã Duyệt không (trước đây khóa sau khi gửi gói).
+5. **Không còn bước "Gửi cho B"**: câu A duyệt (`FIRST_APPROVED`) chờ B xác nhận; ⚠ thời điểm hiện cho B còn chờ xác nhận. Câu A từ chối (`REJECTED`) không tới B. SRS BR-25 hiện ghi A không sửa lại câu đã Duyệt hoặc Từ chối; kế hoạch cũ để mở điểm này, cần nhóm xác nhận sự khác biệt trước khi coi là quyết định mới.
 6. Quá hạn chỉ hiện cảnh báo "Việc này đã quá hạn", **không khóa thao tác**. Admin có thể chỉnh hạn hoặc giao lại câu cho GV khác.
 
 **4.4-C. GV vai B — xác nhận (các câu A đã duyệt và được giao cho mình)**
@@ -422,7 +424,7 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 | BR-22 | Giao việc: nhóm A ≥ 1, đúng một B ∉ A, hai số ngày ≥ 1, lô `READY_TO_ASSIGN` | S30 | Danh sách B loại trừ nhóm A; `CONFIRMER_IN_REVIEW_GROUP`; nút Xác nhận giao có điều kiện bật |
 | BR-23 | Chia đều vòng tròn, chênh tối đa 1 câu | S30 | Bảng xem trước phân bổ |
 | BR-24 | Hạn cuối ngày 23:59 giờ VN; nhắc trước 24 giờ; quá hạn chỉ cảnh báo | S31, S33–S35 | C-DUE; chỉnh hạn chỉ áp dụng việc chưa xử lý |
-| ~~BR-25~~ | ~~A chỉ Gửi khi mọi câu đã quyết; gửi một lần; sau gửi không sửa~~ **Bỏ theo quyết định 03/11/2026 (không còn gói).** ⚠ chờ xác nhận: BR thay thế (nếu có) về việc A sửa lại câu đã Duyệt; SRS Mục IXb phải sửa theo | S11, S33 | Không còn nút "Gửi cho B"; không còn `PACKAGE_INCOMPLETE` |
+| BR-25 | Bỏ điều kiện gửi gói theo quyết định 03/11/2026. SRS hiện ghi A không sửa lại câu đã Duyệt hoặc Từ chối; kế hoạch cũ để mở điểm này, cần nhóm xác nhận sự khác biệt. ⚠ Thời điểm B thấy câu vẫn chờ xác nhận. | S11, S33 | Không còn nút "Gửi cho B"; không còn `PACKAGE_INCOMPLETE` |
 | BR-26 | B chỉ đọc: Xác nhận/Loại từng câu hoặc "Xác nhận tất cả câu còn lại"; không trả về A | S35 | Không có ô sửa, không có nút trả về |
 | BR-27 | Sửa xong chạy lại luật cứng và T1–T2; hỏng/trùng chặn Duyệt | S11 | `INVALID_AFTER_EDIT`/`DUPLICATE_AFTER_EDIT`; Duyệt bị khóa |
 | BR-28 | Import khi lô `READY_TO_FINALIZE` và có báo cáo C3 còn hiệu lực | S32 | Nút Import khóa tới khi có báo cáo hợp lệ; `FINAL_CHECK_REQUIRED`/`STALE`/`BATCH_NOT_READY_TO_FINALIZE` |

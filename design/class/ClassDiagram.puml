@@ -192,7 +192,7 @@ class SecondReviewDetail <<DataType>> {
 }
 class ItemReviewEvent {
   - id: UUID
-  - itemId: UUID
+  - itemId: UUID {nullable}
   - batchId: UUID
   - actorId: UUID
   - action: ReviewAction

@@ -267,7 +267,7 @@
 							<UML:Collaboration.interaction>
 								<UML:Interaction xmi.id="EAPK_E6B417A7_0D72_4015_AAFB_5C2136688B4C_INT" name="EAPK_E6B417A7_0D72_4015_AAFB_5C2136688B4C_INT">
 									<UML:Interaction.message>
-										<UML:Message name="Mo lo READY_TO_ASSIGN, xem cau qua / AI da loai / co mem; chon nhom A, GV B, reviewDays, confirmDays; Click Xem truoc phan bo()" xmi.id="EAID_E69A75B6_7E3A_41A8_9492_53B1BC6DFFB2" visibility="public" sender="EAID_130D3B13_DEB9_4EE7_9838_394FDD6EB8F6" receiver="EAID_6D56E860_47B9_44CF_A344_88C361CE771C">
+										<UML:Message name="Open READY_TO_ASSIGN batch; select reviewers and deadlines [selection and deadline rules pending]()" xmi.id="EAID_E69A75B6_7E3A_41A8_9492_53B1BC6DFFB2" visibility="public" sender="EAID_130D3B13_DEB9_4EE7_9838_394FDD6EB8F6" receiver="EAID_6D56E860_47B9_44CF_A344_88C361CE771C">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -308,10 +308,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-100;PtEndX=0;PtEndY=-100;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="Mo lo READY_TO_ASSIGN, xem cau qua / AI da loai / co mem; chon nhom A, GV B, reviewDays, confirmDays; Click Xem truoc phan bo()"/>
+												<UML:TaggedValue tag="mt" value="Open READY_TO_ASSIGN batch; select reviewers and deadlines [selection and deadline rules pending]()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="previewAssign(batchId, reviewerIds, confirmerId, reviewDays, confirmDays) - GET /item-batches/:id/assign-preview" xmi.id="EAID_A95832E4_8B11_46D6_994E_D4E31E3542B8" visibility="public" sender="EAID_6D56E860_47B9_44CF_A344_88C361CE771C" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
+										<UML:Message name="previewAssign(...) - GET /item-batches/:id/assign-preview [selection and request pending]" xmi.id="EAID_A95832E4_8B11_46D6_994E_D4E31E3542B8" visibility="public" sender="EAID_6D56E860_47B9_44CF_A344_88C361CE771C" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -352,10 +352,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-150;PtEndX=0;PtEndY=-150;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="previewAssign(batchId, reviewerIds, confirmerId, reviewDays, confirmDays) - GET /item-batches/:id/assign-preview"/>
+												<UML:TaggedValue tag="mt" value="previewAssign(...) - GET /item-batches/:id/assign-preview [selection and request pending]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Guard RBAC: chi ADMIN; lo phai READY_TO_ASSIGN; B khong thuoc nhom A (CONFIRMER_IN_REVIEW_GROUP 409)()" xmi.id="EAID_8246C617_FAC8_41E9_917B_5C86D86B9F31" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
+										<UML:Message name="RBAC: ADMIN only; READY_TO_ASSIGN; A differs from B per item [group constraint pending]()" xmi.id="EAID_8246C617_FAC8_41E9_917B_5C86D86B9F31" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -396,7 +396,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-200;PtEndX=0;PtEndY=-200;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="Guard RBAC: chi ADMIN; lo phai READY_TO_ASSIGN; B khong thuoc nhom A (CONFIRMER_IN_REVIEW_GROUP 409)()"/>
+												<UML:TaggedValue tag="mt" value="RBAC: ADMIN only; READY_TO_ASSIGN; A differs from B per item [group constraint pending]()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="findDraftItems(batchId)" xmi.id="EAID_18B37FA8_2166_4011_84B4_E17860086269" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_01DC4876_CC1F_478A_992C_7E15FF714819">
@@ -487,7 +487,7 @@
 												<UML:TaggedValue tag="mt" value="Tra ve cac cau DRAFT()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Sap xep theo (skill, cefr, thu tu sinh); cau thu i giao cho A thu (i mod M) - chia deu, chenh toi da 1 cau()" xmi.id="EAID_A2B43DA4_B7F2_42DD_A0FD_DF91A31AA25C" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
+										<UML:Message name="Proposed round-robin allocation by skill and CEFR [pending confirmation]()" xmi.id="EAID_A2B43DA4_B7F2_42DD_A0FD_DF91A31AA25C" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -528,7 +528,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-350;PtEndX=0;PtEndY=-350;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="Sap xep theo (skill, cefr, thu tu sinh); cau thu i giao cho A thu (i mod M) - chia deu, chenh toi da 1 cau()"/>
+												<UML:TaggedValue tag="mt" value="Proposed round-robin allocation by skill and CEFR [pending confirmation]()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Tra ve bang xem truoc: GV - so cau, theo ky nang / CEFR()" xmi.id="EAID_58ED4F51_52E4_41D1_81E6_DE5B52E4B8F1" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_6D56E860_47B9_44CF_A344_88C361CE771C">
@@ -663,7 +663,7 @@
 												<UML:TaggedValue tag="mt" value="Click Xac nhan giao"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="assign(batchId, reviewerIds, confirmerId, reviewDays, confirmDays) - POST /item-batches/:id/assign" xmi.id="EAID_79BE0CBA_41B3_4406_A673_759E6D394F6B" visibility="public" sender="EAID_6D56E860_47B9_44CF_A344_88C361CE771C" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
+										<UML:Message name="assign(...) - POST /item-batches/:id/assign [selection and request pending]" xmi.id="EAID_79BE0CBA_41B3_4406_A673_759E6D394F6B" visibility="public" sender="EAID_6D56E860_47B9_44CF_A344_88C361CE771C" receiver="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -704,7 +704,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-550;PtEndX=0;PtEndY=-550;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="assign(batchId, reviewerIds, confirmerId, reviewDays, confirmDays) - POST /item-batches/:id/assign"/>
+												<UML:TaggedValue tag="mt" value="assign(...) - POST /item-batches/:id/assign [selection and request pending]"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="updateStatus(IN_REVIEW) [cho xac nhan: reviewDays/confirmDays chi la tham so tinh dueAt, khong con luu item_batch_assignments]" xmi.id="EAID_50E2BCC6_7A23_4060_8202_6E3EC744845E" visibility="public" sender="EAID_392CFF03_2AF8_48FB_A9CD_67FFA545D9D2" receiver="EAID_4F45258A_60B9_42FE_9CC3_E984A7D62E0D">
@@ -1939,7 +1939,7 @@
 												<UML:TaggedValue tag="mt" value="Tra ve so cau chua xong (bang 0: khong nhac)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="send thong bao gop mot lan: con x cau, han dd/mm (kem thong bao trong ung dung)" xmi.id="EAID_86B03DCE_3776_41E7_B8A6_626004A5631A" visibility="public" sender="EAID_2D368B30_A54F_4521_A135_88CCF7573DA4" receiver="EAID_1A5F677C_A59A_456C_9DF7_AD41705890D5">
+										<UML:Message name="Send grouped reminder email; tasks remain visible in inbox (no real-time notification)" xmi.id="EAID_86B03DCE_3776_41E7_B8A6_626004A5631A" visibility="public" sender="EAID_2D368B30_A54F_4521_A135_88CCF7573DA4" receiver="EAID_1A5F677C_A59A_456C_9DF7_AD41705890D5">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1980,7 +1980,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2000;PtEndX=0;PtEndY=-2000;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_8518F31A_EEB1_41B6_8A47_974A9C4FCBE0"/>
-												<UML:TaggedValue tag="mt" value="send thong bao gop mot lan: con x cau, han dd/mm (kem thong bao trong ung dung)"/>
+												<UML:TaggedValue tag="mt" value="Send grouped reminder email; tasks remain visible in inbox (no real-time notification)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Nhan email nhac han()" xmi.id="EAID_BE6E824E_C658_4CB4_B944_2422032EBF92" visibility="public" sender="EAID_1A5F677C_A59A_456C_9DF7_AD41705890D5" receiver="EAID_E84D8BFA_6C5D_4002_A57B_BBD3474CCA75">

@@ -187,7 +187,15 @@ $$
 \mathrm{SE}(\hat{\theta}) = \sqrt{\frac{\sum_{k = 1}^{41} (\theta_k-\hat{\theta})^2 \cdot L(\mathbf{u}|\theta_k) \cdot \pi(\theta_k)}{\sum_{k = 1}^{41} L(\mathbf{u}|\theta_k) \cdot \pi(\theta_k)}}
 $$
 
-**[NOTE]** **Phân biệt θ₀ và Prior (hai vai trò tách biệt):**  | | θ₀ = −0.5 | Prior N(0,1) | |---|---|---| | **Vai trò** | Điểm khởi tạo để chọn **câu hỏi đầu tiên** | Phân phối Bayes để ước lượng θ **sau mỗi response** | | **Ảnh hưởng** | Chỉ ảnh hưởng item selection round 1 | Ảnh hưởng EAP estimation suốt bài thi | | **Sau câu 1** | Không còn dùng nữa, bị thay bởi EAP | Tiếp tục đóng vai trò prior |  Hiệu ứng **shrinkage** của prior N(0,1) (kéo θ về 0 trong 20-25 câu đầu) là hành vi đúng và mong muốn của Bayesian estimation — ngăn θ bị ước lượng quá cực đoan khi còn ít data. Prior N(-0.5, 1) là lựa chọn hợp lệ hơn về mặt lý thuyết nếu biết chắc dân số có mean = -0.5, nhưng N(0,1) là chuẩn học thuật được áp dụng rộng rãi (weakly informative).  **Sau khi có calibration data thực tế (Tuần 9-10):** Có thể cập nhật prior mean thành mean(θ) thực tế của cohort để giảm shrinkage bias.
+**[NOTE]** **Phân biệt θ₀ và Prior (hai vai trò tách biệt):**
+
+| | θ₀ = −0.5 | Prior N(0,1) |
+|---|---|---|
+| **Vai trò** | Điểm khởi tạo để chọn **câu hỏi đầu tiên** | Phân phối Bayes để ước lượng θ **sau mỗi response** |
+| **Ảnh hưởng** | Chỉ ảnh hưởng item selection round 1 | Ảnh hưởng EAP estimation suốt bài thi |
+| **Sau câu 1** | Không còn dùng nữa, bị thay bởi EAP | Tiếp tục đóng vai trò prior |
+
+Hiệu ứng **shrinkage** của prior N(0,1) (kéo θ về 0 trong 20-25 câu đầu) là hành vi đúng và mong muốn của Bayesian estimation — ngăn θ bị ước lượng quá cực đoan khi còn ít data. Prior N(-0.5, 1) là lựa chọn hợp lệ hơn về mặt lý thuyết nếu biết chắc dân số có mean = -0.5, nhưng N(0,1) là chuẩn học thuật được áp dụng rộng rãi (weakly informative).  **Sau khi có calibration data thực tế (Tuần 9-10):** Có thể cập nhật prior mean thành mean(θ) thực tế của cohort để giảm shrinkage bias.
 
 **[WARNING]** **MLE Fallback Guard (nếu EAP bị bug):** MLE trong Rasch model **không hội tụ** khi sinh viên trả lời đúng hết hoặc sai hết — θ → ±∞, hệ thống crash hoặc trả về `NaN`. Trường hợp này xảy ra thường xuyên (SV Pre-A1 sai 5-10 câu đầu liên tiếp).  **Guard condition bắt buộc khi dùng MLE fallback:** 1. Chỉ invoke MLE khi có ≥ 1 câu đúng VÀ ≥ 1 câu sai trong session. 2. Nếu chưa đủ điều kiện (toàn đúng hoặc toàn sai): dùng EAP với prior mạnh hơn N(0, 0.5) tạm thời. 3. Clip θ kết quả về [-4, +4] trong MỌI trường hợp — không để θ vượt ra ngoài lưới 41 điểm.
 
@@ -223,7 +231,19 @@ Nếu chọn câu có $b_i$ gần $\hat{\theta}$ nhất theo kiểu tất địn
 
 **[NOTE]** Randomized Top-5 không giải quyết hoàn toàn bài toán exposure (vùng A2-B1 còn 20-35 câu, 500 SV vẫn sẽ thấy lại câu cũ sau 25-50 lượt). Tuy nhiên, đây là biện pháp **phòng thủ theo chiều sâu** phù hợp với quy mô Tiểu luận: không phức tạp, không tốn thêm câu hỏi, giảm đáng kể tính tất định so với b-match tuyệt đối. **Khóa luận sẽ implement Sympson-Hetter** với exposure cap cứng ≤ 0.3 như đặc tả Mục 4.8.
 
-**[IMPORTANT]** **Guard condition bắt buộc:** Query item selection **PHẢI** filter `WHERE status = 'FINAL_APPROVED'`. Item có status khác FINAL_APPROVED (DRAFT, FIRST_APPROVED, SECOND_APPROVED, REJECTED, AI_REJECTED) tuyệt đối không được đưa vào bài thi. Đây phải được đặt ở tầng Repository, không phải business logic. ```typescript // ItemRepository.findForCAT() — Randomized Top-5 return this.db.query( `WITH TopMatches AS ( SELECT * FROM items WHERE status = 'FINAL_APPROVED' AND skill = $1 AND id != ALL($2) ORDER BY ABS(irt_b - $3) LIMIT 5 ) SELECT * FROM TopMatches ORDER BY RANDOM() LIMIT 1;`, [skill, usedIds, currentTheta] ); ```
+**[IMPORTANT]** **Guard condition bắt buộc:** Query item selection **PHẢI** filter `WHERE status = 'FINAL_APPROVED'`. Item có status khác FINAL_APPROVED (DRAFT, FIRST_APPROVED, SECOND_APPROVED, REJECTED, AI_REJECTED) tuyệt đối không được đưa vào bài thi. Đây phải được đặt ở tầng Repository, không phải business logic.
+
+```typescript
+// ItemRepository.findForCAT() — Randomized Top-5
+return this.db.query(
+  `WITH TopMatches AS (
+    SELECT * FROM items
+    WHERE status = 'FINAL_APPROVED' AND skill = $1 AND id != ALL($2)
+    ORDER BY ABS(irt_b - $3) LIMIT 5
+  ) SELECT * FROM TopMatches ORDER BY RANDOM() LIMIT 1;`,
+  [skill, usedIds, currentTheta],
+);
+```
 
 **[NOTE]** Vòng 3 (DC-39): trạng thái đã duyệt cũ được đổi tên thành FINAL_APPROVED; FIRST_APPROVED và SECOND_APPROVED là hai mức duyệt trung gian (GV vai A, GV vai B) và chưa được CAT chọn. Điều kiện lọc ở tầng Repository, Partial Index (Mục 6.2) và R9 đều đổi theo; công thức và các bước chọn câu Top-5 không đổi. Mã BE và seed hiện có còn dùng tên cũ — nợ đồng bộ, chưa sửa ở tài liệu này.
 
@@ -1053,6 +1073,8 @@ Sau khi giao: ghi reviewer_id, confirmer_id, first_review.dueAt, second_review.d
 **Hạn và nhắc.** Mỗi câu có hạn riêng cho từng vòng: first_review.dueAt (A) và second_review.dueAt (B), cuối ngày, giờ chốt 23:59:59 giờ Việt Nam (cấu hình). ⚠ chờ xác nhận: cách tính hạn của B. Admin chỉnh hạn (chỉ áp dụng cho việc chưa xử lý) ⇒ tính lại dueAt, hủy và tạo lại lịch nhắc (⚠ chờ xác nhận: hành động ghi nhật ký khi chỉnh hạn, vì EXTEND đã bỏ). Nhắc: job trễ BullMQ chạy lúc dueAt trừ 24 giờ, nếu việc chưa xong và cờ first_reminder_sent / second_reminder_sent còn false thì gửi một email nhắc gộp theo (lô, bước, GV) qua MailPort rồi bật cờ (việc vẫn hiện trong Hộp việc); cờ là cột riêng của items, tách khỏi JSON kết quả duyệt nên job nhắc không ghi đè quyết định của GV; hạn còn dưới 24 giờ lúc giao/chỉnh ⇒ nhắc ngay một lần; kèm đối chiếu lazy khi mở hộp việc phòng mất job. Quá hạn: chỉ hiển thị "quá hạn" cho Admin và GV (tính lazy bằng Item.isOverdue(round, at)), không tự đổi trạng thái hay tự giao lại; Admin chọn chỉnh hạn hoặc giao lại. Đã bỏ "ép gửi gói" (FORCE_SEND) cùng với gói.
 
 **Sau khi B confirm.** Câu SECOND_APPROVED nằm chờ trong lô, chưa vào ngân hàng. Khi mọi câu đã xong vòng 2 (SECOND_APPROVED hoặc REJECTED) hoặc các câu còn lại đã quá hạn ⇒ lô READY_TO_FINALIZE; Admin thấy thống kê (SECOND_APPROVED, REJECTED bởi A/B, AI_REJECTED, chưa xử lý). Admin bấm Kiểm tra (C3), đọc báo cáo, xử lý lỗi mềm, rồi bấm Import ⇒ câu qua (và lỗi mềm Admin chấp nhận) thành FINAL_APPROVED, ghi approved_by, approved_at, có hiệu lực cho CAT, calibrated = false. Câu chưa quyết định (còn DRAFT hoặc FIRST_APPROVED chưa tới B) không được import. Quy tắc nghiệp vụ (chốt 18/10/2026): đến hạn mọi GV phải hoàn thành việc được giao, nên không có "câu tồn đọng" cần xử lý riêng sau Import; chỉnh hạn và giao lại chỉ là biện pháp dự phòng của Admin trước khi chạy C3. Lô chuyển DONE khi mọi câu đã ở trạng thái cuối.
+
+> ⚠ **Điểm cần đối chiếu khi đồng bộ UC:** đoạn trên cho phép lô sẵn sàng khi còn câu quá hạn chưa quyết, nhưng cũng nêu không có câu tồn đọng sau Import. Kế hoạch sinh và duyệt đề mục 6.4 mô tả câu chưa xử lý không được import và lô chỉ DONE khi mọi câu đã ở trạng thái cuối. Nhóm cần xác nhận cách xử lý phần còn lại; ghi chú này không thay đổi điều kiện import hay tự chọn phương án.
 
 ### 9b.15. Câu bị loại
 

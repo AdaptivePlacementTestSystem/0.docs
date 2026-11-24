@@ -17,6 +17,7 @@
 | 2026-10-27 | Thêm lại `irtA`, `TestMetadata`, method Admin/Teacher; bỏ `ItemBatch.createdAt`; thêm Mục 8–12 (quy tắc nghiệp vụ, đối chiếu `schema.prisma`, dữ liệu minh họa, module, tệp sinh tự động); sinh lại `ClassDiagram.puml/.mmd`; `schema.prisma` thêm khóa ngoại `ItemReviewEvent.packageId` |
 | 2026-11-02 | Đăng xếp lại vị trí và đường nối trên draw.io, bỏ ký hiệu `?` (dùng `{nullable}`); thêm `Item.originalSnapshot` và `TestSession.responses`; `schema.prisma` thêm `Item.originalSnapshot`; sinh lại `ClassDiagram.puml/.mmd`; ảnh PNG dựng lại bằng script |
 | 2026-11-03 | Theo họp GVHD: bỏ `ItemPackage`, `PackageStatus`; thêm `Item.reviewerId/confirmerId` (cột khóa ngoại) và `Item.firstReview/secondReview` (JSON, kiểu `FirstReviewDetail`/`SecondReviewDetail`); `originalSnapshot` chuyển vào `FirstReviewDetail`; `ReviewAction` bỏ `EXTEND`/`FORCE_SEND`, thêm `ASSIGN`; `Teacher` có `reviewItem`/`confirmItem`, bỏ `submitPackage`; `ExamRound ◆ TestSession` (Composition); `schema.prisma` bỏ ba model giao việc/gói; sinh lại `ClassDiagram.puml/.mmd` |
+| 2026-11-24 | Đồng bộ ký hiệu `ItemReviewEvent.itemId` có thể rỗng trên UML và draw.io theo mô tả Mục 3.6 và schema: `CONFIRM_ALL` có thể ghi sự kiện mức lô; `ASSIGN`/`REASSIGN` vẫn ghi theo từng câu. Ảnh PNG cần xuất lại. |
 
 ---
 # BẢNG MÔ TẢ 3 CLASS DIAGRAM (bản đề xuất đã rút gọn — Tuần 7)
@@ -74,7 +75,7 @@ Lớp cha của mọi tài khoản (hệ thống đơn trường, 3 role). Khôn
 | `+ reviewItem(item, action, comment): void` | GV A duyệt hoặc từ chối một câu được giao (`APPROVE`/`REJECT`); ghi vào `Item.firstReview` và `ItemReviewEvent` |
 | `+ confirmItem(item, action, comment): void` | GV B xác nhận hoặc loại một câu được giao (`CONFIRM`/`REMOVE`); ghi vào `Item.secondReview` và `ItemReviewEvent` |
 
-Khi Admin giao việc, giảng viên làm **GV A** (sửa, duyệt/từ chối từng câu) hoặc **GV B** (xác nhận/loại từng câu). Không còn gói: mỗi câu được giao riêng cho một GV A và một GV B (`Item.reviewerId`, `Item.confirmerId`); Thời điểm GV B thấy câu để xác nhận (ngay khi được giao hay sau khi A duyệt câu đó) ⚠ chờ xác nhận.
+Khi Admin giao việc, giảng viên làm **GV A** (sửa, duyệt/từ chối từng câu) hoặc **GV B** (xác nhận/loại từng câu). Không còn gói: mỗi câu được giao riêng cho một GV A và một GV B (`Item.reviewerId`, `Item.confirmerId`). Theo SRS BR-25, câu cần được A duyệt trước khi B xác nhận; thời điểm câu `FIRST_APPROVED` hiện cho B — ngay sau khi A duyệt câu đó hay sau khi A xử lý hết phần được giao — ⚠ chờ xác nhận.
 
 ### 1.4 `Admin` (kế thừa `User`) — quản trị viên trường
 Không có thuộc tính riêng: Admin chỉ khác ở **quyền**. Admin **không sửa nội dung câu hỏi**.
