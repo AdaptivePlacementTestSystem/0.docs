@@ -8,7 +8,7 @@
 
 **GV vai A:** xem các câu được phân công, có thể sửa nội dung, lựa chọn, đáp án hoặc giải thích của câu đủ điều kiện, sau đó duyệt hoặc từ chối từng câu. Thông tin vòng 1 được lưu trong `firstReview`; bản gốc được chụp một lần trước lần sửa đầu tiên. Không có bước gửi gói.
 
-**GV vai B:** xem và xác nhận hoặc loại từng câu được phân công, đủ điều kiện theo trạng thái; chỉ đọc nội dung, được đối chiếu bản gốc và bản A đã sửa nếu có. B không sửa nội dung, không trả câu về A. Có hành động xác nhận hàng loạt; **[CHỜ CHỐT]** phạm vi theo lô hay toàn bộ hộp việc.
+**GV vai B:** xem và xác nhận hoặc loại từng câu được phân công, đủ điều kiện theo trạng thái; chỉ đọc nội dung, được đối chiếu bản gốc và bản A đã sửa nếu có. B không sửa nội dung, không trả câu về A. Có hành động xác nhận hàng loạt; **[ĐÃ CHỐT 24/11/2026]** phạm vi theo từng lô (`batchId`) đang mở trên giao diện, không phải toàn bộ hệ thống.
 
 **Admin:** tạo/import lô, giao và giao lại công việc, chỉnh hạn, theo dõi, kiểm tra C3 và import câu đủ điều kiện; không sửa hoặc duyệt nội dung thay GV. Người được giao A và B trên cùng câu phải khác nhau; quy tắc B có được thuộc nhóm A của cùng lô hay không còn chờ xác nhận theo SRS.
 
@@ -25,7 +25,7 @@
   5. A chọn Duyệt hoặc Từ chối; hệ thống kiểm tra lại quyền/trạng thái và ghi quyết định, thời điểm, sự kiện liên quan theo transaction phù hợp.
   6. Hệ thống trả kết quả và cập nhật tiến độ từng câu; không tạo hay gửi ItemPackage.
 - **Ngoại lệ:** sai người/role ⇒ từ chối; sai trạng thái ⇒ không ghi; bản sửa không hợp lệ hoặc trùng ⇒ không duyệt, mã lỗi cụ thể theo hợp đồng đã được duyệt. Không còn `PACKAGE_INCOMPLETE` cho bước gửi gói đã bị bỏ.
-- **Chờ chốt:** thời điểm B thấy câu `FIRST_APPROVED`; SRS BR-25 ghi không sửa lại sau quyết định trong khi kế hoạch cũ từng để mở. Phạm vi `comment` cần đối chiếu quy tắc không lưu lý do từ chối.
+- **Đã chốt (24/11/2026):** GV B thấy ngay từng câu ngay khi GV A bấm duyệt câu đó (`FIRST_APPROVED`), không cần đợi A duyệt hết cả lô. Trường `comment` là tùy chọn (optional): GV có thể nhập lý do/ghi chú nếu muốn, nhưng hệ thống không bắt buộc (không validate required). SRS BR-25 ghi A không sửa lại sau khi đã quyết định.
 - **Tiêu chí kiểm:** sai người không thay đổi dữ liệu; A sửa hai lần chỉ có một snapshot gốc; bản sửa lỗi/trùng không được duyệt; hành động lặp/cạnh tranh không ghi đè quyết định.
 
 ## 3. UCGV15 — Xác nhận câu hỏi (GV vai B)
@@ -37,7 +37,7 @@
   2. B xem câu ở chế độ chỉ đọc; nếu có snapshot, xem bản gốc so với bản A đã sửa.
   3. B chọn Xác nhận hoặc Loại; hệ thống kiểm tra quyền và trạng thái ngay khi ghi, lưu kết quả và audit.
   4. Hệ thống cập nhật tiến độ và điều kiện sẵn sàng của lô theo quy tắc được chốt.
-- **Luồng thay thế:** B chọn Xác nhận tất cả câu còn lại; chỉ ảnh hưởng các câu chưa được quyết định, B được giao và đủ điều kiện; ghi sự kiện `CONFIRM_ALL` theo hợp đồng audit. **[CHỜ CHỐT]** theo lô hay toàn hộp việc.
+- **Luồng thay thế:** B chọn Xác nhận tất cả câu còn lại; chỉ ảnh hưởng các câu chưa được quyết định, B được giao và đủ điều kiện; ghi sự kiện `CONFIRM_ALL` theo hợp đồng audit. **[ĐÃ CHỐT 24/11/2026]** phạm vi theo từng lô (`batchId`) đang mở trên giao diện, không phải toàn bộ hệ thống.
 - **Ngoại lệ:** B gọi chức năng sửa hoặc trả về A ⇒ từ chối; sai người/trạng thái ⇒ không ghi; yêu cầu cạnh tranh hoặc lặp phải có kết quả nhất quán, không ghi đè quyết định khác.
 - **Tiêu chí kiểm:** B chỉ thấy câu đúng phân công; A từ chối không tới B; B không sửa được; xác nhận hàng loạt không tác động câu của người khác hoặc đã quyết.
 
@@ -51,7 +51,7 @@
   4. Admin xác nhận; hệ thống gán `reviewerId`/`confirmerId` và hạn cho từng câu, ghi sự kiện `ASSIGN` tương ứng, cập nhật trạng thái lô và xử lý thông báo/nhắc theo thiết kế.
   5. Admin theo dõi tiến độ theo câu và người được giao.
 - **Luồng thay thế:** Admin chỉnh hạn hoặc giao lại phần chưa xử lý. Hệ thống kiểm tra lại trạng thái, quyền, hạn, nhật ký và lịch nhắc; không ép gửi gói.
-- **Chờ chốt:** chọn thủ công từng câu hay nhóm + phân bổ; mốc hạn B; giá trị action audit khi chỉnh hạn; quy tắc B so với toàn nhóm A; thời hạn và lịch nhắc cụ thể.
+- **Đã chốt (24/11/2026):** Mốc hạn B cố định theo ngày giao việc của đợt (A = Ngày giao + reviewDays; B = Ngày giao + confirmDays, chốt 23:59:59); không thả nổi hạn của B theo lúc A duyệt để tránh trôi hạn và xung đột lịch nhắc tự động BullMQ. Chọn thủ công từng câu hay nhóm + phân bổ; giá trị action audit khi chỉnh hạn; quy tắc B so với toàn nhóm A tiếp tục theo dõi.
 - **Tiêu chí kiểm:** không giao A=B; sai trạng thái hoặc quyền không ghi; xác nhận trùng hoặc hai Admin cùng giao không tạo phân công/sự kiện mâu thuẫn; quá hạn không tự giao lại.
 
 ## 5. UCADM14 — Kiểm tra cuối và import vào ngân hàng
@@ -84,7 +84,7 @@ Sau khi nhóm chốt điểm mở, cập nhật file Word đặc tả, Use Case 
 | UCGV15 | B chỉ đọc, xác nhận hoặc loại; SECOND_APPROVED chưa vào ngân hàng; xác nhận hàng loạt chỉ tác động câu đủ điều kiện được giao và chưa quyết. | F-27, BR-26; thời điểm hiển thị và phạm vi hàng loạt còn chờ chốt. |
 | UCADM13 | Giao A/B khác nhau trên từng câu khi lô READY_TO_ASSIGN; hạn hai vòng riêng; ghi ASSIGN và theo dõi. | F-25, BR-22–24; phân bổ, mốc hạn B, audit chỉnh hạn và ràng buộc nhóm A/B còn mở. SRS 9b.2 chưa xác nhận việc chỉ chọn tài khoản TEACHER. |
 | UCADM14 | Kiểm tra C3 khi đủ điều kiện; báo cáo C3 còn hiệu lực trước import; kiểm T1–T2 lại, không nhập câu chưa xử lý. | F-28, BR-28, 9b.12–9b.14; xử lý câu còn quá hạn sau import đang có hai cách diễn đạt, không mặc định lô DONE khi câu chưa ở trạng thái cuối. |
-| UCSV02/UCSV07 | Phân biệt kỳ thi và phiên thi; mô tả bắt đầu, phiên đang chạy, tải lại và tiếp tục. | Route dùng roundId hay sessionId chưa thống nhất; không thay URL khi chưa chốt và kiểm thử. |
+| UCSV02/UCSV07 | Phân biệt kỳ thi và phiên thi; mô tả bắt đầu, phiên đang chạy, tải lại và tiếp tục. | Đã chốt xong (11/11/2026): URL phòng thi là `/student/exams/[roundId]/take`, gọi API `/api/v1/exam-rounds/:roundId/session/current` để lấy session an toàn chống IDOR; khi thi xong tự redirect về `/results/[sessionId]` (S05). |
 
 ### Ca kiểm tra cần truy vết khi triển khai
 

@@ -52,13 +52,29 @@ Các mục dưới là hướng thay thế có truy vết, không chốt các th
 | UCSV02/UCSV07 | Giữ đúng phân biệt ID kỳ và ID phiên; mô tả tình huống bắt đầu, có phiên đang chạy, reload và tiếp tục. | Chưa thống nhất route cuối; kiểm tra mã và trải nghiệm thực trước khi thay route. |
 | Mục 2.5 | Ghi Composition `ExamRound ◆ TestSession`, FK và chính sách Restrict. | Bổ sung đây là chi tiết mô hình lớp; không nhầm thành quan hệ use case hoặc hành vi xóa dây chuyền. |
 
-## 5. Các điểm cần nhóm/GVHD quyết định
+## 5. Kết quả chốt chính thức của nhóm (24/11/2026)
 
-1. **Thời điểm B thấy câu:** (A) ngay sau A duyệt từng câu; (B) sau khi A xử lý hết phần được giao. Cả hai không cần khôi phục ItemPackage. Lựa chọn ảnh hưởng thông báo, thời hạn và test.
-2. **Phạm vi xác nhận tất cả:** (A) câu đủ điều kiện trong lô đang mở; (B) toàn bộ câu đủ điều kiện của B. Cần xác nhận hành vi đồng thời và audit.
-3. **Giao việc/hạn:** (A) gán trực tiếp từng câu; (B) chọn nhóm, xem trước rồi ghi phân công từng câu. Hạn B tính từ ngày giao hay lúc A duyệt; cách sửa hạn và ghi audit còn mở.
-4. **Route S04/tiếp tục bài:** (A) lấy sessionId làm ID route; (B) giữ roundId và khôi phục phiên qua API. So sánh reload, phiên không tồn tại/nhiều phiên, quyền và lịch sử trước khi chốt.
-5. **`comment` và từ chối:** (A) không ghi lý do từ chối, chỉ cho phép ghi chú trường hợp khác; (B) thay đổi quy tắc nghiệp vụ nếu nhóm muốn lưu lý do. Phương án B cần quyết định và đồng bộ SRS/UC/schema/UI.
+Đối chiếu với các phân tích hiện trạng Thiết kế, Prisma Schema và Code Backend/Frontend thực tế, nhóm đã thống nhất hướng chốt chính thức cho 5 điểm mở như sau:
+
+1. **Thời điểm GV B nhìn thấy câu hỏi:**
+   - **Hiện trạng:** Trong đặc tả UI (màn S34, S35) và code Backend `confirm-item.use-case.ts`: Backend truy vấn các câu `confirmerId == teacherId` và `status == FIRST_APPROVED`.
+   - 👉 **Chốt:** GV B thấy ngay từng câu ngay khi GV A bấm duyệt câu đó (`FIRST_APPROVED`), không cần đợi A duyệt hết cả lô. (Không khôi phục `ItemPackage`, hỗ trợ xử lý cuốn chiếu liên tục).
+
+2. **Phạm vi "Xác nhận tất cả" (`CONFIRM_ALL`):**
+   - **Hiện trạng:** UI S35 nằm tại route `/teacher/tasks/confirms/[batchId]`. Trong Backend, `confirm-all-items.use-case.ts` nhận tham số `execute(teacherId, batchId)` và chỉ `updateMany` các câu thuộc `batchId` đó.
+   - 👉 **Chốt:** Theo phạm vi từng Lô (`batchId`) đang mở trên giao diện, không phải toàn bộ hệ thống.
+
+3. **Giao việc và thời hạn của B:**
+   - **Hiện trạng:** Class Diagram quy định `firstReview.dueAt` và `secondReview.dueAt`. SRS 9b.13 và UI S33/S34 mô tả Admin giao theo đợt, hệ thống gán `dueAt` cho A = Ngày giao + reviewDays, và B = Ngày giao + confirmDays (chốt 23:59:59).
+   - 👉 **Chốt:** Hạn cố định theo ngày giao việc của đợt. Không thả nổi hạn của B theo lúc A duyệt vì sẽ làm trôi hạn và gây xung đột với lịch hẹn gửi email nhắc tự động của BullMQ.
+
+4. **Route S04 / phiên thi CAT:**
+   - **Hiện trạng:** Đã hoàn thành 100% trong quyết định ngày 11/11/2026: URL phòng thi là `/student/exams/[roundId]/take`, gọi API `/api/v1/exam-rounds/:roundId/session/current` để lấy session an toàn chống IDOR; khi thi xong tự redirect về `/results/[sessionId]` (S05).
+   - 👉 **Đã chốt xong:** Giữ nguyên theo quyết định ngày 11/11/2026. Cập nhật các tài liệu mô tả của Phương để đồng bộ hoàn toàn với file quyết định này.
+
+5. **Ghi nhận lý do từ chối (`comment`):**
+   - **Hiện trạng:** Quyết định 03/11, Prisma Schema (`first_review`, `second_review`) và code Backend `ReviewItemUseCase` đều có trường `comment?: string`. Điểm lệch xuất hiện do SRS v3 mục 9b.14 có dòng viết nháp: "Từ chối (REJECTED, không lưu lý do)" nhằm giảm thao tác cho GV.
+   - 👉 **Chốt:** Trường `comment` là tùy chọn (optional): GV có thể nhập lý do/ghi chú nếu muốn, nhưng hệ thống không bắt buộc (không validate required).
 
 ## 6. Thay đổi tài liệu đã thực hiện và nợ còn lại
 

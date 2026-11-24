@@ -341,14 +341,14 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 1. Nhận **email nhắc việc** ("Bạn có x câu cần duyệt, hạn dd/mm") và thấy việc ở **Hộp việc → Cần duyệt (S33)**: mỗi thẻ gom **các câu được giao cho mình trong một lô** (tên lô, "Đã quyết 12 / 20", hạn, tiến độ; gom theo lô chỉ để hiển thị).
 2. Bấm thẻ → **S11**: danh sách câu được giao trong lô đó + trình sửa/duyệt từng câu. Chỉ thấy **câu giao cho mình** (khác → 403).
 3. Với mỗi câu (đang `DRAFT`): có thể **sửa** nội dung, 4 phương án, đáp án đúng, giải thích (kỹ năng/CEFR/chủ đề/`irt_b` chỉ đọc `🔶 P25-3`); bấm **Lưu sửa** → server chạy lại **luật cứng + trùng T1–T2** trên bản sửa; lỗi/trùng → **chặn nút Duyệt** (`INVALID_AFTER_EDIT`/`DUPLICATE_AFTER_EDIT`).
-4. Chọn **Duyệt** (→ `FIRST_APPROVED`) hoặc **Từ chối** (→ `REJECTED`, **không có ô lý do**). Sau mỗi thao tác tự sang câu chưa quyết kế tiếp.
-5. **Không còn bước "Gửi cho B"**: câu A duyệt (`FIRST_APPROVED`) chờ B xác nhận; ⚠ thời điểm hiện cho B còn chờ xác nhận. Câu A từ chối (`REJECTED`) không tới B. SRS BR-25 hiện ghi A không sửa lại câu đã Duyệt hoặc Từ chối; kế hoạch cũ để mở điểm này, cần nhóm xác nhận sự khác biệt trước khi coi là quyết định mới.
+4. Chọn **Duyệt** (→ `FIRST_APPROVED`) hoặc **Từ chối** (→ `REJECTED`, ô ghi chú/lý do là tùy chọn optional, không bắt buộc). Sau mỗi thao tác tự sang câu chưa quyết kế tiếp.
+5. **Không còn bước "Gửi cho B"**: câu A duyệt (`FIRST_APPROVED`) chờ B xác nhận; B thấy ngay từng câu khi A duyệt (chốt 24/11/2026). Câu A từ chối (`REJECTED`) không tới B. SRS BR-25 ghi A không sửa lại câu đã Duyệt hoặc Từ chối.
 6. Quá hạn chỉ hiện cảnh báo "Việc này đã quá hạn", **không khóa thao tác**. Admin có thể chỉnh hạn hoặc giao lại câu cho GV khác.
 
 **4.4-C. GV vai B — xác nhận (các câu A đã duyệt và được giao cho mình)**
-1. Nhận email nhắc, thấy **các câu được giao** ở **Hộp việc → Cần xác nhận (S34)** (gom theo lô để hiển thị; hạn của B là `secondReview.dueAt` của từng câu; ⚠ chờ xác nhận: mốc tính hạn là ngày giao hay lúc A duyệt).
+1. Nhận email nhắc, thấy **các câu được giao** ở **Hộp việc → Cần xác nhận (S34)** (gom theo lô để hiển thị; hạn của B là `secondReview.dueAt` cố định theo ngày giao việc của đợt = ngày giao + confirmDays, chốt 24/11/2026).
 2. Bấm lô → **S35**: **chỉ đọc**. Mỗi câu hiện cờ mềm, dấu **"A đã sửa"** và **bản gốc so với bản đã sửa**.
-3. Với mỗi câu: **Xác nhận** (→ `SECOND_APPROVED`) hoặc **Loại bỏ** (→ `REJECTED`, không ô lý do). Hoặc nút **"Xác nhận tất cả câu còn lại"** (chỉ tác động câu chưa quyết; ghi log `CONFIRM_ALL`).
+3. Với mỗi câu: **Xác nhận** (→ `SECOND_APPROVED`) hoặc **Loại bỏ** (→ `REJECTED`, ô comment tùy chọn optional). Hoặc nút **"Xác nhận tất cả câu còn lại"** (phạm vi theo từng Lô `batchId` đang mở trên giao diện, chỉ tác động câu chưa quyết; ghi log `CONFIRM_ALL`, chốt 24/11/2026).
 4. B **không sửa, không trả về A**. Mọi câu của lô trong hộp việc đã có quyết định → màn hiện "Đã xử lý hết các câu được giao." và chỉ đọc.
 
 ### 4.5. Luồng Quản trị (ADMIN)

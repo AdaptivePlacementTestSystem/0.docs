@@ -57,7 +57,7 @@ Một chiều, **không có đường quay lại**. Chỉ `FINAL_APPROVED` đư�
 | Trạng thái | Ý nghĩa | Ai/cái gì chuyển |
 |---|---|---|
 | `DRAFT` (đã có) | Đã qua AI check, chờ Admin giao việc, hoặc đã giao và chờ A duyệt | Hệ thống (sau C1/C2) |
-| `FIRST_APPROVED` (**thêm**) | A đã duyệt câu; chờ B xác nhận (⚠ chờ xác nhận: B thấy câu ngay khi A duyệt câu đó, hay phải chờ A xong hết các câu được giao) | A bấm Duyệt |
+| `FIRST_APPROVED` (**thêm**) | A đã duyệt câu; chờ B xác nhận (Đã chốt 24/11/2026: B thấy ngay từng câu ngay khi A duyệt câu đó, không cần đợi A duyệt hết cả lô) | A bấm Duyệt |
 | `SECOND_APPROVED` (**thêm**) | B đã confirm; chờ Admin kiểm tra và import | B bấm Xác nhận (từng câu hoặc "tất cả còn lại") |
 | `FINAL_APPROVED` (**đổi tên từ `APPROVED`**) | Đã vào ngân hàng, dùng cho CAT, cấm sửa (#64) | Admin bấm Import |
 | `REJECTED` (đã có) | **Người** loại: A, B hoặc Admin lúc quyết lỗi mềm. Không lưu lý do (#56) | A, B, Admin |
@@ -174,13 +174,13 @@ Chọn **O2** vì: (1) giữ luồng một chiều như bạn đã chốt ở #1
 5. **Lệch tài liệu cần nhóm xác nhận:** SRS BR-25 và Mục 9b.13 hiện ghi A không sửa lại câu đã Duyệt hoặc Từ chối; bản kế hoạch trước đây để mở sau khi bỏ gói. Chưa được xem khác biệt này là một quyết định mới.
 
 ### 6.2. GV B confirm
-1. B mở "Hộp việc → Cần confirm": thấy **danh sách câu được giao cho mình** (câu `FIRST_APPROVED`, ⚠ chờ xác nhận về thời điểm như Mục 2.2), chỉ đọc. Mỗi câu hiện cờ và dấu **"A đã sửa"** kèm bản gốc so với bản sửa.
-2. B xử lý **từng câu: Xác nhận** (`SECOND_APPROVED`) **hoặc Loại bỏ** (`REJECTED`), hoặc bấm **"Xác nhận tất cả câu còn lại"** (xác nhận hết câu chưa quyết được giao cho B; ghi log hành động hàng loạt `CONFIRM_ALL`; ⚠ chờ xác nhận phạm vi: theo lô hay theo toàn bộ hộp việc).
+1. B mở "Hộp việc → Cần confirm": thấy **danh sách câu được giao cho mình** (câu `FIRST_APPROVED`, B thấy ngay khi A duyệt câu đó, chốt 24/11/2026), chỉ đọc. Mỗi câu hiện cờ và dấu **"A đã sửa"** kèm bản gốc so với bản sửa.
+2. B xử lý **từng câu: Xác nhận** (`SECOND_APPROVED`) **hoặc Loại bỏ** (`REJECTED`), hoặc bấm **"Xác nhận tất cả câu còn lại"** (xác nhận hết câu chưa quyết được giao cho B; ghi log hành động hàng loạt `CONFIRM_ALL`; đã chốt 24/11/2026: phạm vi theo từng Lô `batchId` đang mở trên giao diện, không phải toàn hệ thống).
 3. B **không sửa**, **không trả về** A (DC-33). B ≠ A đã bảo đảm lúc giao.
-4. Kết quả vòng 2 ghi vào `second_review` (`action` `CONFIRM`/`REMOVE`, `confirmedAt`, `comment`).
+4. Kết quả vòng 2 ghi vào `second_review` (`action` `CONFIRM`/`REMOVE`, `confirmedAt`, `comment` tùy chọn optional).
 
 ### 6.3. Hạn và nhắc
-- **A:** `first_review.dueAt` = cuối ngày (ngày giao + `reviewDays`). **B:** `second_review.dueAt` của từng câu (⚠ chờ xác nhận mốc tính, xem Mục 5 và Q-3). Giờ chốt 23:59:59 giờ Việt Nam (cấu hình) — **đề xuất, chờ bạn xác nhận**.
+- **A:** `first_review.dueAt` = cuối ngày (ngày giao + `reviewDays`). **B:** `second_review.dueAt` của từng câu cố định theo ngày giao việc của đợt = ngày giao + `confirmDays` (chốt 24/11/2026, không thả nổi theo lúc A duyệt để tránh trôi hạn và xung đột lịch nhắc BullMQ). Giờ chốt 23:59:59 giờ Việt Nam (cấu hình).
 - **Admin chỉnh hạn** (cả `reviewDays`, `confirmDays`; chỉ áp dụng cho câu chưa xử lý ở vòng tương ứng) ⇒ tính lại `dueAt` của các câu đó, hủy và tạo lại lịch nhắc. ⚠ chờ xác nhận: `ReviewAction` đã bỏ `EXTEND`, chưa quy định thao tác chỉnh hạn được ghi kiểm toán bằng giá trị nào.
 - **Nhắc:** job trễ BullMQ chạy lúc `due_at − 24 giờ`, nếu nhóm (lô, bước, GV) còn câu chưa xong thì gửi **một** thông báo gộp (trong ứng dụng + email `MailPort`); hạn còn < 24 giờ lúc giao/chỉnh ⇒ nhắc ngay một lần (đề xuất); kèm đối chiếu lazy khi mở hộp việc phòng mất job. Cờ "đã nhắc" lưu ở cột `items.first_reminder_sent` / `items.second_reminder_sent` (cột riêng, không nằm trong JSON kết quả duyệt).
 - **Quá hạn:** chỉ hiển thị "quá hạn" cho Admin và GV (tính lazy), **không tự đổi trạng thái hay tự giao lại**. Admin chọn: chỉnh hạn, giao lại, hoặc loại câu (đề xuất, Q-2). **Không còn "ép gửi gói"** (đã bỏ cùng gói).
