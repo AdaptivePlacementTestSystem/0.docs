@@ -75,7 +75,7 @@ Mức 5 cần: 100% chức năng cam kết chạy ổn định, ≥100% khối l
 
 ### TC2.3 — Làm chủ & kiểm soát AI (5đ) — **quan trọng nhất với cách nhóm đang làm việc**
 
-Đọc kỹ Mức 5: cần **AI Usage Log đầy đủ đối chiếu được với git history** (công cụ, phạm vi, prompt chính, phần AI sinh, phần SV sửa); giải thích đúng **100%** vị trí code AI sinh khi hội đồng hỏi ngẫu nhiên ≥5 vị trí; nêu được ≥5 lỗi/ảo giác AI đã tự phát hiện kèm phân tích nguyên nhân; có quy trình kiểm soát đầu ra AI thành hệ thống (checklist review, đối chiếu tài liệu chính thức, kiểm tra license/dữ liệu nhạy cảm trong prompt).
+Đọc kỹ Mức 5: cần **AI Usage Log đầy đủ đối chiếu được với git history** (ngày, công cụ/model, phạm vi dùng cho phần nào, prompt — Tuần 1–10 giữ nguyên kiểu cũ ở Bảng 1, từ Tuần 11 trở đi lưu nguyên văn `Prompt gốc` ở Bảng 2, phần AI sinh, phần SV sửa); giải thích đúng **100%** vị trí code AI sinh khi hội đồng hỏi ngẫu nhiên ≥5 vị trí; nêu được ≥5 lỗi/ảo giác AI đã tự phát hiện kèm phân tích nguyên nhân; có quy trình kiểm soát đầu ra AI thành hệ thống (checklist review, đối chiếu tài liệu chính thức, kiểm tra license/dữ liệu nhạy cảm trong prompt).
 
 Rủi ro cụ thể của dự án này: công thức Rasch/EAP/Gaussian-Hermite quadrature rất dễ bị AI sinh sai tinh vi (SRS đã tự cảnh báo ở Mục 4.3: "EAP là phần dễ bug nhất"). Đây vừa là rủi ro kỹ thuật (R3 trong Risk Register) vừa là **cơ hội điểm** — nếu nhóm chủ động viết unit test đối chiếu tay 3 case biết trước (toàn đúng/toàn sai/xen kẽ) và ghi lại trong AI Usage Log rằng "AI sinh code EAP lần đầu bị lỗi X, phát hiện qua test case Y, đã sửa ở commit Z" — đó **chính là bằng chứng cho cả TC2.3 Mức 5 lẫn TC5 (trả lời hội đồng về phần có AI hỗ trợ)**.
 

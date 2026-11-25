@@ -36,7 +36,7 @@
 ### 6. Định nghĩa "Xong" (Definition of Done) cho prompt này
 - Code chạy được + unit test đi kèm pass.
 - `tracking/feature-plans/<slug>.md` cập nhật đầy đủ, mọi câu hỏi ở Mục 3 đã có quyết định, trạng thái chuyển sang "Đã merge".
-- `tracking/AI_USAGE_LOG.md` có dòng tương ứng cho phiên làm việc này.
+- `tracking/AI_USAGE_LOG.md` có dòng tương ứng cho phiên làm việc này (từ Tuần 11 trở đi ghi vào Bảng 2, lưu đầy đủ ngày, công cụ/model, phạm vi dùng cho phần nào và nguyên văn `Prompt gốc`).
 - Nếu Mục 3 của feature plan có ít nhất 1 quyết định mới → đã nhắc lại trong `weekly-log` của đúng tuần đó.
 
 ### 7. (Tuỳ chọn) Ràng buộc phi chức năng cụ thể của phần này

@@ -33,7 +33,7 @@
      không hardcode phần SRS Mục XIV báo trước sẽ mở rộng ở KL) và skill `rubric-tracker`.
   3. Gặp lựa chọn ảnh hưởng khả năng mở rộng/bảo trì mà SRS/Class Diagram KHÔNG nói rõ →
      DỪNG LẠI, hỏi tôi kèm ít nhất 2 phương án + đánh đổi, không tự quyết định.
-  4. Sau khi xong: cập nhật `tracking/feature-plans/<slug>.md`, `tracking/AI_USAGE_LOG.md`,
+  4. Sau khi xong: cập nhật `tracking/feature-plans/<slug>.md`, `tracking/AI_USAGE_LOG.md` (từ Tuần 11 trở đi ghi vào Bảng 2 với đầy đủ ngày, công cụ/model, phạm vi dùng cho phần nào và nguyên văn `Prompt gốc`),
      và `tracking/weekly-log/Tuan-XX.md` nếu có quyết định thiết kế mới.
   5. Nếu thiếu thông tin để làm đúng → hỏi lại tôi, không tự suy đoán rồi làm liều.
 ```
@@ -77,7 +77,7 @@ hay không, cứ để AI tự đánh giá — nếu nghi ngờ AI sẽ tạo fe
 
 - Bạn (người ra lệnh) muốn tự tay kiểm soát chi tiết OOP/pattern ngay từ đầu thay vì để AI đề xuất.
 - Chức năng phức tạp, nhiều lớp liên quan, muốn soạn sẵn Mục 1–4 của feature-plan trước khi giao AI.
-- Chuẩn bị hồ sơ minh chứng cho hội đồng và muốn prompt gốc đã đầy đủ chi tiết ngay trong log.
+- Chuẩn bị hồ sơ minh chứng cho hội đồng và muốn prompt gốc đã đầy đủ chi tiết ngay trong log (lưu ý từ Tuần 11 trở đi, dù dùng bản đầy đủ hay bản rút gọn, `tracking/AI_USAGE_LOG.md` Bảng 2 vẫn lưu nguyên văn `Prompt gốc`).
 
 Trong mọi trường hợp còn lại — kể cả khi dùng bản rút gọn này — kết quả cuối cùng (feature-plan,
 AI_USAGE_LOG, weekly-log) phải đầy đủ như thể dùng bản chi tiết; khác biệt duy nhất là **công sức
