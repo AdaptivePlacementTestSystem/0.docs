@@ -266,6 +266,7 @@ enum ReviewAction {
   REASSIGN
   ACCEPT_FLAG
   UPDATE_DUE_DATE
+  CANCEL_PENDING
 }
 enum SessionState {
   WAITING_FOR_ANSWER

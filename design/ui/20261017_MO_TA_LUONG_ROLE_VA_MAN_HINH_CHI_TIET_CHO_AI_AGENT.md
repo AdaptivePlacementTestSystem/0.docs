@@ -111,7 +111,7 @@ Mỗi màn có cùng khuôn: **(a) Thông tin chung** (route, file Next.js, guar
 
 **Mức kiểm AI `CheckLevel`:** `PASS` Qua · `SOFT` Cờ mềm · `HARD` Lỗi cứng. **Điểm kiểm `CheckPoint`:** C1 (sau khi AI sinh), C2 (sau import file), C3 (Kiểm tra cuối trước Import).
 
-**Hành động kiểm toán `ReviewAction`** (hiển thị ở "Lịch sử" câu): `APPROVE` Duyệt · `REJECT` Từ chối · `CONFIRM` Xác nhận · `REMOVE` Loại bỏ · `CONFIRM_ALL` Xác nhận hàng loạt cấp batch · `IMPORT` Import · `ASSIGN` Giao việc · `REASSIGN` Giao lại item chưa bị loại · `ACCEPT_FLAG` Admin chấp nhận cờ · `UPDATE_DUE_DATE` Admin đổi hạn cấp batch. `CONFIRM_ALL` dùng `item_id = NULL`; `UPDATE_DUE_DATE` cũng ghi event cấp batch với hạn cũ/mới, actor, lý do và số item ảnh hưởng. Đã bỏ `EXTEND`, `FORCE_SEND`; item `REJECTED`/`REMOVE` không giao lại.
+**Hành động kiểm toán `ReviewAction`** (hiển thị ở "Lịch sử" câu): `APPROVE` Duyệt · `REJECT` Từ chối · `CONFIRM` Xác nhận · `REMOVE` Loại bỏ · `CONFIRM_ALL` Xác nhận hàng loạt cấp batch · `IMPORT` Import · `ASSIGN` Giao việc · `REASSIGN` Giao lại A (theo câu `DRAFT`) hoặc thay B chung (cấp batch `item_id = NULL`) · `ACCEPT_FLAG` Admin chấp nhận cờ · `UPDATE_DUE_DATE` Admin đổi hạn cấp batch · `CANCEL_PENDING` Admin hủy câu `DRAFT`/`FIRST_APPROVED` tồn đọng cấp batch. Các sự kiện cấp batch (`CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING`, `REASSIGN` đổi B) dùng `item_id = NULL` kèm `details` (itemIds, số lượng theo trạng thái cũ, giá trị cũ/mới, `reason`). Đã bỏ `EXTEND`, `FORCE_SEND`; item `REJECTED`/`REMOVE` không giao lại.
 
 **Mức nghiêm trọng chủ đề sai:** Nhẹ · Trung bình · Nghiêm trọng. **Kỹ năng:** Từ vựng · Ngữ pháp. **Lý do dừng bài:** `MAX_ITEMS_REACHED` "Đã làm đủ số câu tối đa" · `SE_THRESHOLD` "Hệ thống đã đủ tin cậy về năng lực của bạn" · `ITEM_BANK_BOUNDARY` "Năng lực của bạn ở vùng biên của thang đánh giá" · `TIMEOUT` "Đã hết thời gian làm bài".
 
@@ -270,9 +270,9 @@ Trang chủ theo role sau đăng nhập: STUDENT → `/student/dashboard`; TEACH
 | S28 | `/admin/item-batches` | `item-batches/page.tsx` | `GET /item-batches` | UCADM13 |
 | S26 | `/admin/item-batches/generate` | `item-batches/generate/page.tsx` | `POST /item-batches` | UCADM11 |
 | S27 | `/admin/item-batches/import` | `item-batches/import/page.tsx` | `POST /item-imports/upload`, `GET\|DELETE /item-imports/grid[/:rowKey]`, `POST /item-imports/save` | UCADM12 |
-| S29 (+ S31 là ngăn phải) | `/admin/item-batches/[batchId]` | `item-batches/[batchId]/page.tsx` | `GET /item-batches/:id`, `GET …/ai-rejected`, `PATCH …/deadlines` | UCADM13 |
-| S30 | `/admin/item-batches/[batchId]/assign` | `…/assign/page.tsx` | `GET /item-batches/:id`, `GET /teachers`, `POST …/assign`; xem trước tính tại giao diện | UCADM13 |
-| S32 | `/admin/item-batches/[batchId]/final-check` | `…/final-check/page.tsx` | `POST\|GET …/final-check`, `POST /items/:id/decision`, `POST …/import` | UCADM14 |
+| S29 (+ S31 là ngăn phải) | `/admin/item-batches/[batchId]` | `item-batches/[batchId]/page.tsx` | `GET /item-batches/:id`, `GET …/ai-rejected`, `POST …/reassign`, `POST …/reassign-confirmer`, `POST …/cancel-pending`, `PATCH …/deadlines` | UCADM13 |
+| S30 | `/admin/item-batches/[batchId]/assign` | `…/assign/page.tsx` | `GET /item-batches/:id`, `GET /teachers`, `POST …/assign-preview` (trả phân bổ + `batchRevision`), `POST …/assign` (kèm `batchRevision`) | UCADM13 |
+| S32 | `/admin/item-batches/[batchId]/final-check` | `…/final-check/page.tsx` | `POST\|GET …/final-check`, `POST /item-batches/:id/items/:itemId/flag-decision`, `POST …/import` | UCADM14 |
 | S20 | `/admin/exam-rounds` | `exam-rounds/page.tsx` | `GET /exam-rounds` | UCADM15 |
 | S21 | `/admin/exam-rounds/new`, `/admin/exam-rounds/[roundId]/edit` | `exam-rounds/new/page.tsx`, `[roundId]/edit/page.tsx` | `POST /exam-rounds`, `PATCH /exam-rounds/:id` | UCADM15 |
 | S22 | `/admin/exam-rounds/[roundId]` | `[roundId]/page.tsx` | `GET /exam-rounds/:id`, `…/participants`, `POST …/publish\|close`, `DELETE …/participants/:studentId` | UCADM15, UCADM17 |
@@ -369,16 +369,16 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 - Kết quả: lô `READY_TO_ASSIGN` (hoặc `PARTIAL`/`FAILED`). Câu rớt tầng cứng → `AI_REJECTED` (tab "AI đã loại", chỉ Admin).
 
 **D. Giao việc (S30)** — điều kiện: lô `READY_TO_ASSIGN`.
-1. Chọn **nhóm A** (≥ 1 GV, khuyên ≥ 2), **GV B** (đúng 1, ∉ nhóm A, bắt buộc), `reviewDays` ≥ 1, `confirmDays` ≥ 1.
+1. Chọn **nhóm A** (`reviewerIds` có thứ tự, ≥ 1 GV, khuyên ≥ 2), **GV B chung** (`confirmerId`, đúng 1, ∉ nhóm A, bắt buộc), **`firstDueAt`** và **`secondDueAt`** xác định khi giao (23:59:59 giờ Việt Nam).
 2. Xem trước phân bổ và điều chỉnh GV A theo câu; chọn một GV B chung. Hai hạn được xác định khi giao.
 3. Xác nhận ghi `reviewerId` và hạn theo câu, `confirmerId` cấp lô, cùng `ASSIGN` mỗi câu; lô chuyển `IN_REVIEW`. Email nhắc lúc 08:00 ngày trước hạn.
 4. Theo dõi quá hạn chỉ để cảnh báo. Chỉnh hạn yêu cầu lý do, ghi `UPDATE_DUE_DATE` cấp lô và đặt lại nhắc; chỉ đổi A của DRAFT; thay B là thao tác riêng có reason và audit.
 
-**E. Kiểm tra cuối (C3) và Import (S32)** — điều kiện: lô `READY_TO_FINALIZE`.
+**E. Kiểm tra cuối (C3) và Import (S32)** — điều kiện: lô `READY_TO_FINALIZE` (**không còn câu `DRAFT` hoặc `FIRST_APPROVED`**; quá hạn không tự mở C3/import — Admin phải chờ, giao lại hoặc chủ động gọi `cancel-pending` kèm `reason`).
 1. Xem thống kê (Đã xác nhận vòng 2, Đã loại bởi A/B, AI đã loại, chưa xử lý/quá hạn).
-2. Bấm **Kiểm tra** (C3, chạy theo thay đổi): báo cáo theo câu Qua/Cờ mềm/Lỗi cứng + mã lý do + câu nghi trùng + bản gốc so bản sửa; tổng hợp theo GV; số câu A sửa, tỉ lệ A/B loại. **Lỗi cứng → tự `AI_REJECTED`.** **Lỗi mềm → Admin quyết từng câu: "Chấp nhận (cho Import)" (ghi `ACCEPT_FLAG`) hoặc "Loại" (`REJECTED`).**
-3. **Import** chỉ bật khi có báo cáo C3 **còn hiệu lực** (không câu nào đổi, ngân hàng không đổi kể từ lúc kiểm); nếu đổi → `FINAL_CHECK_STALE` → kiểm lại. Lúc Import, server vẫn chạy lại T1–T2 nhanh chống tranh chấp (hai Admin Import cùng lúc). Câu chưa xử lý (quá hạn) **không** được import.
-4. Thành công: các câu qua → `FINAL_APPROVED` (ghi `approved_by`, `approved_at`, `calibrated=false`) → CAT dùng được.
+2. Bấm **Kiểm tra** (C3, chạy trên các câu `SECOND_APPROVED` còn lại theo thay đổi): đọc/tải qua `POST`/`GET …/final-check`, báo cáo theo câu Qua/Cờ mềm/Lỗi cứng + mã lý do + câu nghi trùng + bản gốc so bản sửa + trạng thái/lý do stale; tổng hợp theo GV; số câu A sửa, tỉ lệ A/B loại. **Lỗi cứng → tự `AI_REJECTED`.** **Lỗi mềm → Admin quyết từng câu: "Chấp nhận (cho Import)" (ghi `ACCEPT_FLAG`, comment tùy chọn) hoặc "Loại" (`REJECTED`, comment bắt buộc sau trim, `400 VALIDATION_FAILED` nếu thiếu).**
+3. **Import** chỉ bật khi có báo cáo C3 **còn hiệu lực** (nội dung câu, ngân hàng và chính sách kiểm tra không đổi kể từ lúc kiểm); nếu stale → `FINAL_CHECK_STALE` → chạy lại C3 trên các câu `SECOND_APPROVED` còn lại và **Admin phải quyết lại tất cả cờ mềm trên báo cáo mới** (không tự kế thừa `ACCEPT_FLAG` cũ). Lúc Import, server vẫn chạy lại T1–T2 nhanh chống tranh chấp (hai Admin Import cùng lúc). Câu chưa xử lý **không** được import.
+4. Thành công: các câu đủ điều kiện → `FINAL_APPROVED` (ghi `approved_by`, `approved_at`, `calibrated=false`) → CAT dùng được. Nếu đã import ≥ 1 câu mà vẫn còn câu `SECOND_APPROVED`, lô chuyển `PARTIALLY_IMPORTED`; lô có ≥ 1 item và mọi item đều kết thúc chuyển `DONE` (kể cả 0 câu import; UI hiển thị rõ số câu đã import); lô rỗng do lỗi sinh/import là `FAILED`.
 
 **F. Hạn và dự phòng:** quá hạn chỉ cảnh báo để Admin xử lý; không tự loại, giao lại hay import. Không chạy C3/import khi còn DRAFT/FIRST_APPROVED; Admin có thể thay B hoặc cancel-pending có reason. Sau ít nhất một câu import, phần SECOND_APPROVED còn lại tạo PARTIALLY_IMPORTED; C3 stale phải chạy lại và quyết lại cờ. DONE khi lô có item và mọi câu kết thúc; lô rỗng do lỗi FAILED.
 
@@ -388,10 +388,10 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 | Bước | Ai | Việc | Màn | Trạng thái sau |
 |---|---|---|---|---|
 | 1 | Admin | Tạo lô AI "Từ vựng B1", N = 100 | S26 → S29 | Lô `GENERATING` → `CHECKING` → `READY_TO_ASSIGN`; ~100 câu `DRAFT`, một số `AI_REJECTED` |
-| 2 | Admin | Xem tab "AI đã loại", cờ mềm; **Giao việc**: A = {Lan, Hùng, Mai, Tú, Đức}, B = Bình, `reviewDays`=5, `confirmDays`=3 | S29 → S30 | Lô `IN_REVIEW`; mỗi GV A được giao 20 câu (`reviewerId`, `confirmerId`=Bình); 5 email nhắc |
-| 3 | GV A (Lan) | Duyệt 17 câu, sửa 3 câu, từ chối 3 câu | S33 → S11 | 17 câu `FIRST_APPROVED`; 3 câu `REJECTED` |
-| 4 | GV B (Bình) | Mở các câu Lan đã duyệt, xác nhận 15, loại 2 | S34 → S35 | 15 `SECOND_APPROVED`; 2 `REJECTED` |
-| 5 | (hệ thống) | Mọi câu xong vòng 2 hoặc các câu còn lại quá hạn | — | Lô `READY_TO_FINALIZE` |
+| 2 | Admin | Xem tab "AI đã loại", cờ mềm; **Giao việc**: A = {Lan, Hùng, Mai, Tú, Đức}, B = Bình, `firstDueAt`/`secondDueAt` | S29 → S30 | Lô `IN_REVIEW`; mỗi GV A được giao 20 câu (`Item.reviewerId`), một GV B chung cho lô (`ItemBatch.confirmerId`=Bình); 5 email nhắc |
+| 3 | GV A (Lan) | Duyệt 17 câu, sửa 3 câu, từ chối 3 câu (comment bắt buộc) | S33 → S11 | 17 câu `FIRST_APPROVED`; 3 câu `REJECTED` |
+| 4 | GV B (Bình) | Mở các câu Lan đã duyệt, xác nhận 15, loại 2 (comment bắt buộc) | S34 → S35 | 15 `SECOND_APPROVED`; 2 `REJECTED` |
+| 5 | (hệ thống) | Mọi câu xong vòng 2 (không còn `DRAFT`/`FIRST_APPROVED`; câu quá hạn phải chờ, giao lại hoặc Admin `cancel-pending` có `reason`) | — | Lô `READY_TO_FINALIZE` |
 | 6 | Admin | **Kiểm tra** (C3) → chấp nhận 1 cờ mềm → **Import** | S32 | Câu qua → `FINAL_APPROVED`; lô `DONE` nếu mọi câu ở trạng thái cuối |
 | 7 | SV | Làm bài kỳ thi; CAT chọn từ các câu `FINAL_APPROVED` | S02–S04 | — |
 
@@ -422,7 +422,7 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 | BR-20 | Tạo từng người: nhập MSSV/Mã GV, họ tên, email; trùng → 409; import không cập nhật tài khoản có sẵn | S24, S19 | Form tạo lẻ; popup "đã tồn tại" |
 | BR-21 | Câu hỏi chỉ vào qua lô; không form thêm câu; GV không import; Admin không sửa nội dung | S08, S10, S26, S27 | Không có nút Thêm/Sửa/Xóa; S26/S27 chỉ Admin |
 | BR-22 | Giao việc: nhóm A ≥ 1, đúng một B không trùng A, hạn A/B xác định khi giao, lô `READY_TO_ASSIGN` | S30 | Danh sách B loại trừ nhóm A; nút Xác nhận giao có điều kiện bật |
-| BR-23 | Chia đều vòng tròn, chênh tối đa 1 câu | S30 | Bảng xem trước phân bổ |
+| BR-23 | Backend `assign-preview` sắp `DRAFT` theo `(skill, cefrTarget, createdAt, id)` chia vòng tròn liên tục, trả `batchRevision`; `assign` kiểm `batchRevision` | S30 | Bảng xem trước phân bổ từ server |
 | BR-24 | Nhắc lúc 08:00 giờ VN ngày trước hạn; quá hạn chỉ cảnh báo | S31, S33–S35 | C-DUE; chỉnh hạn cho việc chưa xử lý, bắt buộc lý do và audit cấp lô |
 | BR-25 | A chỉ sửa câu DRAFT được giao khi lô IN_REVIEW; B thấy câu ngay sau khi A duyệt. | S11, S33 | Không có bước gửi gói |
 | BR-26 | B chỉ đọc: Xác nhận/Loại từng câu hoặc "Xác nhận tất cả câu còn lại"; không trả về A | S35 | Không có ô sửa, không có nút trả về |
@@ -724,7 +724,7 @@ Hộp việc          [ Cần duyệt (2) ]  [ Cần xác nhận (1) ]
 | # | Thành phần | testid | Quy tắc |
 |---|---|---|---|
 | 1 | Khung tab Hộp việc + huy hiệu số | `tasks-tabs` | Tab hiện tại gạch chân xanh |
-| 2 | Danh sách thẻ — **mỗi thẻ = các câu được giao cho GV này trong một lô** (nhóm hiển thị, không phải thực thể) | `inbox-review-list`, `inbox-batch-{id}` | Tên lô; C-PROGRESS "Đã quyết x / y" (y = số câu giao cho mình); C-DUE theo `firstReview.dueAt` (cuối ngày giao + `reviewDays`, 23:59:59 giờ VN); dòng phụ "Còn k câu chưa quyết định" |
+| 2 | Danh sách thẻ — **mỗi thẻ = các câu được giao cho GV này trong một lô** (nhóm hiển thị, không phải thực thể) | `inbox-review-list`, `inbox-batch-{id}` | Tên lô; C-PROGRESS "Đã quyết x / y" (y = số câu giao cho mình); C-DUE theo `firstReview.dueAt` (`firstDueAt`, 23:59:59 giờ VN); dòng phụ "Còn k câu chưa quyết định" |
 | 3 | Nút chính **"Mở danh sách câu"** | `open-batch-{id}` | → `/teacher/tasks/reviews/[batchId]` |
 **(e)** Rỗng: "Bạn chưa có câu nào cần duyệt." · Quá hạn: C-DUE đỏ "Quá hạn" **nhưng vẫn thao tác được**.
 **(f)** Mock: 2 thẻ (12/20 còn 5 ngày; 20/20 đã quyết hết).
@@ -1222,12 +1222,12 @@ Cuối cùng liệt kê: các điểm TODO-CONFIRM đã dùng mặc định, cá
 | UCSV08 | Đổi mật khẩu | S16 | `POST /auth/change-password` | BR-06 |
 | UCSV09 | Quên mật khẩu (OTP) | S17, S18 | `POST /auth/forgot-password`, `/auth/reset-password` | BR-14 |
 | UCGV02 | Xem ngân hàng (GV) | S08, S10 | `GET /items`, `GET /items/:id` | BR-16, 21, 29, 30 |
-| UCGV04 | Sửa câu (bước con của UCGV14) | S11 | `PATCH /items/:id` | BR-27, 30 |
+| UCGV04 | Sửa câu (bước con của UCGV14) | S11 | `PATCH /teacher/items/:id` | BR-27, 30 |
 | UCGV07 | Xem báo cáo lớp | S12 | `GET /reports/class-distribution`, `/reports/error-patterns` | BR-13 |
 | UCGV08 | Xuất báo cáo CSV | S12 | (chưa có endpoint riêng trong API Contract) `⚠️ ĐX` | BR-13 |
 | UCGV09 | Xem hồ sơ SV | S13, S14 | `GET /placement-profiles/:id`, `…/history` | BR-16 |
-| UCGV14 | Duyệt câu (GV A); DOCX còn nợ đồng bộ | S33, S11 | `GET /teacher/tasks/reviews/:batchId`, `PATCH /teacher/items/:id`, `POST /teacher/items/:id/approve` hoặc `/reject` | BR-16, 22, 24, 27 |
-| UCGV15 | Xác nhận câu (GV B); DOCX còn nợ đồng bộ | S34, S35 | `GET /teacher/tasks/confirms/:batchId`, `POST /teacher/items/:id/confirm` hoặc `/remove`, `POST /teacher/tasks/confirms/:batchId/confirm-all` | BR-16, 24, 26 |
+| UCGV14 | Duyệt câu (GV A) | S33, S11 | `GET /teacher/tasks/reviews[:batchId]`, `PATCH /teacher/items/:id`, `POST /teacher/items/:id/approve` hoặc `/reject` | BR-16, 22, 24, 27 |
+| UCGV15 | Xác nhận câu (GV B) | S34, S35 | `GET /teacher/tasks/confirms[:batchId]`, `POST /teacher/items/:id/confirm` hoặc `/remove`, `POST /teacher/tasks/confirms/:batchId/confirm-all` | BR-16, 24, 26 |
 | UCADM04 | Xem hồ sơ SV (Admin) | S13, S14 | như UCGV09 | BR-16 |
 | UCADM05 | Báo cáo tổng thể | S36, S12 | `GET /reports/…?examRoundId=` | BR-13 |
 | UCADM06 | Quản lý/giám sát ngân hàng | S08, S10 | `GET /items`, `GET /item-batches/:id/ai-rejected` | BR-16, 21, 29, 30 |
@@ -1235,8 +1235,8 @@ Cuối cùng liệt kê: các điểm TODO-CONFIRM đã dùng mặc định, cá
 | UCADM09 | Quản lý tài khoản | S24 | `GET|POST|PATCH /students`, `/teachers`, `POST …/lock|unlock|resend-temporary-password`, `PATCH /users/:id/role` | BR-01, 02, 16…20 |
 | UCADM11 | Tạo lô bằng AI | S26, S29 | `POST /item-batches`, `GET /item-batches/:id` | BR-21, 29, 30 |
 | UCADM12 | Import đề từ file | S27, S29 | `POST /item-imports/upload|save`, `GET|DELETE /item-imports/grid` | BR-21, 29, 30 |
-| UCADM13 | Giao việc và theo dõi lô | S28, S29, S30, S31 | `GET /item-batches/:id`, `GET /teachers`, `POST …/assign\|reassign`, `PATCH …/deadlines` | BR-22…24 |
-| UCADM14 | Kiểm tra C3 và Import | S32 | `POST|GET …/final-check`, `POST /items/:id/decision`, `POST …/import` | BR-28, 29, 30 |
+| UCADM13 | Giao việc và theo dõi lô | S28, S29, S30, S31 | `GET /item-batches/:id`, `GET /teachers`, `POST …/assign-preview`, `POST …/assign`, `POST …/reassign`, `POST …/reassign-confirmer`, `POST …/cancel-pending`, `PATCH …/deadlines` | BR-22…24, 29 |
+| UCADM14 | Kiểm tra C3 và Import | S32 | `POST\|GET …/final-check`, `POST /item-batches/:id/items/:itemId/flag-decision`, `POST …/import` | BR-28, 29, 30 |
 | UCADM15 | Quản lý kỳ thi | S20, S21, S22 | `POST|GET|PATCH /exam-rounds`, `POST …/publish|close` | BR-07, 08, 12 |
 | UCADM16 | Import danh sách thi | S23 | `POST …/participants/import/upload|save`, `GET|DELETE …/import/grid`, `DELETE …/participants/:studentId` | BR-03, 04, 07, 09 |
 | UCADM17 | Theo dõi dự thi | S22 | `GET /exam-rounds/:id/participants`, `GET …/participants/export` `⚠️ ĐX` | BR-07, 10, 11 |
@@ -1255,11 +1255,11 @@ Ghi chú: UC `UCADM02/03/07`, `UCGV03/05/06/10` đã bỏ hoặc ngoài phạm v
 | `TestSession` | `status`, `thetaFinal`, `seFinal`, `startedAt`, `completedAt`, `expiresAt`, `stoppingReason` | S04, S05, S07, S22 |
 | `SessionResponse` | `itemId`, `response` (A–D), `isCorrect`, `thetaAfter`, `seAfter`, `responseTimeMs` | S06 (đáp án chọn, đúng/sai) |
 | `LanguageProfile` | `cefrLevel`, `cefrConfidence`, `theta`, `standardError`, `confidenceInterval95`, `boundaryEffect`, `skillProfiles` (JSON), `errorPatterns` (JSON), `aiRecommendations`, `testMetadata` | S05, S14 |
-| `Item` | `content`, `options` (JSON), `correctAnswer`, `skill`, `topicTag`, `cefrTarget`, `irtB` (∈ [−4, +4]), `status`, `approvedBy`/`approvedAt` (Admin Import), `batchId` (bắt buộc), `reviewerId`/`confirmerId` (GV A/B được giao), `firstReview`/`secondReview` (JSON: `dueAt`, `action`, `reviewedAt`/`confirmedAt`, `comment`, `originalSnapshot` ở vòng 1), `firstReminderSent`/`secondReminderSent` (cờ kỹ thuật, không hiển thị) | S08, S10, S11, S35 |
+| `Item` | `content`, `options` (JSON), `correctAnswer`, `skill`, `topicTag`, `cefrTarget`, `irtB` (∈ [−4, +4]), `status`, `approvedBy`/`approvedAt` (Admin Import), `batchId` (bắt buộc), `reviewerId` (GV A được giao; GV B nằm tại `ItemBatch.confirmerId`), `firstReview`/`secondReview` (JSON: `dueAt`, `action`, `reviewedAt`/`confirmedAt`, `comment`, `originalSnapshot` ở vòng 1), `firstReminderSent`/`secondReminderSent` (cờ kỹ thuật, không hiển thị) | S08, S10, S11, S35 |
 | `Explanation` | `content` (một bản cho mỗi `Item`) | S06, S10, S11 |
-| `ItemBatch` | `source` (`ItemBatchSource`), `name?`, `status`, `skill?`, `cefrTarget?`, `topicTag?`, `requestedCount?` (chỉ lô AI), `createdBy` | S28, S29 |
+| `ItemBatch` | `source` (`ItemBatchSource`), `name?`, `confirmerId?` (một GV B chung cho lô), `status`, `skill?`, `cefrTarget?`, `topicTag?`, `requestedCount?` (chỉ lô AI), `createdBy` | S28, S29, S30 |
 | `ItemCheckResult` | `checkpoint` (C1/C2/C3), `level` (PASS/SOFT/HARD), `reasonCodes[]`, `suspectedDuplicateId?` | S10, S27, S29, S32 (chỉ Admin) |
-| `ItemReviewEvent` | `action` (`ReviewAction`), `actorId`, `itemId`, `createdAt` | S10 "Lịch sử" (chỉ Admin) |
+| `ItemReviewEvent` | `batchId`, `action` (`ReviewAction`), `actorId`, `itemId` (nullable cho sự kiện cấp lô), `details?` (JSON), `createdAt` | S10 "Lịch sử" (chỉ Admin) |
 
 ### 10.7. Việc còn lại với file này
 - **Người review (W4.4):** rà từng màn với SRS v3.0 và UC spec; duyệt hoặc đổi các mục `⚠️ ĐX` và `🔶` ở Mục 9.

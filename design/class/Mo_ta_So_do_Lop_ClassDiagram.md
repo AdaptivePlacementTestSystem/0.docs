@@ -1,6 +1,6 @@
 # MÔ TẢ SƠ ĐỒ LỚP (CLASS DIAGRAM) — HỆ THỐNG PLACEMENT TEST THÍCH ỨNG
 
-> **Thiết kế đích 27/11 — sơ đồ và schema còn nợ đồng bộ:** bổ sung `ReviewAction.CANCEL_PENDING` cấp lô, `REASSIGN` B cấp lô, `batchRevision` phục vụ preview/assign và transactional outbox theo `decisions/20261127_BO_SUNG_Q1_Q8_VONG_DOI_LO_VA_API.md`. Các thuộc tính/cấu trúc lưu trữ cụ thể của revision/outbox chưa được xác nhận trong schema backend; không coi sơ đồ hoặc migration đã hoàn thành. `design/class/schema.prisma` vẫn là bản tham chiếu đối chiếu mã hiện hành.
+> **Thiết kế đích 27/11:** `ReviewAction.CANCEL_PENDING`, audit cấp lô cho `REASSIGN` B và `CANCEL_PENDING`, cùng mô tả `batchRevision`/transactional outbox đã được đồng bộ vào `TLCN.drawio.xml`, `ClassDiagram.puml/.mmd` và `design/class/schema.prisma` theo `decisions/20261127_BO_SUNG_Q1_Q8_VONG_DOI_LO_VA_API.md`. Các thuộc tính/cấu trúc lưu trữ cụ thể của `batchRevision` và transactional outbox vẫn là thiết kế đích, chưa được xác nhận trong schema/migration backend hay production.
 
 > **Phiên bản:** Tuần 7 (2026-10-26). Mô tả bản Class Diagram **gọn** `TLCN.drawio.xml` (3 trang: Tổng thể, Core CAT/Testing, Item Authoring/Review) và ảnh xem trước `TLCN-Trang-1.png`…`TLCN-Trang-3.png`.
 > Bản mô tả cũ (47 lớp, theo `Trang-1` một trang) và sơ đồ cũ đã chuyển vào `_ARCHIVE_20261026/design/class/`.
@@ -20,6 +20,7 @@
 | 2026-11-02 | Đăng xếp lại vị trí và đường nối trên draw.io, bỏ ký hiệu `?` (dùng `{nullable}`); thêm `Item.originalSnapshot` và `TestSession.responses`; `schema.prisma` thêm `Item.originalSnapshot`; sinh lại `ClassDiagram.puml/.mmd`; ảnh PNG dựng lại bằng script |
 | 2026-11-03 | Theo họp GVHD: bỏ `ItemPackage`, `PackageStatus`; thêm `Item.reviewerId/confirmerId` (cột khóa ngoại) và `Item.firstReview/secondReview` (JSON, kiểu `FirstReviewDetail`/`SecondReviewDetail`); `originalSnapshot` chuyển vào `FirstReviewDetail`; `ReviewAction` bỏ `EXTEND`/`FORCE_SEND`, thêm `ASSIGN`; `Teacher` có `reviewItem`/`confirmItem`, bỏ `submitPackage`; `ExamRound ◆ TestSession` (Composition); `schema.prisma` bỏ ba model giao việc/gói; sinh lại `ClassDiagram.puml/.mmd` |
 | 2026-11-27 | Theo quyết định Q1–Q8: nguồn GV B duy nhất là `ItemBatch.confirmerId` (không còn `Item.confirmerId` trong mô hình chuẩn); `ItemBatchStatus` thêm `PARTIALLY_IMPORTED`; `ReviewAction` có `UPDATE_DUE_DATE`; audit batch bắt buộc `batchId`, `actorId`, `itemId` nullable cho CONFIRM_ALL/UPDATE_DUE_DATE. DDL thực tế được đối chiếu theo `backend/prisma/schema.prisma`, chưa xác nhận migration ở production. |
+| 2026-11-27 (bổ sung) | Đồng bộ theo `20261127_BO_SUNG_Q1_Q8_VONG_DOI_LO_VA_API.md`: thêm `ReviewAction.CANCEL_PENDING`; audit cấp lô (`itemId = null`) cho `CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING` và `REASSIGN` (đổi GV B); comment bắt buộc sau trim khi A `REJECT`, B `REMOVE`, Admin soft-reject hoặc `cancel-pending`; C3/import chặn khi còn `DRAFT`/`FIRST_APPROVED` (quá hạn không tự mở C3); `PARTIALLY_IMPORTED`/`DONE`/`FAILED` theo trạng thái kết thúc và lỗi; `batchRevision` và transactional outbox là thiết kế đích chưa có migration ở backend. |
 
 ---
 # BẢNG MÔ TẢ 3 CLASS DIAGRAM (bản đề xuất đã rút gọn — Tuần 7)
@@ -77,7 +78,7 @@ Lớp cha của mọi tài khoản (hệ thống đơn trường, 3 role). Khôn
 | `+ reviewItem(item, action, comment): void` | GV A duyệt hoặc từ chối một câu được giao (`APPROVE`/`REJECT`); ghi vào `Item.firstReview` và `ItemReviewEvent` |
 | `+ confirmItem(item, action, comment): void` | GV B xác nhận hoặc loại một câu được giao (`CONFIRM`/`REMOVE`); ghi vào `Item.secondReview` và `ItemReviewEvent` |
 
-Khi Admin giao việc, giảng viên làm **GV A** (sửa, duyệt/từ chối từng câu) hoặc **GV B** (xác nhận/loại từng câu). Không còn gói: mỗi câu có một GV A (`Item.reviewerId`), còn **một GV B chung cho toàn bộ lô** nằm ở `ItemBatch.confirmerId`; B không trùng bất kỳ A nào trong lô. B thấy câu ngay sau khi A duyệt thành `FIRST_APPROVED`. Chỉ giao lại A cho câu `DRAFT`; giữ B, hạn và kết quả đã duyệt. Câu `REJECTED`/`REMOVE` là kết thúc, không giao lại và không đưa về `DRAFT`.
+Khi Admin giao việc, giảng viên role `TEACHER` làm **GV A** (sửa, duyệt/từ chối từng câu) hoặc **GV B** (xác nhận/loại từng câu); Admin chỉ xem tiến độ/audit qua API quản trị riêng. Không còn gói: mỗi câu có một GV A (`Item.reviewerId`), còn **một GV B chung cho toàn bộ lô** nằm ở `ItemBatch.confirmerId`; B không trùng bất kỳ A nào trong lô. B thấy câu ngay sau khi A duyệt thành `FIRST_APPROVED`. Giao lại A (`POST /item-batches/:id/reassign`) chỉ đổi A của câu `DRAFT` và bắt buộc `reason`; đổi B (`POST /item-batches/:id/reassign-confirmer`) bắt buộc `reason`, giữ hạn và kết quả đã duyệt, ghi 1 event `REASSIGN` cấp lô (`itemId = null`), gửi thông báo qua transactional outbox, khiến B cũ mất ngay quyền Teacher Review đối với lô còn B mới xem các câu đã qua A và chỉ xử lý `FIRST_APPROVED`. Admin có thể chủ động gọi `cancel-pending` kèm `reason` để chuyển `DRAFT`/`FIRST_APPROVED` tồn đọng sang `REJECTED` (audit `CANCEL_PENDING` cấp lô). Câu `REJECTED`/`REMOVE` là kết thúc, không giao lại và không đưa về `DRAFT`.
 
 ### 1.4 `Admin` (kế thừa `User`) — quản trị viên trường
 Không có thuộc tính riêng: Admin chỉ khác ở **quyền**. Admin **không sửa nội dung câu hỏi**.
@@ -264,7 +265,7 @@ Gom câu hỏi theo nguồn để kiểm và duyệt cùng nhau. Nguồn của c
 |---|---|
 | `+ transitionTo(next): void` | Chuyển trạng thái lô hợp lệ |
 | `+ canAssign(): boolean` | Lô đã qua kiểm C1/C2 và ở `READY_TO_ASSIGN` nên Admin giao việc được (kế hoạch Mục 3) |
-| `+ canFinalize(): boolean` | Lô ở `READY_TO_FINALIZE`: mọi câu đã xong vòng 2 (`SECOND_APPROVED` hoặc `REJECTED`) **hoặc** các câu còn lại đã quá hạn; chỉ khi đó Admin mới chạy kiểm C3 và import (DC-44) |
+| `+ canFinalize(): boolean` | Lô ở `READY_TO_FINALIZE`: **không còn câu `DRAFT` hoặc `FIRST_APPROVED`** (mọi câu đã kết thúc vòng 2 `SECOND_APPROVED`/`REJECTED` hoặc đã `AI_REJECTED`); câu quá hạn không tự mở C3/import — Admin phải chờ, giao lại hoặc chủ động gọi `cancel-pending` có `reason` trước khi chạy C3 |
 
 ### 3.4 `FirstReviewDetail` và `SecondReviewDetail` — kết quả hai vòng duyệt
 Hai kiểu giá trị (`<<DataType>>`, Value Object), không có danh tính riêng, **thuộc về một `Item`** (Composition `0..1`) và lưu thành cột JSON của `items`. Thay cho `ItemPackage` đã bỏ (họp GVHD 03/11/2026): Admin giao **từng câu** cho GV A và GV B, mỗi vòng có hạn riêng.
@@ -275,7 +276,7 @@ Hai kiểu giá trị (`<<DataType>>`, Value Object), không có danh tính riê
 | `dueAt: DateTime` | Hạn hoàn thành vòng 1 cho câu này |
 | `action: ReviewAction {nullable}` | `APPROVE` hoặc `REJECT`; rỗng khi chưa duyệt |
 | `reviewedAt: DateTime {nullable}` | Lúc GV A duyệt |
-| `comment: String {nullable}` | Ghi chú, lý do sửa hoặc từ chối |
+| `comment: String {nullable}` | Ghi chú/lý do; **bắt buộc (không rỗng sau trim)** khi A `REJECT` (`400 VALIDATION_FAILED` nếu thiếu), tùy chọn khi `APPROVE`; comment lịch sử `null` giữ nguyên |
 | `originalSnapshot: Json {nullable}` | Bản gốc của câu (nội dung, lựa chọn, đáp án, giải thích) chụp trước khi GV A sửa lần đầu; rỗng nếu chưa sửa. **Ghi một lần**. Dùng dựng "bản gốc so với bản A đã sửa" cho GV B và Admin (UCGV15, C3). Trước 03/11 là thuộc tính của `Item` |
 
 **`SecondReviewDetail`** (vòng 2, GV B: thẩm định, xác nhận hoặc loại)
@@ -284,7 +285,7 @@ Hai kiểu giá trị (`<<DataType>>`, Value Object), không có danh tính riê
 | `dueAt: DateTime` | Hạn hoàn thành vòng 2 cho câu này |
 | `action: ReviewAction {nullable}` | `CONFIRM` hoặc `REMOVE`; rỗng khi chưa xác nhận |
 | `confirmedAt: DateTime {nullable}` | Lúc GV B xác nhận hoặc loại |
-| `comment: String {nullable}` | Nhận xét của GV B |
+| `comment: String {nullable}` | Nhận xét của GV B; **bắt buộc (không rỗng sau trim)** khi B `REMOVE` (`400 VALIDATION_FAILED` nếu thiếu), tùy chọn khi `CONFIRM`; comment lịch sử `null` giữ nguyên |
 
 ID không nằm trong hai kiểu này: `Item.reviewerId` là GV A của câu, còn `ItemBatch.confirmerId` là GV B chung của lô. Mô hình chuẩn không còn `Item.confirmerId`; việc chuyển dữ liệu legacy phải theo migration riêng, không được giả định đã triển khai ở production.
 
@@ -309,7 +310,7 @@ Mỗi thao tác duyệt/giao việc để lại một dòng (truy vết, phục 
 | Thuộc tính | Ý nghĩa |
 |---|---|
 | `batchId` | Lô liên quan |
-| `itemId` | Câu liên quan (có thể rỗng); rỗng với thao tác tác động nhiều câu (`CONFIRM_ALL`). Giao việc (`ASSIGN`) và giao lại (`REASSIGN`) ghi **một dòng cho mỗi câu**, `actorId` là Admin |
+| `itemId` | Câu liên quan (nullable); **rỗng (`null`) với sự kiện cấp lô** (`CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING` và `REASSIGN` khi đổi GV B — kèm `details` chứa itemIds/số lượng/giá trị cũ-mới/`reason`). Giao việc (`ASSIGN`) và giao lại GV A (`REASSIGN`) ghi **một dòng cho mỗi câu**, `actorId` là Admin |
 | `actorId` | Người thực hiện |
 | `action: ReviewAction` | Hành động |
 | `createdAt` | Lúc xảy ra |
@@ -318,10 +319,10 @@ Mỗi thao tác duyệt/giao việc để lại một dòng (truy vết, phục 
 | Enum | Giá trị | Ý nghĩa |
 |---|---|---|
 | `ItemBatchSource` | AI_GENERATED, IMPORTED | Lô do AI sinh / import từ file |
-| `ItemBatchStatus` | GENERATING / IMPORTING → CHECKING → READY_TO_ASSIGN → IN_REVIEW → READY_TO_FINALIZE → FINAL_CHECKED → PARTIALLY_IMPORTED / DONE; FAILED, PARTIAL | `PARTIALLY_IMPORTED` là đã nhập một phần; `PARTIAL` phản ánh sinh chưa đủ do hết ngân sách |
+| `ItemBatchStatus` | GENERATING / IMPORTING → CHECKING → READY_TO_ASSIGN → IN_REVIEW → READY_TO_FINALIZE → FINAL_CHECKED → PARTIALLY_IMPORTED / DONE; FAILED, PARTIAL | `PARTIALLY_IMPORTED` chỉ sau khi đã import ≥ 1 câu và còn `SECOND_APPROVED`; `DONE` khi lô có ≥ 1 item và mọi câu kết thúc (kể cả 0 câu import); lô rỗng do lỗi sinh/import là `FAILED`; `PARTIAL` là sinh chưa đủ ngân sách |
 | `CheckPoint` | C1, C2, C3 | Ba điểm kiểm AI |
 | `CheckLevel` | PASS, SOFT, HARD | Đạt / cảnh báo / lỗi nặng |
-| `ReviewAction` | APPROVE, REJECT, CONFIRM, REMOVE, CONFIRM_ALL, IMPORT, ASSIGN, REASSIGN, ACCEPT_FLAG, UPDATE_DUE_DATE | Quyết định duyệt và thao tác quản trị; `CONFIRM_ALL` và `UPDATE_DUE_DATE` ghi audit cấp lô |
+| `ReviewAction` | APPROVE, REJECT, CONFIRM, REMOVE, CONFIRM_ALL, IMPORT, ASSIGN, REASSIGN, ACCEPT_FLAG, UPDATE_DUE_DATE, CANCEL_PENDING | Quyết định duyệt và thao tác quản trị; `CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING` và `REASSIGN` (đổi GV B) ghi audit cấp lô (`itemId = null`) |
 
 ### 3.8 `ItemStatus` — vòng đời câu hỏi
 | Giá trị | Ý nghĩa |
@@ -439,9 +440,9 @@ Các quy tắc dưới đây lấy từ SRS v3.0, `CLAUDE.md` và kế hoạch s
 | `TestSession` | Thuộc sở hữu của `ExamRound` (Composition; DB dùng `Restrict`, không xóa kỳ đã có phiên). `expiresAt = min(startedAt + durationMinutes, closesAt)`, tính **một lần** lúc bắt đầu phiên. Hết hạn: từ 8 câu trở lên thì `COMPLETED` + `TIMEOUT`, ít hơn thì `ABANDONED`. Mỗi sinh viên chỉ có một phiên đang chạy (mã lỗi `SESSION_IN_PROGRESS`). Sinh viên phải nằm trong danh sách của kỳ thi | DC-20, #122 |
 | `CATEngine` | Không giữ trạng thái. Tham số **cấu hình, không hardcode**: θ₀ = −0,5; ngưỡng SE 0,35; tối đa 25 câu; tối thiểu 8 câu trước khi Early Stop có hiệu lực; lưới EAP 41 điểm trên [−4, +4] bước 0,2; prior N(0, 1). Thứ tự dừng: SE → đủ câu → Early Stop → hết hạn | CLAUDE.md, SRS 4.x |
 | `Item` | Chỉ `FINAL_APPROVED` được CAT chọn, **lọc ở tầng Repository**. `irtA` cố định 1,0 (Rasch). `irtB` nằm trong [−4, +4]. Mọi câu thuộc đúng một `ItemBatch` (`batchId` bắt buộc). Câu `FINAL_APPROVED` cấm sửa. Vòng đời một chiều, không quay lại | SRS 6.x, #64, DC-34 |
-| `ItemBatch` | Trạng thái đi một chiều `GENERATING`/`IMPORTING` → `CHECKING` → `READY_TO_ASSIGN` → `IN_REVIEW` → `READY_TO_FINALIZE` → `FINAL_CHECKED` → `DONE`; nhánh lỗi `FAILED`, `PARTIAL`. Lô seed của từng bộ nguồn là lô `IMPORTED`/`DONE` | KE_HOACH_SINH_VA_DUYET_DE_AI |
-| `FirstReviewDetail` / `SecondReviewDetail` | Mỗi vòng có hạn `dueAt` riêng. `originalSnapshot` ghi một lần, không sửa lại. GV B không trả câu về A. Giao việc theo từng câu (không còn gói) | Họp GVHD 03/11/2026 |
-| `ItemReviewEvent` | Chỉ ghi thêm, không sửa hay xóa. Hành động tác động nhiều câu (`CONFIRM_ALL`) có `itemId` rỗng; `ASSIGN`/`REASSIGN` ghi một dòng cho mỗi câu | SRS 6.2b |
+| `ItemBatch` | Trạng thái đi một chiều `GENERATING`/`IMPORTING` → `CHECKING` → `READY_TO_ASSIGN` → `IN_REVIEW` → `READY_TO_FINALIZE` (không còn `DRAFT`/`FIRST_APPROVED`) → `FINAL_CHECKED` → `PARTIALLY_IMPORTED` (sau khi import ≥ 1 câu và còn `SECOND_APPROVED`) / `DONE` (≥ 1 câu, mọi câu kết thúc); nhánh lỗi `FAILED` (gồm lô rỗng do lỗi sinh/import), `PARTIAL`. Lô seed là lô `IMPORTED`/`DONE` | KE_HOACH_SINH_VA_DUYET_DE_AI, quyết định 27/11 |
+| `FirstReviewDetail` / `SecondReviewDetail` | Mỗi vòng có hạn `dueAt` riêng. `originalSnapshot` ghi một lần, không sửa lại. Comment bắt buộc sau trim khi `REJECT` / `REMOVE`, tùy chọn khi `APPROVE` / `CONFIRM`. GV B không trả câu về A. Giao việc theo từng câu (không còn gói), 1 GV B chung tại `ItemBatch.confirmerId` | Họp GVHD 03/11/2026, quyết định 27/11 |
+| `ItemReviewEvent` | Chỉ ghi thêm, không sửa hay xóa. Sự kiện cấp lô (`CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING`, `REASSIGN` đổi B) có `itemId = null` và lưu `details Json?`; `ASSIGN`/`REASSIGN` (đổi A) ghi một dòng cho mỗi câu | SRS 6.2b, quyết định 27/11 |
 | `LanguageProfile` | Mỗi phiên hoàn thành tạo tối đa một hồ sơ (`testSessionId` duy nhất). Xuất cho EduZ ở dạng JSON Profile v1 qua `exportForEduZ()` | SRS Mục IX |
 
 ## 9. Đối chiếu với `schema.prisma`: cột có ở DB nhưng không vẽ
@@ -480,8 +481,8 @@ Lược đồ gọn là tập con của schema (quyết định #128, #130, #132
 | `ItemBatch` (`item_batches`) | `createdById` | Admin tạo lô |
 | | `skill`, `cefrTarget`, `topicTag`, `requestedCount` | Đích và số lượng yêu cầu; **chỉ lô AI sinh có**, lô import để trống |
 | | `createdAt`, `updatedAt` | Mốc kiểm toán |
-| | `reminderSent` | Đã gửi email nhắc chưa |
-| `ItemReviewEvent` (`item_review_events`) | — | Không còn cột `packageId` (đã bỏ cùng `ItemPackage`) |
+| | *(thiết kế đích 27/11)* `batchRevision` / transactional outbox | Chưa có cột/bảng cụ thể trong `schema.prisma`; cờ nhắc hạn hiện đặt tại `Item.firstReminderSent`/`secondReminderSent` |
+| `ItemReviewEvent` (`item_review_events`) | `details` (`Json?`) | Ngữ cảnh audit (`itemIds`, `counts`, hạn cũ/mới, người cũ/mới, `reason`); không còn cột `packageId` |
 
 ## 10. Dữ liệu minh họa
 

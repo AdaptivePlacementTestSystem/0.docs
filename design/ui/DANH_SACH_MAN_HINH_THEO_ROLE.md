@@ -63,7 +63,7 @@ Ngân hàng câu hỏi (chỉ xem): S08 ─► S10 (chỉ câu được giao; kh
 **Luồng câu hỏi (Admin điều phối, DC-27…DC-45)**
 ```
 Tạo lô: S26 (AI sinh)  hoặc  S27 (import file, lưới tạm) ─► AI kiểm C1/C2 ─► S29 Chi tiết lô (READY_TO_ASSIGN; tab “AI đã loại”)
-S29 ─► S30 Giao việc (nhóm A, GV B, reviewDays, confirmDays; xem trước phân bổ) ─► lô IN_REVIEW ─► [GV A: S33/S11] ─► [GV B: S34/S35]
+S29 ─► S30 Giao việc (nhóm A, một GV B chung tại ItemBatch.confirmerId, firstDueAt, secondDueAt; assign-preview kèm batchRevision) ─► lô IN_REVIEW ─► [GV A: S33/S11] ─► [GV B: S34/S35]
 S29 ─► S31 Chỉnh hạn ; S30 tab Giao lại ; (lô theo dõi tại S28 Danh sách lô; không còn “Ép gửi gói”)
 Lô READY_TO_FINALIZE ─► S32 Kiểm tra (C3) ─► quyết lỗi mềm ─► Import ─► FINAL_APPROVED
 Xem ngân hàng: S08 ─► S10 (chỉ đọc)
@@ -175,12 +175,12 @@ Ghi chú phạm vi: hệ thống chỉ có **một trường** (DC-19), nên kh�
 | UCSV04–06 | S05–S07 | result / review / history | Student | ✅ |
 | UCGV02, UCADM06 (UCGV04 là bước con của UCGV14; UCGV06 ngoài phạm vi) | S08, S10 | `GET /items…` (chỉ xem) | Teacher (câu được giao), Admin (mọi câu) | ✅ đã sửa theo quyền mới (không sửa/xóa/nhân bản) |
 | ~~UCGV03~~ | ~~S09~~ | — | — | ⛔ bỏ (DC-32) |
-| UCGV14 (thay UCGV05) | S11, S33 | `GET /teacher/tasks/reviews/:batchId`, `PATCH /teacher/items/:id`, `POST /teacher/items/:id/approve` hoặc `/reject` | GV A | Đặc tả UC Word còn nợ đồng bộ |
-| UCGV15 | S34, S35 | `GET /teacher/tasks/confirms/:batchId`, `POST /teacher/items/:id/confirm` hoặc `/remove`, `POST /teacher/tasks/confirms/:batchId/confirm-all` | GV B | Đặc tả UC Word còn nợ đồng bộ |
+| UCGV14 (thay UCGV05) | S11, S33 | `GET /teacher/tasks/reviews/:batchId`, `PATCH /teacher/items/:id`, `POST /teacher/items/:id/approve` hoặc `/reject` | GV A | Đã đồng bộ UC Word & SD |
+| UCGV15 | S34, S35 | `GET /teacher/tasks/confirms/:batchId`, `POST /teacher/items/:id/confirm` hoặc `/remove`, `POST /teacher/tasks/confirms/:batchId/confirm-all` | GV B | Đã đồng bộ UC Word & SD |
 | UCADM11 | S26 | `POST /item-batches` | Admin | ⚠️ ID UC đề xuất |
 | UCADM12 | S27 | `/item-imports/{upload,grid,save}` | Admin | ✅ DC-22, DC-28; ⚠️ ID UC đề xuất |
 | UCADM13 | S28, S29, S30, S31 | `GET /item-batches/:id`, `GET /teachers`, `POST …/assign-preview`, `POST …/assign`, `POST …/reassign`, `POST …/reassign-confirmer`, `POST …/cancel-pending`, `PATCH …/deadlines` | Admin | Preview do backend tính; hợp đồng đích chưa tích hợp |
-| UCADM14 | S32 | `/item-batches/:id/{final-check,import}`, `/items/:id/decision` | Admin | ⚠️ ID UC đề xuất |
+| UCADM14 | S32 | `POST/GET /item-batches/:id/final-check`, `POST /item-batches/:id/items/:itemId/flag-decision`, `POST /item-batches/:id/import` | Admin | ⚠️ ID UC đề xuất; đã đồng bộ 27/11 |
 | UCGV07–08, UCADM05 | S12 (E2/E5) | `/reports/…?examRoundId=` | Teacher, Admin | ✅ lọc theo kỳ (BR-13) |
 | UCGV09, UCADM04 | S13, S14 | `/placement-profiles/…` | Teacher, Admin | ✅ |
 | UCADM15 | S20, S21, S22 | `/exam-rounds…` | **Admin** (DC-18) | ⚠️ ID UC/route |

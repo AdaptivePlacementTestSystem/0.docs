@@ -6,7 +6,9 @@
 
 ## Prompt chuẩn (dùng lại mỗi tuần — điền vào 5 ô của form)
 
-> "Prompt đã dùng" không phải chép nguyên văn cả hội thoại — mà phải **cho thấy nhóm dùng đúng quy trình prompt chuẩn 7 phần** đã lập ở `tracking/PROMPT_TEMPLATE_FEATURE.md` (bối cảnh/phạm vi → tài liệu tham chiếu bắt buộc → yêu cầu OOP → ràng buộc rubric → quy tắc không tự quyết định → ghi log → tracking), rút gọn thành 5 khối dưới đây. Đây chính là bằng chứng cho TC2.3 Mức 5 ("quy trình hóa thành hệ thống"), không phải mô tả chung chung "dùng AI viết code".
+> **"Prompt đã dùng":**
+> - Với dữ liệu **Tuần 1–10** (Bảng 1 của `AI_USAGE_LOG.md`): tóm tắt theo cấu trúc quy trình prompt chuẩn 7 phần ở `tracking/PROMPT_TEMPLATE_FEATURE.md`, mục `[Nội dung yêu cầu cụ thể]` tóm tắt 1–3 dòng.
+> - Từ **Tuần 11 trở đi** (Bảng 2 của `AI_USAGE_LOG.md`): **trích nguyên văn `Prompt gốc`** mà thành viên đã gửi cho AI (kèm bối cảnh/tài liệu tham chiếu nếu dùng prompt rút gọn) để bảo đảm truy vết chính xác cho TC2.3 Mức 5.
 
 ```
 Công cụ AI: <VD: Claude Code, ChatGPT, GitHub Copilot>
@@ -21,7 +23,7 @@ Prompt đã dùng:
 
 [Yêu cầu tracking] <Yêu cầu tường minh: cập nhật tracking/weekly-log/Tuan-XX.md mục "Thay đổi thiết kế & lý do" / "Công việc đã hoàn thành"; cập nhật tracking/TRACKING.md nếu có số liệu KPI thay đổi>
 
-[Nội dung yêu cầu cụ thể] <Câu lệnh chính đã gõ thực tế, tóm tắt 1-3 dòng>
+[Nội dung yêu cầu cụ thể / Prompt gốc] <Từ Tuần 11 trở đi: chép nguyên văn Prompt gốc từ cột `Prompt gốc` ở Bảng 2 của `tracking/AI_USAGE_LOG.md` (Tuần 1–10 giữ tóm tắt 1–3 dòng)>
 
 Nội dung AI tạo ra:
 <Liệt kê cụ thể: file nào / đoạn nào / class nào AI sinh ra hoặc sửa đổi trong tuần>

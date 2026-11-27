@@ -137,7 +137,7 @@ Chỉ chạy được khi lô ở `READY_TO_FINALIZE` (DC-44). **Mục tiêu kh�
 
 **Vì sao delta:** sau C1/C2, phần lớn câu **không đổi** nên không cần tốn AI lần nữa; hỏng hóc chỉ có thể sinh ra từ **(a) A sửa nội dung** và **(b) ngân hàng thay đổi**, và hai thứ này phát hiện được rẻ bằng so hash và so theo thời điểm.
 
-**Kết quả C3 hiển thị cho Admin:** bảng theo câu (qua / cờ mềm / lỗi cứng, mã lý do, câu bị nghi trùng, bản gốc so với bản đã sửa), tổng hợp theo GV. **Import bị khóa** cho đến khi có báo cáo C3 còn hiệu lực (không câu nào đổi và ngân hàng không đổi kể từ lúc kiểm); nếu đổi, hệ thống yêu cầu kiểm lại phần chênh. Lúc bấm Import, hệ thống vẫn chạy lại **T1–T2 nhanh** để chặn tranh chấp (hai Admin import cùng lúc).
+**Kết quả C3 hiển thị cho Admin:** bảng theo câu (qua / cờ mềm / lỗi cứng, mã lý do, câu bị nghi trùng, bản gốc so với bản đã sửa), tổng hợp theo GV, thông tin phiên bản và trạng thái stale (`GET /item-batches/:id/final-check`). **Import bị khóa** cho đến khi không còn câu `DRAFT`/`FIRST_APPROVED` và có báo cáo C3 còn hiệu lực (nội dung câu, ngân hàng và chính sách kiểm tra không đổi kể từ lúc kiểm); nếu stale, hệ thống yêu cầu **chạy lại C3 trên các câu `SECOND_APPROVED` còn lại và Admin phải quyết định lại tất cả cờ mềm trên báo cáo mới** (không tự kế thừa `ACCEPT_FLAG` cũ). Lúc bấm Import, hệ thống vẫn chạy lại **T1–T2 nhanh** để chặn tranh chấp (hai Admin import cùng lúc).
 
 ### 4.4. Xử lý câu rớt C3 (AI đề xuất theo ủy quyền của bạn, **chờ xác nhận**)
 
@@ -203,7 +203,7 @@ Chọn **O2** vì: (1) giữ luồng một chiều như bạn đã chốt ở #1
 |---|---|---|---|---|
 | Máy ở C1, C2, C3 | `AI_REJECTED` | Nội dung + **mã lý do** + câu bị nghi trùng (nếu có) | Chỉ Admin (tab "AI đã loại") | Không; Admin dùng để chỉnh ngưỡng. Dọn sau N ngày (cấu hình) |
 | GV A hoặc GV B | `REJECTED` | Nội dung và comment bắt buộc | Admin (danh sách và thống kê theo GV) | Không; Admin muốn bù thì tạo lô mới |
-| Admin (lỗi mềm ở C3) | `REJECTED` | Như trên | Admin | Không |
+| Admin (lỗi mềm ở C3 hoặc `cancel-pending`) | `REJECTED` | Nội dung và comment/reason bắt buộc (báo cáo tách riêng hủy hành chính với loại chất lượng) | Admin | Không |
 
 Câu `AI_REJECTED` **không** được đưa cho GV. Thống kê bắt buộc: tỷ lệ loại theo tầng AI, theo A, theo B, để hiệu chỉnh.
 
@@ -221,10 +221,10 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 
 **L-1. Tạo lô bằng AI (UCADM11).** Ad nhập skill, CEFR, topic, N ⇒ H kiểm giới hạn, tạo lô (`GENERATING`), đẩy job ⇒ Worker: G1 → G2 → **C1** → G6 → G7 ⇒ lô `READY_TO_ASSIGN` (hoặc `PARTIAL`/`FAILED`) ⇒ thông báo Ad. Mỗi lời gọi ghi mô hình, token.
 **L-2. Tạo lô bằng import file (UCADM12, đề xuất).** Ad tải một hoặc nhiều file vào lưới (C2 tầng 1–4 chạy ngay) ⇒ xem lưới/popup ⇒ **Lưu** ⇒ H tạo lô `IMPORTED`, chạy C2 tầng 5 ⇒ `READY_TO_ASSIGN`.
-**L-3. Xem kết quả và giao việc (UCADM13, đề xuất).** Ad xem số câu qua, danh sách AI đã loại, cờ ⇒ **Giao việc** (chọn A, B, `reviewDays`, `confirmDays`) ⇒ xem trước phân bổ ⇒ xác nhận ⇒ H ghi người duyệt/xác nhận và hạn vào từng câu, ghi `ASSIGN`, lô `IN_REVIEW`, thông báo và đặt lịch nhắc.
+**L-3. Xem kết quả và giao việc (UCADM13, đề xuất).** Ad xem số câu qua, danh sách AI đã loại, cờ ⇒ **Giao việc** (chọn `reviewerIds` có thứ tự, một B chung và `firstDueAt`/`secondDueAt`) ⇒ `assign-preview` trả phân bổ và `batchRevision` ⇒ xác nhận `assign` ⇒ H ghi `Item.reviewerId` theo câu, `ItemBatch.confirmerId` trên lô, hạn hai vòng, `ASSIGN` mỗi câu, lô `IN_REVIEW`, thông báo và đặt lịch nhắc.
 **L-4. A duyệt câu (UCGV14).** A sửa/duyệt/từ chối từng câu (H kiểm lại cứng + T1–T2 sau sửa) ⇒ ghi `first_review`; B thấy câu `FIRST_APPROVED` ngay sau khi A duyệt.
 **L-5. B confirm (UCGV15).** B mở danh sách câu được giao ⇒ xử lý từng câu hoặc "xác nhận tất cả còn lại" ⇒ ghi `second_review`.
-**L-6. Theo dõi, chỉnh hạn, giao lại.** Ad xem tiến độ theo GV/câu, chỉnh hạn, giao lại.
+**L-6. Theo dõi, chỉnh hạn, giao lại và hủy tồn đọng.** Ad xem tiến độ theo GV/câu, chỉnh hạn (reason + `UPDATE_DUE_DATE` cấp lô), giao lại A (`DRAFT` + reason), đổi B chung (`reassign-confirmer` + reason + audit cấp lô + outbox) hoặc `cancel-pending` (`reason` + `CANCEL_PENDING` cấp lô).
 **L-7. Kiểm tra và import (UCADM14, đề xuất).** Lô `READY_TO_FINALIZE` ⇒ Ad bấm **Kiểm tra** (C3) ⇒ xem báo cáo ⇒ quyết lỗi mềm ⇒ **Import** (H chạy lại T1–T2 nhanh) ⇒ `FINAL_APPROVED`.
 **L-8. Quá hạn.** Hiển thị, không tự đổi; Ad xử lý như L-6.
 
@@ -261,7 +261,7 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 
 Các route trên là **hợp đồng đích**; mã hiện tại và spec OpenAPI còn cần đồng bộ.
 
-**Mã lỗi:** `NOT_ASSIGNED` (403), `CONFIRMER_IN_REVIEW_GROUP` (409), `FINAL_CHECK_REQUIRED` (409), `FINAL_CHECK_STALE` (409), `BATCH_NOT_READY_TO_FINALIZE` (409), `DUPLICATE_AFTER_EDIT` (422), `INVALID_AFTER_EDIT` (422), `BATCH_BUDGET_EXCEEDED` (409), `IMPORT_GRID_EXPIRED` (410).
+**Mã lỗi:** `VALIDATION_FAILED` (400 — thiếu/rỗng comment hoặc reason sau trim), `NOT_ASSIGNED` (403), `CONFIRMER_IN_REVIEW_GROUP` (409), `FINAL_CHECK_REQUIRED` (409), `FINAL_CHECK_STALE` (409), `BATCH_NOT_READY_TO_FINALIZE` (409), `DUPLICATE_AFTER_EDIT` (422), `INVALID_AFTER_EDIT` (422), `BATCH_BUDGET_EXCEEDED` (409), `IMPORT_GRID_EXPIRED` (410).
 
 ---
 
@@ -301,7 +301,7 @@ Các route trên là **hợp đồng đích**; mã hiện tại và spec OpenAPI
 - **Duyệt theo câu:** câu A loại (`REJECTED`) không tới B; B chỉ thấy câu giao cho mình; ghi `first_review`/`second_review` đúng vòng; `originalSnapshot` chỉ ghi một lần; giao việc ghi `ASSIGN` một dòng mỗi câu.
 - **B:** Xác nhận/Loại từng câu; "xác nhận tất cả còn lại" chỉ ảnh hưởng câu chưa quyết; gọi API sửa hoặc "trả về" ⇒ lỗi.
 - **Kiểm tra C3:** câu không đổi dùng lại kết quả; câu A sửa bị chạy lại G5; có câu mới vào ngân hàng trong lúc chờ ⇒ T1–T2 bắt trùng; lỗi cứng ⇒ `AI_REJECTED`; lỗi mềm ⇒ Admin quyết, ghi `ACCEPT_FLAG`; sửa/đổi sau khi kiểm ⇒ `FINAL_CHECK_STALE`.
-- **Import:** chỉ khi lô `READY_TO_FINALIZE` (mọi câu đã xong vòng 2 hoặc các câu còn lại đã quá hạn) và C3 còn hiệu lực; câu chưa xử lý không được import; hai Admin import cùng lúc không tạo trùng.
+- **Import & vòng đời lô:** chỉ C3/import khi lô `READY_TO_FINALIZE` (**không còn câu `DRAFT` hoặc `FIRST_APPROVED`**; quá hạn không tự mở C3 — Admin phải chờ, giao lại hoặc `cancel-pending`) và báo cáo C3 còn hiệu lực; khi C3 stale phải chạy lại và quyết lại mọi cờ mềm (không kế thừa `ACCEPT_FLAG`); import ≥ 1 câu mà còn `SECOND_APPROVED` → `PARTIALLY_IMPORTED`; lô ≥ 1 item đều kết thúc → `DONE` (kể cả 0 câu import); lô rỗng do lỗi → `FAILED`; hai Admin import cùng lúc không tạo trùng.
 - **Lọc trùng:** giống hệt (T1), gần giống chữ (T2), diễn đạt lại (T3 cảnh báo), trùng giữa hai file trong lưới, trùng với câu đang chờ ở lô khác.
 - **Trạng thái:** chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` không sửa; chuyển trạng thái chỉ đi một chiều.
 - **Hạn và nhắc:** hạn hai vòng xác định khi giao; Admin đổi hạn với lý do và audit; nhắc lúc 08:00 giờ Việt Nam ngày trước hạn.

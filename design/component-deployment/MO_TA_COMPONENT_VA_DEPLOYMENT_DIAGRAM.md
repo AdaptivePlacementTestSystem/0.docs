@@ -55,3 +55,11 @@
 | Đường kiểm tra uptime | Better Stack ping **cả** `/api/health` (BFF frontend) **và** `/api/v1/health`, `/api/v1/ready` (backend); Nginx phải chuyển tiếp `/api/v1/*` tới backend | Ghi vào cấu hình Nginx khi có; vẽ mũi tên thứ hai trên sơ đồ |
 | `prisma/migrations` trống | Đúng; artifact "migrations" trong sơ đồ là **kế hoạch**, chưa có migration đầu (điểm chặn Q1 của CI/CD) | Sinh migration đầu bằng `prisma migrate` sau khi chốt schema |
 | `ai-explainer` gọi thẳng Gemini; `bullmq`, `nodemailer`, `@nestjs/terminus` chưa cài | Nợ đã ghi ở mục 5 | Sửa mã theo thiết kế |
+
+## 7. Cập nhật đồng bộ 27/11/2026 (Q1–Q8)
+- **Deployment Diagram:** Topology không thay đổi (worker tiếp tục chạy chung tiến trình backend trên staging theo chốt #123).
+- **Component Diagram ([TLCN_Component_Deployment.drawio](file:///D:/DaiHoc/TLCN/AdaptivePlacementTestSystem/0.docs/design/component-deployment/TLCN_Component_Deployment.drawio)):**
+  - `llm-gateway`: ghi nhận cấu hình **LiteLLM** qua biến môi trường theo quyết định 25–27/11 bên cạnh `Gemini API (Flash)` và `Fallback LLM Provider`.
+  - `Job Queues & Workers (BullMQ)`: ghi nhận thiết kế đích `outbox-notify` (**Transactional Outbox / Outbox Worker**) phục vụ thông báo đổi GV B chung (`reassign-confirmer`) và lưu ý đối chiếu chuyển đổi sweep nhắc hạn. Phần DDL cụ thể của `batchRevision` và bảng outbox **được tạm gác** theo chỉ đạo 27/11, chưa thêm vào `schema.prisma`.
+  - `item-generation`: lưu ý mã nguồn backend hiện tách module `teacher-review`; hợp đồng đích `/teacher/tasks/...` và `/teacher/items/:id/...` sẽ hợp nhất/đồng bộ khi triển khai code.
+  - Ảnh PNG (`TLCN_ComponentDiagram.png`, `TLCN_DeploymentDiagram.png`) cần xuất lại từ GUI draw.io khi rà soát trình bày cuối.

@@ -27,7 +27,7 @@ Cấu trúc dự án được thiết kế tuân thủ nghiêm ngặt **Clean Ar
    - `user-admin`: Quản lý tài khoản SV/GV, tạo lẻ, khóa/mở khóa, cấp lại mật khẩu tạm, nâng/thu hồi quyền Admin (UCADM09).
    - `exam-round`: Quản lý kỳ thi, import danh sách thí sinh dự thi theo lưới tạm, theo dõi tiến độ thi thời gian thực (UCADM15, UCADM16, UCADM17).
    - `mail`: Module gửi email bất đồng bộ qua hàng đợi BullMQ, giao tiếp qua port `MailPort` và adapter `SmtpMailAdapter`.
-   - `item-generation`: Kéo từ Khóa luận vào Tiểu luận — điều phối tạo lô câu hỏi (AI sinh hoặc file import), bộ lọc AI 3 chặng C1/C2/C3, thuật toán chia đều câu hỏi cho nhóm GV A, giao từng câu cho GV A và GV B (`reviewer_id`, `confirmer_id`), nhắc hạn 24h (cờ `first_reminder_sent`/`second_reminder_sent` trên `items`), kiểm tra delta C3 và import vào ngân hàng (UCADM11..14, UCGV14..15).
+   - `item-generation`: Kéo từ Khóa luận vào Tiểu luận — điều phối tạo lô câu hỏi (AI sinh hoặc file import), bộ lọc AI 3 chặng C1/C2/C3, thuật toán chia đều câu hỏi cho nhóm GV A, giao GV A theo câu (`items.reviewer_id`) và một GV B chung trên lô (`item_batches.confirmer_id`), nhắc hạn lúc 08:00 giờ VN ngày trước hạn (cờ `first_reminder_sent`/`second_reminder_sent` trên `items`), kiểm tra delta C3 và import vào ngân hàng (UCADM11..14, UCGV14..15).
    - `llm-gateway`: Cổng gọi LLM dùng chung có dự phòng nhà cung cấp, ghi nhận token/mô hình, cache prompt.
 2. **Loại bỏ hoàn toàn multi-tenant:**
    - Xóa bỏ mọi tham chiếu tới `Institution`, `institution_id`, `resolveScope`.
@@ -317,9 +317,9 @@ adaptive-placement-test/
 │       │   │   ├── item-bank/page.tsx          # UCGV02: Ngân hàng câu hỏi chế độ chỉ xem (câu được giao); chi tiết item-bank/[id]/page.tsx
 │       │   │   ├── tasks/
 │       │   │   │   ├── reviews/page.tsx        # Hộp việc GV vai A: danh sách câu hỏi được giao
-│       │   │   │   ├── reviews/[itemId]/page.tsx # Màn hình duyệt một câu của GV A: sửa câu, Duyệt (FIRST_APPROVED), Từ chối (⚠ chờ xác nhận route theo từng câu)
-│       │   │   │   ├── confirms/page.tsx       # Hộp việc GV vai B: danh sách câu được giao xác nhận
-│       │   │   │   └── confirms/[itemId]/page.tsx # Màn hình xem một câu, Xác nhận / Loại hoặc Confirm-All (⚠ chờ xác nhận route và phạm vi Confirm-All)
+│       │   │   │   ├── reviews/[batchId]/page.tsx # S11: Màn hình duyệt câu của GV A trong lô: sửa câu DRAFT, Duyệt (FIRST_APPROVED), Từ chối (REJECT, comment bắt buộc)
+│       │   │   │   ├── confirms/page.tsx       # S34: Hộp việc GV vai B: danh sách lô được giao xác nhận
+│       │   │   │   └── confirms/[batchId]/page.tsx # S35: Màn hình xác nhận câu trong lô của GV B (Xác nhận / Loại bỏ bắt buộc comment / confirm-all cấp lô)
 │       │   │
 │       │   ├── (admin)/                        # Màn hình dành cho Quản trị viên
 │       │   │   ├── dashboard/page.tsx          # Thống kê tổng quan hệ thống
@@ -469,12 +469,12 @@ adaptive-placement-test/
 | F-27 | UCGV15 | Xác nhận câu hỏi được giao (GV vai B) | GV vai B | `src/modules/item-generation/` | `/teacher/tasks/confirms` |
 | F-28 | UCADM14 | Kiểm tra C3 và Import vào ngân hàng | Admin | `src/modules/item-generation/` | `/admin/item-batches/[id]/final-check` |
 | F-03 | UCSV02, UCSV03, UCSV07 | Làm bài thi thích ứng (CAT) | Sinh viên | `src/modules/test-session/`, `cat-engine/` | `/student/exams/[roundId]/take` |
-| F-05 | UCSV04, UCGV09, UCADM04 | Xem kết quả & Hồ sơ năng lực | SV, GV, Admin | `src/modules/language-profile/` | `/student/results/[id]`, `/teacher/students/[id]` |
-| F-06 | UCSV05 | Xem giải thích AI | Sinh viên | `src/modules/ai-explainer/` | `/student/results/[id]` |
+| F-05 | UCSV04, UCGV09, UCADM04 | Xem kết quả & Hồ sơ năng lực | SV, GV, Admin | `src/modules/language-profile/` | `/student/results/[sessionId]`, `/teacher/students/[id]` |
+| F-06 | UCSV05 | Xem giải thích AI | Sinh viên | `src/modules/ai-explainer/` | `/student/results/[sessionId]/review` |
 | F-09 | UCGV07, UCGV08, UCADM05 | Báo cáo lớp học & Tổng thể (lọc kỳ) | GV, Admin | `src/modules/reporting/` | `/teacher/reports`, `/admin/dashboard` |
-| F-02 | UCGV02, UCADM06 | Xem ngân hàng câu hỏi (chỉ xem) | GV (câu được giao), Admin (mọi câu) | `src/modules/item-bank/` | `/teacher/item-bank`, `/admin/item-bank` |
-| F-08 | UCSV06 | Xem lịch sử bài thi | Sinh viên | `src/modules/language-profile/` | `/history` |
-| F-26 | UCGV04 | Chỉnh sửa câu hỏi (bước con của UCGV14, chỉ GV vai A, câu DRAFT) | GV vai A | `src/modules/item-generation/` | `/teacher/tasks/reviews/[itemId]` |
+| F-02 | UCGV02, UCADM06 | Xem ngân hàng câu hỏi (chỉ xem) | GV (câu liên quan), Admin (mọi câu) | `src/modules/item-bank/` | `/teacher/item-bank`, `/admin/item-bank` |
+| F-08 | UCSV06 | Xem lịch sử bài thi | Sinh viên | `src/modules/language-profile/` | `/student/history` |
+| F-26 | UCGV04 | Chỉnh sửa câu hỏi (bước con của UCGV14, chỉ GV vai A, câu DRAFT) | GV vai A | `src/modules/item-generation/` | `/teacher/tasks/reviews/[batchId]` |
 
 ---
 

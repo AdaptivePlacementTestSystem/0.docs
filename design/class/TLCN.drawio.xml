@@ -623,7 +623,7 @@
           <mxGeometry height="22" width="180" y="160" as="geometry" />
         </mxCell>
         <mxCell id="ReviewAction" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;Enumeration&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;ReviewAction&lt;/b&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="260" width="160" x="1260" y="795" as="geometry" />
+          <mxGeometry height="282" width="160" x="1260" y="795" as="geometry" />
         </mxCell>
         <mxCell id="attr_258" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="APPROVE" vertex="1">
           <mxGeometry height="22" width="160" y="40" as="geometry" />
@@ -654,6 +654,9 @@
         </mxCell>
         <mxCell id="attr_ASSIGN_p1" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="ASSIGN" vertex="1">
           <mxGeometry height="22" width="160" y="172" as="geometry" />
+        </mxCell>
+        <mxCell id="new_cancel_pending_0" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="CANCEL_PENDING" vertex="1">
+          <mxGeometry height="22" width="160" y="260" as="geometry" />
         </mxCell>
         <mxCell id="edge_279" edge="1" parent="1" source="TestSession" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#000000;fontColor=#000000;endArrow=open;endFill=0;endSize=12;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;;startArrow=diamondThin;startFill=1;startSize=14;" target="SessionResponse" value="1..*">
           <mxGeometry relative="1" x="0.5595" y="6" as="geometry">
@@ -1840,7 +1843,7 @@
           <mxGeometry height="22" width="300" y="106" as="geometry" />
         </mxCell>
         <mxCell id="ReviewAction" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;Enumeration&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;ReviewAction&lt;/b&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="260" width="180" x="660" y="1240" as="geometry" />
+          <mxGeometry height="282" width="180" x="660" y="1240" as="geometry" />
         </mxCell>
         <mxCell id="attr_104" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="APPROVE" vertex="1">
           <mxGeometry height="22" width="180" y="40.0" as="geometry" />
@@ -1871,6 +1874,9 @@
         </mxCell>
         <mxCell id="attr_ASSIGN_p3" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="ASSIGN" vertex="1">
           <mxGeometry height="22" width="180" y="172.0" as="geometry" />
+        </mxCell>
+        <mxCell id="new_cancel_pending_2" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="CANCEL_PENDING" vertex="1">
+          <mxGeometry height="22" width="180" y="260" as="geometry" />
         </mxCell>
         <mxCell id="Admin" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b&gt;Admin&lt;/b&gt;" vertex="1">
           <mxGeometry height="94" width="210" x="430" y="600" as="geometry" />
