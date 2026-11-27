@@ -1059,7 +1059,7 @@
 												<UML:TaggedValue tag="mt" value="Xac nhan transaction thanh cong()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="outbox records written in same tx for worker after commit" xmi.id="EAID_B4E3484F_D078_4AF9_A5C8_DB611F194110" visibility="public" sender="EAID_1C10893E_EE8E_4F2D_8E67_2890F363588E" receiver="EAID_FA75F906_74B7_4C07_90B8_53FFA115A169">
+										<UML:Message name="review_notice_outbox records written in same tx for worker after commit" xmi.id="EAID_B4E3484F_D078_4AF9_A5C8_DB611F194110" visibility="public" sender="EAID_1C10893E_EE8E_4F2D_8E67_2890F363588E" receiver="EAID_FA75F906_74B7_4C07_90B8_53FFA115A169">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1100,7 +1100,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-100;PtEndX=0;PtEndY=-100;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_6F2A9E5D_89AC_423D_9446_9A731B98A4F3"/>
-												<UML:TaggedValue tag="mt" value="outbox records written in same tx for worker after commit"/>
+												<UML:TaggedValue tag="mt" value="review_notice_outbox records written in same tx for worker after commit"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="worker picks outbox after commit; periodic sweep keeps 08:00 GMT+7 day-before reminder" xmi.id="EAID_B8FA3CC8_5462_41F1_AA8D_A635D603934C" visibility="public" sender="EAID_FA75F906_74B7_4C07_90B8_53FFA115A169" receiver="EAID_D7678D77_A16A_43EA_987C_628210810537">
@@ -2027,7 +2027,7 @@
 												<UML:TaggedValue tag="mt" value="Xac nhan cap nhat ItemBatch.confirmerId()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="1 batch REASSIGN event (itemId=null, details: old/new B, reason); write outbox notify in same tx" xmi.id="EAID_6DF4CBA1_ADA0_4B08_A6B9_E4E835E782B8" visibility="public" sender="EAID_1C10893E_EE8E_4F2D_8E67_2890F363588E" receiver="EAID_E8E854C4_C6A6_4959_AF55_9C1F30D40315">
+										<UML:Message name="1 batch REASSIGN_CONFIRMER event (itemId=null, details: old/new B, reason); write review_notice_outbox in same tx" xmi.id="EAID_6DF4CBA1_ADA0_4B08_A6B9_E4E835E782B8" visibility="public" sender="EAID_1C10893E_EE8E_4F2D_8E67_2890F363588E" receiver="EAID_E8E854C4_C6A6_4959_AF55_9C1F30D40315">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2068,7 +2068,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-100;PtEndX=0;PtEndY=-100;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_6F2A9E5D_89AC_423D_9446_9A731B98A4F3"/>
-												<UML:TaggedValue tag="mt" value="1 batch REASSIGN event (itemId=null, details: old/new B, reason); write outbox notify in same tx"/>
+												<UML:TaggedValue tag="mt" value="1 batch REASSIGN_CONFIRMER event (itemId=null, details: old/new B, reason); write review_notice_outbox in same tx"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan transaction thanh cong (old B immediately loses Teacher Review access)()" xmi.id="EAID_2096F90D_6B66_42F0_B291_2663E9DD20D3" visibility="public" sender="EAID_E8E854C4_C6A6_4959_AF55_9C1F30D40315" receiver="EAID_1C10893E_EE8E_4F2D_8E67_2890F363588E">

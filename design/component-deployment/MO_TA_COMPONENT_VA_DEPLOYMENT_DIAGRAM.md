@@ -56,10 +56,10 @@
 | `prisma/migrations` trống | Đúng; artifact "migrations" trong sơ đồ là **kế hoạch**, chưa có migration đầu (điểm chặn Q1 của CI/CD) | Sinh migration đầu bằng `prisma migrate` sau khi chốt schema |
 | `ai-explainer` gọi thẳng Gemini; `bullmq`, `nodemailer`, `@nestjs/terminus` chưa cài | Nợ đã ghi ở mục 5 | Sửa mã theo thiết kế |
 
-## 7. Cập nhật đồng bộ 27/11/2026 (Q1–Q8)
-- **Deployment Diagram:** Topology không thay đổi (worker tiếp tục chạy chung tiến trình backend trên staging theo chốt #123).
+## 7. Cập nhật đồng bộ 27–28/11/2026 (Q1–Q8 & Chốt nhóm)
+- **Deployment Diagram:** Topology không thay đổi (worker tiếp tục chạy chung tiến trình backend trên staging theo chốt #123; SMTP thử nghiệm staging chọn Brevo Relay, giữ `MailPort` trung lập).
 - **Component Diagram ([TLCN_Component_Deployment.drawio](file:///D:/DaiHoc/TLCN/AdaptivePlacementTestSystem/0.docs/design/component-deployment/TLCN_Component_Deployment.drawio)):**
-  - `llm-gateway`: ghi nhận cấu hình **LiteLLM** qua biến môi trường theo quyết định 25–27/11 bên cạnh `Gemini API (Flash)` và `Fallback LLM Provider`.
-  - `Job Queues & Workers (BullMQ)`: ghi nhận thiết kế đích `outbox-notify` (**Transactional Outbox / Outbox Worker**) phục vụ thông báo đổi GV B chung (`reassign-confirmer`) và lưu ý đối chiếu chuyển đổi sweep nhắc hạn. Phần DDL cụ thể của `batchRevision` và bảng outbox **được tạm gác** theo chỉ đạo 27/11, chưa thêm vào `schema.prisma`.
-  - `item-generation`: lưu ý mã nguồn backend hiện tách module `teacher-review`; hợp đồng đích `/teacher/tasks/...` và `/teacher/items/:id/...` sẽ hợp nhất/đồng bộ khi triển khai code.
+  - `llm-gateway`: Cập nhật theo `DECISIONS_LOG.md:207–215`: môi trường thử nghiệm hiện gọi **Gemini trực tiếp qua endpoint tương thích OpenAI** (không có LiteLLM dự phòng ở chế độ thử) và `gemini-embedding-001@768` (**trạng thái pilot / chưa kiểm chứng runtime**).
+  - Hàng đợi & Outbox trong PostgreSQL (`item_batch_jobs` và `review_notice_outbox` trong `schema.prisma` qua 18 migration): sinh/kiểm lô AI chạy trên hàng đợi PostgreSQL có lease (`item_batch_jobs`); thông báo đổi GV B chung (`reassign-confirmer`) dùng transactional outbox **`review_notice_outbox`** (có `lease_token`, `lease_until`, `last_error`, `sent_at`, trạng thái `DEAD`), tách riêng khỏi việc chuyển sweep nhắc hạn 08:00 và `InProcessMailQueue` (thuộc hạng mục Mail/BullMQ riêng). `batchRevision` tính SHA-256 động theo canonical JSON, không thêm cột DB.
+  - `item-generation` vs `item-bank`: Route thực tế phía Admin là `POST /item-batches/generate`, `/item-batches/import/*`, `GET /item-batches/rejected-stats`, `retry-generation`/`retry-checks`/`refresh-status`; luồng Teacher Review (`UCGV14–15`) thống nhất trên `/teacher/tasks/...` và `/teacher/items/:id/...` do một controller ở `item-bank` (`@Roles(TEACHER)` only) phụ trách.
   - Ảnh PNG (`TLCN_ComponentDiagram.png`, `TLCN_DeploymentDiagram.png`) cần xuất lại từ GUI draw.io khi rà soát trình bày cuối.

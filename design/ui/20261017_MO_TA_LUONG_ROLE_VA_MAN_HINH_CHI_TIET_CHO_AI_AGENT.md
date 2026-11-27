@@ -111,7 +111,7 @@ Mỗi màn có cùng khuôn: **(a) Thông tin chung** (route, file Next.js, guar
 
 **Mức kiểm AI `CheckLevel`:** `PASS` Qua · `SOFT` Cờ mềm · `HARD` Lỗi cứng. **Điểm kiểm `CheckPoint`:** C1 (sau khi AI sinh), C2 (sau import file), C3 (Kiểm tra cuối trước Import).
 
-**Hành động kiểm toán `ReviewAction`** (hiển thị ở "Lịch sử" câu): `APPROVE` Duyệt · `REJECT` Từ chối · `CONFIRM` Xác nhận · `REMOVE` Loại bỏ · `CONFIRM_ALL` Xác nhận hàng loạt cấp batch · `IMPORT` Import · `ASSIGN` Giao việc · `REASSIGN` Giao lại A (theo câu `DRAFT`) hoặc thay B chung (cấp batch `item_id = NULL`) · `ACCEPT_FLAG` Admin chấp nhận cờ · `UPDATE_DUE_DATE` Admin đổi hạn cấp batch · `CANCEL_PENDING` Admin hủy câu `DRAFT`/`FIRST_APPROVED` tồn đọng cấp batch. Các sự kiện cấp batch (`CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING`, `REASSIGN` đổi B) dùng `item_id = NULL` kèm `details` (itemIds, số lượng theo trạng thái cũ, giá trị cũ/mới, `reason`). Đã bỏ `EXTEND`, `FORCE_SEND`; item `REJECTED`/`REMOVE` không giao lại.
+**Hành động kiểm toán `ReviewAction`** (hiển thị ở "Lịch sử" câu, chốt 12 giá trị 28/11): `APPROVE` Duyệt · `REJECT` Từ chối · `CONFIRM` Xác nhận · `REMOVE` Loại bỏ · `CONFIRM_ALL` Xác nhận hàng loạt cấp batch · `IMPORT` Import · `ASSIGN` Giao việc · `REASSIGN` Giao lại A (theo câu `DRAFT`) · `REASSIGN_CONFIRMER` Thay B chung cấp batch · `ACCEPT_FLAG` Admin chấp nhận cờ · `UPDATE_DUE_DATE` Admin đổi hạn cấp batch · `CANCEL_PENDING` Admin hủy câu `DRAFT`/`FIRST_APPROVED` tồn đọng cấp batch. Các sự kiện cấp batch (`CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING`, `REASSIGN_CONFIRMER`) dùng `item_id = NULL` kèm `details` (itemIds, số lượng theo trạng thái cũ, giá trị cũ/mới, `reason`). Đã bỏ `EXTEND`, `FORCE_SEND`, và `EDIT` (dùng `firstReview.originalSnapshot`); item `REJECTED`/`REMOVE` không giao lại.
 
 **Mức nghiêm trọng chủ đề sai:** Nhẹ · Trung bình · Nghiêm trọng. **Kỹ năng:** Từ vựng · Ngữ pháp. **Lý do dừng bài:** `MAX_ITEMS_REACHED` "Đã làm đủ số câu tối đa" · `SE_THRESHOLD` "Hệ thống đã đủ tin cậy về năng lực của bạn" · `ITEM_BANK_BOUNDARY` "Năng lực của bạn ở vùng biên của thang đánh giá" · `TIMEOUT` "Đã hết thời gian làm bài".
 
@@ -268,15 +268,15 @@ Trang chủ theo role sau đăng nhập: STUDENT → `/student/dashboard`; TEACH
 | S08 | `/admin/item-bank` | `item-bank/page.tsx` | `GET /items` (mọi câu) | UCADM06 |
 | S10 | `/admin/item-bank/[id]` | `item-bank/[id]/page.tsx` | `GET /items/:id` | UCADM06 |
 | S28 | `/admin/item-batches` | `item-batches/page.tsx` | `GET /item-batches` | UCADM13 |
-| S26 | `/admin/item-batches/generate` | `item-batches/generate/page.tsx` | `POST /item-batches` | UCADM11 |
-| S27 | `/admin/item-batches/import` | `item-batches/import/page.tsx` | `POST /item-imports/upload`, `GET\|DELETE /item-imports/grid[/:rowKey]`, `POST /item-imports/save` | UCADM12 |
-| S29 (+ S31 là ngăn phải) | `/admin/item-batches/[batchId]` | `item-batches/[batchId]/page.tsx` | `GET /item-batches/:id`, `GET …/ai-rejected`, `POST …/reassign`, `POST …/reassign-confirmer`, `POST …/cancel-pending`, `PATCH …/deadlines` | UCADM13 |
+| S26 | `/admin/item-batches/generate` | `item-batches/generate/page.tsx` | `POST /item-batches/generate` | UCADM11 |
+| S27 | `/admin/item-batches/import` | `item-batches/import/page.tsx` | `GET /item-batches/import/template`, `POST /item-batches/import/upload`, `GET\|DELETE /item-batches/import/grid[/:rowKey]`, `POST /item-batches/import/save` | UCADM12 |
+| S29 (+ S31 là ngăn phải) | `/admin/item-batches/[batchId]` | `item-batches/[batchId]/page.tsx` | `GET /item-batches/:id`, `GET /item-batches/rejected-stats`, `POST …/retry-generation`, `POST …/retry-checks`, `POST …/refresh-status`, `POST …/reassign`, `POST …/reassign-confirmer`, `POST …/cancel-pending`, `PATCH …/deadlines` | UCADM13 |
 | S30 | `/admin/item-batches/[batchId]/assign` | `…/assign/page.tsx` | `GET /item-batches/:id`, `GET /teachers`, `POST …/assign-preview` (trả phân bổ + `batchRevision`), `POST …/assign` (kèm `batchRevision`) | UCADM13 |
 | S32 | `/admin/item-batches/[batchId]/final-check` | `…/final-check/page.tsx` | `POST\|GET …/final-check`, `POST /item-batches/:id/items/:itemId/flag-decision`, `POST …/import` | UCADM14 |
 | S20 | `/admin/exam-rounds` | `exam-rounds/page.tsx` | `GET /exam-rounds` | UCADM15 |
 | S21 | `/admin/exam-rounds/new`, `/admin/exam-rounds/[roundId]/edit` | `exam-rounds/new/page.tsx`, `[roundId]/edit/page.tsx` | `POST /exam-rounds`, `PATCH /exam-rounds/:id` | UCADM15 |
 | S22 | `/admin/exam-rounds/[roundId]` | `[roundId]/page.tsx` | `GET /exam-rounds/:id`, `…/participants`, `POST …/publish\|close`, `DELETE …/participants/:studentId` | UCADM15, UCADM17 |
-| S23 | `/admin/exam-rounds/[roundId]/import` | `[roundId]/import/page.tsx` | `…/participants/import/{upload,grid,save}` | UCADM16 |
+| S23 | `/admin/exam-rounds/[roundId]/import` | `[roundId]/import/page.tsx` | `GET …/participants/import/template`, `…/participants/import/{upload,grid,save}` | UCADM16 |
 | S24 | `/admin/users/students`, `/admin/users/teachers` (hai tab = hai route) | `users/students/page.tsx`, `users/teachers/page.tsx` | `GET\|POST\|PATCH /students`, `/teachers`, `POST /students/:id/lock\|unlock\|resend-temporary-password`, `PATCH /users/:id/role` | UCADM09 |
 | S19 | `/admin/users/import` (tham số `?kind=STUDENT\|TEACHER`) | `users/import/page.tsx` | `/users/import/{upload,grid,save}?kind=` | UCADM08 |
 | S12–S14 | Admin dùng chung `/teacher/reports`, `/teacher/students[/…]` `🔶 R-2` | — | như Teacher | UCADM04, UCADM05 |
@@ -360,8 +360,8 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 **B. Kỳ thi**
 1. **S20** danh sách → "Tạo kỳ thi" → **S21** (tên, giờ mở, giờ đóng, **thời lượng bắt buộc điền sẵn 45**; 5–180; ≤ khoảng mở–đóng) → Lưu (kỳ ở `DRAFT`) → **S22**.
 2. S22 → "Import danh sách" → **S23** (lưới tạm, cột MSSV/Ghi chú; MSSV không tồn tại/đã có trong kỳ → bị loại + popup) → Lưu → về S22.
-3. S22 → **Công bố** (cần ≥ 1 SV; `DRAFT → SCHEDULED`) → tới giờ mở tự `OPEN` → tới giờ đóng tự `CLOSED`, hoặc **Đóng kỳ** thủ công (phiên đang chạy vẫn tiếp tục tới `expiresAt`, chỉ chặn phiên mới; `🔶 TODO-CONFIRM Q-2`). Theo dõi trạng thái dự thi từng SV; **Gỡ SV** chỉ ở dòng "Chưa thi" và khi kỳ chưa đóng (SV đã có phiên bị khóa ngoại `fk_session_participant` chặn).
-4. Quy tắc sửa kỳ (BR-08, chỉ thị 27/11): `DRAFT` sửa tự do; sau công bố không sửa tên; `SCHEDULED` chưa mở được sửa giờ mở/đóng với cửa sổ đủ thời lượng; `OPEN` giữ giờ mở, chỉ kéo dài giờ đóng; `CLOSED` không sửa. Hạn phiên đã bắt đầu giữ nguyên; điều kiện công bố/biên giờ còn cần đối chiếu.
+3. S22 → **Công bố** (cần ≥ 1 SV và `opensAt` ở tương lai; `DRAFT → SCHEDULED`) → tới giờ mở tự `OPEN` → tới giờ đóng tự `CLOSED`, hoặc **Đóng kỳ** thủ công (phiên đang chạy vẫn tiếp tục tới `expiresAt`, chỉ chặn phiên mới; đã chốt Q-2 ngày 27/11). Theo dõi trạng thái dự thi từng SV; **Gỡ SV** chỉ ở dòng "Chưa thi" và khi kỳ chưa đóng (SV đã có phiên bị khóa ngoại `fk_session_participant` chặn).
+4. Quy tắc sửa kỳ (BR-08, chốt 27/11): `DRAFT` sửa tự do; sau công bố chỉ sửa giờ; `SCHEDULED` chưa mở được sửa giờ mở/đóng với giờ mở mới ở tương lai và cửa sổ đủ thời lượng; `OPEN` giữ giờ mở, chỉ kéo dài giờ đóng; `CLOSED` không sửa. Công bố chỉ khi giờ mở ở tương lai; hạn phiên đã bắt đầu giữ nguyên.
 
 **C. Tạo lô câu hỏi** (câu hỏi chỉ vào hệ thống qua lô; **không có form thêm từng câu**)
 - **Bằng AI (S26):** nhập Kỹ năng, CEFR, Chủ đề (tùy chọn), Số câu N → "Tạo lô" → lô `GENERATING` (chạy nền) → S29 xem tiến độ. Hệ thống sinh dư, **kiểm C1** (luật cứng → trùng T1/T2/T3 → kiểm đáp án độc lập), bù thiếu, cắt về N; giải thích được sinh **cùng lúc** với câu. Không chọn GV ở bước này.
@@ -407,17 +407,17 @@ Chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` **cấm sửa**.
 | BR-05 | Tài khoản mới có role, `mustChangePassword = true`; email gửi sau khi Lưu/tạo; gửi lỗi không rollback | S19, S24 | Sau Lưu: "Đã tạo {n} tài khoản, {m} email đã xếp hàng gửi"; không hiện mật khẩu; `🔶 BR-05` nơi hiển thị lỗi gửi (Mục 9) |
 | BR-06 | Đổi mật khẩu: khác mật khẩu cũ, ≥ 8 ký tự gồm chữ thường, chữ hoa, chữ số, ký tự đặc biệt (Q-4 đã chốt 09/11/2026) | S16, S18 | Kiểm tra form; sau thành công cấp lại token |
 | BR-07 | Chỉ Admin tạo/sửa/công bố/đóng kỳ và import danh sách thi | S20–S23 | Menu và route chỉ có ở Admin; GV/SV vào → 403 |
-| BR-08 | DRAFT sửa tự do; sau công bố không sửa tên; SCHEDULED chưa mở sửa giờ mở/đóng đủ thời lượng; OPEN chỉ kéo dài đóng; CLOSED không sửa | S21 | Ô bị khóa theo trạng thái; hạn phiên đã bắt đầu giữ nguyên |
+| BR-08 | DRAFT sửa tự do; sau công bố chỉ sửa giờ; SCHEDULED chưa mở sửa giờ mở/đóng đủ thời lượng và giờ mở mới ở tương lai; OPEN chỉ kéo dài đóng; CLOSED không sửa | S21 | Ô bị khóa theo trạng thái; hạn phiên đã bắt đầu giữ nguyên |
 | BR-09 | Danh sách thi chỉ gồm tài khoản STUDENT đã tồn tại | S23 | MSSV không tồn tại → bị loại + popup |
 | BR-10 | Bắt đầu phiên: thuộc kỳ, kỳ `OPEN`, chưa có phiên dở, chưa `COMPLETED` | S02, S03 | Nút Bắt đầu chỉ bật ở kỳ đang mở; lỗi `NOT_IN_ROUND`/`ROUND_NOT_OPEN`/`ROUND_ALREADY_COMPLETED`/`SESSION_IN_PROGRESS` |
 | BR-11 | `expires_at` tính một lần; quá hạn: ≥ 8 câu → COMPLETED + TIMEOUT, ít hơn → ABANDONED | S04, S05, S07 | Đồng hồ đếm theo `expiresAt`; thông báo theo kết cục |
-| BR-12 | Đóng kỳ thủ công: phiên đang chạy tiếp tục tới `expires_at` `🔶 Q-2` | S22 | Hộp xác nhận "Phiên đang làm bài vẫn tiếp tục…" |
+| BR-12 | Đóng kỳ thủ công: phiên đang chạy tiếp tục tới `expires_at` đã cấp; chặn phiên mới (chốt 27/11) | S22 | Hộp xác nhận "Phiên đang làm bài vẫn tiếp tục…" |
 | BR-13 | Báo cáo lọc theo kỳ, mặc định toàn hệ thống | S12, S36 | Chip lọc "Kỳ thi" gửi `examRoundId` |
 | BR-14 | Quên mật khẩu: phản hồi luôn như nhau; OTP một lần, 10 phút, sai tối đa 5 lần | S17, S18 | Thông điệp trung tính; `INVALID_RESET_OTP`; `RATE_LIMITED` |
 | BR-15 | Import ghi nhật ký kiểm toán (ai, khi nào, số dòng, kết quả) | — | **Không có UI** (chưa có màn nhật ký) |
 | BR-16 | Phân quyền theo role và theo phân công; không đủ quyền → 403 | Mọi màn | Guard route + API; `NOT_ASSIGNED` → S15 (403) |
 | BR-17 | Admin tạo/sửa/khóa GV; nâng/thu hồi Admin; không tự thu hồi mình | S24 | Nút "Nâng lên Admin"/"Thu hồi Admin" (tab GV), ẩn/khóa với chính mình |
-| BR-18 | Ghi nhật ký nâng/thu hồi; không thu hồi Admin cuối `🔶`; token cũ mất quyền cũ | S24 | Thu hồi Admin cuối → bị từ chối, thông điệp rõ |
+| BR-18 | Giữ #136 hoãn `audit_logs` DB (ghi log Pino có cấu trúc); không thu hồi Admin cuối (đã chốt 28/11); token cũ mất quyền cũ | S24 | Thu hồi Admin cuối → bị từ chối, thông điệp rõ |
 | BR-19 | Khóa tài khoản = không đăng nhập; không xóa cứng; gửi lại mật khẩu tạm | S24 | Nút Khóa/Mở khóa, Gửi lại mật khẩu tạm (hộp xác nhận); không có nút Xóa |
 | BR-20 | Tạo từng người: nhập MSSV/Mã GV, họ tên, email; trùng → 409; import không cập nhật tài khoản có sẵn | S24, S19 | Form tạo lẻ; popup "đã tồn tại" |
 | BR-21 | Câu hỏi chỉ vào qua lô; không form thêm câu; GV không import; Admin không sửa nội dung | S08, S10, S26, S27 | Không có nút Thêm/Sửa/Xóa; S26/S27 chỉ Admin |
@@ -914,34 +914,34 @@ Kỳ thi đang mở: bảng (tên, giờ mở–đóng, thời lượng, số SV
 **(e)** Rỗng: "Chưa có lô câu hỏi nào." · Lô seed (`IMPORTED`/`DONE`) hiển thị bình thường, lọc được.
 
 ### S26 — Tạo lô bằng AI
-**(a)** Route `/admin/item-batches/generate` · API `POST /item-batches` · UC UCADM11.
+**(a)** Route `/admin/item-batches/generate` · API `POST /item-batches/generate` · UC UCADM11. **GV không có màn này (403).**
 **(c)** Thẻ ≤ 560 px, một cột:
 | # | Thành phần | testid | Quy tắc |
 |---|---|---|---|
 | 1 | **Kỹ năng \*** (select: Từ vựng / Ngữ pháp) | `batch-skill` | Bắt buộc |
 | 2 | **Cấp CEFR \*** (select: A1, A2, B1, B2 `[D]`) | `batch-cefr` | Bắt buộc |
 | 3 | **Chủ đề** (tùy chọn) | `batch-topic` | Văn bản ngắn |
-| 4 | **Số câu cần \*** (số nguyên dương) | `batch-count` | Bắt buộc; > 0 |
+| 4 | **Số câu cần** (số nguyên dương, tối đa 50 câu/lô) | `batch-count` | Bắt buộc; `1..50` |
 | 5 | Dòng phụ | — | "AI sẽ sinh dư và lọc trùng; số câu cuối có thể thấp hơn nếu hết ngân sách." |
 | 6 | Nút chính **"Tạo lô"**, nút chữ "Hủy" | `batch-create` | Vô hiệu khi thiếu trường. **Không chọn GV ở bước này.** |
-**(d)** OK → tạo lô `GENERATING` → chuyển S29 (hiện tiến độ). Lỗi: `BATCH_BUDGET_EXCEEDED` → "Lô vượt giới hạn gọi AI cho phép."; thiếu trường; mạng.
+**(d)** OK → tạo lô `GENERATING` → chuyển S29 (hiện tiến độ). Lỗi: `BATCH_BUDGET_EXCEEDED` / `AI_BUDGET_EXCEEDED` → "Lô vượt giới hạn gọi AI cho phép."; thiếu trường; mạng.
 
 ### S27 — Import đề từ file (lưới tạm)
-**(a)** Route `/admin/item-batches/import` · API `POST /item-imports/upload`, `GET|DELETE /item-imports/grid[/:rowKey]`, `POST /item-imports/save` · UC UCADM12. **GV không có màn này (403).**
+**(a)** Route `/admin/item-batches/import` · API `GET /item-batches/import/template`, `POST /item-batches/import/upload`, `GET|DELETE /item-batches/import/grid[/:rowKey]`, `POST /item-batches/import/save` · UC UCADM12. **GV không có màn này (403).**
 **(b)** Dùng **C-IMPORT-GRID** (Mục 2.7). Cột lưới: `Skill · CEFR · Topic · Câu hỏi · A · B · C · D · Đáp án · Giải thích · irt_b` (Giải thích, irt_b tùy chọn; `irt_b` ∈ [−4, +4]).
 **(c)** Khác biệt so với cơ chế chung:
 | # | Điểm | Quy tắc |
 |---|---|---|
-| 1 | Popup dòng bị loại (`itemimport-rejected-popup`) | Lý do: thiếu cột bắt buộc; kiểu dữ liệu sai; Skill/CEFR không hợp lệ; `irt_b` ngoài [−4, +4]; trùng ngân hàng / lô khác / trong lưới (T1–T2 cứng) |
+| 1 | Popup dòng bị loại (`itemimport-rejected-popup`) | Lý do (`CandidateRejectionReason` Phụ lục A): thiếu cột bắt buộc; kiểu dữ liệu sai; Skill/CEFR không hợp lệ; `irt_b` ngoài [−4, +4]; trùng ngân hàng / lô khác / trong lưới (T1–T2 cứng) |
 | 2 | **Cờ mềm** trên dòng lưới | Trùng gần đúng (T2 giữa hai ngưỡng, T3) **không bị loại**: dòng mang chip C-FLAG; vẫn Lưu được |
-| 3 | Nút chính | **"Lưu {N} câu và kiểm tra bằng AI"** (`itemimport-save`) → tạo lô `IMPORTED`, chạy C2 tầng 5 → chuyển S29 |
+| 3 | Nút chính | **"Lưu {N} câu và kiểm tra bằng AI"** (`itemimport-save`) → tách lô tối đa 50 câu `IMPORTED`, chạy C2 tầng 5 → chuyển S29 |
 | 4 | Testid | `itemimport-dropzone`, `itemimport-grid`, `itemimport-rejected-popup`, `itemimport-clear`, `itemimport-save`, `itemimport-template` |
 **(e)** Lỗi: `IMPORT_FILE_INVALID`, `IMPORT_GRID_EXPIRED`, `IMPORT_GRID_EMPTY`.
 
 ---
 
 ### S29 — Chi tiết lô: tiến độ, câu, AI đã loại (+ S31 Chỉnh hạn)
-**(a)** Route `/admin/item-batches/[batchId]` · API `GET /item-batches/:id`, `PATCH …/deadlines`, `POST …/reassign` · UC UCADM13.
+**(a)** Route `/admin/item-batches/[batchId]` · API `GET /item-batches/:id`, `GET /item-batches/rejected-stats`, `POST …/{retry-generation, retry-checks, refresh-status}`, `PATCH …/deadlines`, `POST …/{reassign, reassign-confirmer, cancel-pending}` · UC UCADM13.
 **(b)**
 ```
 Lô "Từ vựng B1 – đợt 1"  [Đang duyệt]                [Giao việc] [Chỉnh hạn] [Giao lại] [Kiểm tra]
@@ -961,7 +961,7 @@ Tạo ─ AI kiểm ─ Giao việc ─ A duyệt ─ B xác nhận ─ Kiểm t
 | 7 | Tab **AI đã loại** (**chỉ Admin**) | `tab-ai-rejected` | Nội dung + mã lý do (Phụ lục A) + câu bị nghi trùng; rỗng: "Chưa có câu nào bị AI loại." |
 | 8 | Tab **Thống kê** | `tab-stats` | Tỉ lệ loại theo tầng AI, theo từng GV A, theo GV B |
 | 9 | **S31 Chỉnh hạn** | — | Nhập `firstDueAt`, `secondDueAt` và `reason` bắt buộc; chỉ áp dụng việc chưa xử lý; `PATCH …/deadlines` ghi audit cấp lô và đặt lại cờ nhắc tương ứng. |
-**(e)** Lô `FAILED`: dải đỏ + lý do; lô `PARTIAL`: dải vàng "Thiếu {x} câu so với yêu cầu"; 404 lô không tồn tại.
+**(e)** Lô `FAILED`: dải đỏ + `failureReason` (`NO_VALID_ITEMS_GENERATED`, `BATCH_BUDGET_EXCEEDED`, `AI_BUDGET_EXCEEDED`…); lô `PARTIAL`: dải vàng "Thiếu {x} câu so với yêu cầu"; lô `DONE` (0 câu import): "Hoàn tất (0 câu được import)"; 404 lô không tồn tại.
 
 ### S30 — Giao việc (xem trước phân bổ) và Giao lại
 **(a)** Route `/admin/item-batches/[batchId]/assign` · API đích `POST …/assign-preview`, `POST …/assign` kèm batchRevision; giao lại A dùng `POST …/reassign`, thay B dùng `POST …/reassign-confirmer` với reason · UC UCADM13 · Giao việc chỉ khi lô `READY_TO_ASSIGN`.
@@ -1020,7 +1020,7 @@ Cờ mềm chưa quyết định (chưa được import): 2
 | 4 | **Thời lượng làm bài (phút) \*** | `round-duration` | **Bắt buộc, điền sẵn 45**; số nguyên 5–180; không lớn hơn khoảng từ giờ mở đến giờ đóng; lỗi: "Thời lượng phải từ 5 đến 180 phút và không vượt khoảng mở–đóng." |
 | 5 | Dòng phụ | — | "Sinh viên vào muộn chỉ còn phần thời gian còn lại tới giờ đóng." |
 | 6 | Nút chính **"Lưu"** (kỳ `DRAFT`), nút chữ "Hủy" | `save-round` | Vô hiệu khi thiếu/không hợp lệ |
-**(d)** OK → toast, về S22. **Quy tắc sửa theo trạng thái (BR-08):** `DRAFT` sửa tự do · sau công bố khóa tên · `SCHEDULED` chưa mở sửa giờ mở/đóng nếu cửa sổ đủ thời lượng · `OPEN` chỉ kéo dài giờ đóng · `CLOSED` chỉ xem. Hạn của phiên đã bắt đầu giữ nguyên; các biên thời gian khi công bố còn cần đối chiếu.
+**(d)** OK → toast, về S22. **Quy tắc sửa theo trạng thái (BR-08, chốt 27/11):** `DRAFT` sửa tự do · sau công bố chỉ sửa giờ · `SCHEDULED` chưa mở sửa giờ mở/đóng nếu giờ mở mới ở tương lai và cửa sổ đủ thời lượng · `OPEN` chỉ kéo dài giờ đóng · `CLOSED` chỉ xem. Chỉ công bố khi giờ mở còn ở tương lai; hạn của phiên đã bắt đầu giữ nguyên.
 
 ### S22 — Chi tiết kỳ thi / Theo dõi dự thi
 **(a)** Route `/admin/exam-rounds/[roundId]` · API `GET /exam-rounds/:id`, `…/participants`, `POST …/publish|close`, `DELETE …/participants/:studentId`, `GET …/participants/export?format=csv|xlsx&status=&q=&studentIds=` `⚠️ ĐX` · UC UCADM15, UCADM17.
@@ -1028,8 +1028,8 @@ Cờ mềm chưa quyết định (chưa được import): 2
 | # | Thành phần | testid | Quy tắc |
 |---|---|---|---|
 | 1 | Đầu trang: tên, trạng thái, giờ mở/đóng, thời lượng | — | |
-| 2 | Nút **"Công bố"** (chính) | `publish-round` | Hiện khi `DRAFT`; **bật khi có ≥ 1 SV** (`title`: "Cần ít nhất 1 sinh viên"); → `DRAFT → SCHEDULED` |
-| 3 | Nút **"Đóng kỳ"** | `close-round` | Hiện khi `SCHEDULED`/`OPEN`; hộp xác nhận ghi rõ: "Phiên đang làm bài vẫn tiếp tục tới hết thời gian của phiên; chỉ chặn sinh viên bắt đầu phiên mới." `🔶 Q-2` |
+| 2 | Nút **"Công bố"** (chính) | `publish-round` | Hiện khi `DRAFT`; **bật khi có ≥ 1 SV** (`title`: "Cần ít nhất 1 sinh viên"); kiểm `opensAt` ở tương lai; → `DRAFT → SCHEDULED` |
+| 3 | Nút **"Đóng kỳ"** | `close-round` | Hiện khi `SCHEDULED`/`OPEN`; hộp xác nhận ghi rõ: "Phiên đang làm bài vẫn tiếp tục tới hết thời gian của phiên; chỉ chặn sinh viên bắt đầu phiên mới." (chốt Q-2 ngày 27/11) |
 | 4 | Nút phụ "Import danh sách" (→ S23), "Sửa" (→ S21) | `import-roster` | "Import" ẩn khi `CLOSED` |
 | 5 | Bảng SV | `participants-table` | Cột: ô tick · MSSV · Họ tên · Ghi chú · Trạng thái dự thi (Chưa thi / Đang thi / Hoàn thành / Bỏ dở) · nút chữ **"Gỡ"** (`remove-participant-{id}`; **chỉ bật ở dòng "Chưa thi"** và khi kỳ chưa đóng; dòng Đang thi/Hoàn thành/Bỏ dở ẩn nút hoặc vô hiệu kèm `title` giải thích — khóa ngoại phiên thi chặn xóa) |
 | 6 | Bộ lọc trạng thái và ô tìm MSSV/Họ tên | `participants-filter`, `participants-search` | Lọc bảng; "chọn tất cả theo bộ lọc" ở ô tick đầu cột |
@@ -1037,7 +1037,7 @@ Cờ mềm chưa quyết định (chưa được import): 2
 **(e)** Rỗng: "Chưa có sinh viên trong kỳ." · thao tác sai trạng thái: lỗi 409 hiển thị toast.
 
 ### S23 — Import danh sách thi (lưới tạm)
-**(a)** Route `/admin/exam-rounds/[roundId]/import` · API `…/participants/import/{upload,grid,save}` · UC UCADM16.
+**(a)** Route `/admin/exam-rounds/[roundId]/import` · API `GET …/participants/import/template`, `…/participants/import/{upload,grid,save}` · UC UCADM16.
 **(b/c)** Dùng **C-IMPORT-GRID**. Tiêu đề "Import danh sách sinh viên cho \"{tên kỳ}\"". Cột lưới: **MSSV · Ghi chú** (A = MSSV, B = Ghi chú tùy chọn ≤ 255 ký tự). Popup dòng bị loại (`roster-rejected-popup`): thiếu cột · sai định dạng · trùng trong file · **"MSSV không tồn tại"** (hoặc không phải sinh viên) · **"Đã có trong kỳ"**. Nút chính **"Lưu {N} sinh viên vào kỳ"** (`roster-save`) → một transaction → về S22. Testid: `roster-dropzone`, `roster-grid`, `roster-clear`.
 
 ---
@@ -1101,14 +1101,14 @@ Sau mỗi lượt: đối chiếu AC (g) từng màn, đối chiếu "KHÔNG hi�
 
 ## 9. ĐIỂM CHƯA CHỐT — AGENT KHÔNG TỰ QUYẾT, DÙNG MẶC ĐỊNH VÀ GẮN `TODO-CONFIRM`
 
-| Mã | Nội dung | Mặc định tạm dùng trong file này | Ảnh hưởng |
+| Mã | Nội dung | Mặc định / Quyết định hiện hành | Ảnh hưởng |
 |---|---|---|---|
-| Q-2 | Đóng kỳ thủ công khi còn phiên đang chạy: cắt ngay hay để chạy tới `expiresAt` (BR-12) | **Để chạy**, chỉ chặn phiên mới | S22 |
-| Q-4 | Chính sách mật khẩu (độ dài tối thiểu) | ≥ 8, đọc từ cấu hình | S16, S18 |
-| Q-5 | Nhà cung cấp SMTP | Không hiển thị gì phụ thuộc nhà cung cấp | S19, S24 |
-| 🔶 BR-05 | BR-05 (SRS) yêu cầu ghi trạng thái "chưa gửi" **để Admin xem được**; nhưng #120 chọn không đổi schema và không có màn nhật ký kiểm toán → **chưa có nơi hiển thị**. Cần chốt: (1) thêm cột trạng thái trên `User` hoặc bảng nhật ký gửi email + hiển thị ở S24, hay (2) chấp nhận Admin không thấy lỗi gửi | **Mặc định: UI không hiển thị**; chỉ có "Gửi lại mật khẩu tạm" từng tài khoản | S19, S24 |
-| BR-08 | Quy tắc sửa kỳ thi theo trạng thái | `DRAFT` tự do; sau công bố khóa tên; `SCHEDULED` chưa mở sửa giờ mở/đóng đủ thời lượng; `OPEN` chỉ kéo dài đóng; `CLOSED` không sửa | S21 |
-| BR-18 | Không thu hồi Admin cuối | Có chặn | S24 |
+| ✅ Q-2 | Đóng kỳ thủ công khi còn phiên đang chạy (BR-12) | **Đã chốt 27/11: để chạy** tới `expires_at` đã cấp, chỉ chặn phiên mới | S22 |
+| ✅ Q-4 | Chính sách mật khẩu (Q-4 chốt 09/11, #134 D4) | ≥ 8 ký tự, chữ thường/hoa/số/đặc biệt | S16, S18 |
+| ✅ Q-5 | Nhà cung cấp SMTP thử nghiệm (chốt 28/11) | Brevo SMTP Relay cho staging/demo; UI không phụ thuộc | S19, S24 |
+| ✅ BR-05 | Hiển thị lỗi gửi mail mật khẩu tạm | **Chốt giữ #120 (14/11 & 28/11):** UI không hiển thị trạng thái gửi; báo lỗi `ERROR` lên Better Stack và dùng "Gửi lại mật khẩu tạm" trên S24 | S19, S24 |
+| ✅ BR-08 | Quy tắc sửa & công bố kỳ thi theo trạng thái | **Chốt 27/11:** `DRAFT` tự do; chỉ công bố khi `opensAt` tương lai; sau công bố chỉ sửa giờ; `SCHEDULED` giờ mở mới ở tương lai & đủ thời lượng; `OPEN` chỉ kéo dài đóng; `CLOSED` không sửa | S21 |
+| ✅ BR-18 | Không thu hồi Admin cuối & AuditLog (#136) | **Chốt 28/11:** chặn thu hồi Admin cuối; giữ #136 hoãn bảng `audit_logs` DB | S24 |
 | ✅ P25-1 | Admin có được chọn làm GV A/B? Admin có Hộp việc? | **Đã chốt 18/10: Không** (S30 chỉ liệt kê `role = TEACHER`; menu Admin không có Hộp việc) | S30, menu |
 | P25-2 | Admin có xóa được câu `REJECTED`/lô? | **Không có nút Xóa** | S08, S29 |
 | P25-3 | GV A có sửa được kỹ năng/CEFR/chủ đề/`irt_b`? | **Không** (chỉ nội dung, đáp án, giải thích) | S11 |
@@ -1135,23 +1135,37 @@ Sau mỗi lượt: đối chiếu AC (g) từng màn, đối chiếu "KHÔNG hi�
 
 ## 10. PHỤ LỤC
 
-### 10.1. Phụ lục A — Từ điển mã lý do kiểm AI `⚠️ ĐX` (nhãn tiếng Việt cho C-FLAG, S10, S11, S29, S32)
-> BE chưa chốt tên mã; FE ánh xạ theo bảng này, **mã lạ → hiển thị "Lý do khác ({mã})"**. Mức: **Cứng** = `HARD` (tự `AI_REJECTED`), **Mềm** = `SOFT` (cờ cho người xem).
-| Mã (đề xuất) | Mức | Nhãn hiển thị |
+### 10.1. Phụ lục A — Từ điển mã lý do kiểm AI & validation (đã chuẩn hóa theo `@apt/shared-types` v3.1.0 ngày 28/11)
+> Nguồn sự thật là code thực tế của module `item-generation` và `@apt/shared-types`; FE ánh xạ theo hai bảng dưới đây, **mã lạ → hiển thị `"Lý do khác ({mã})"`**.
+
+#### A.1. `ItemCheckReasonCode` (lưu trong `ItemCheckResult.reasonCodes` cho C1 / C2 / C3)
+| Mã (`ItemCheckReasonCode`) | Mức | Nhãn hiển thị |
 |---|---|---|
-| `OPTIONS_INVALID` | Cứng | Phương án không đủ 4 hoặc có phương án trùng nhau |
-| `CORRECT_ANSWER_INVALID` | Cứng | Không có đúng một đáp án đúng |
-| `LENGTH_INVALID` | Cứng | Độ dài nội dung/phương án không hợp lệ |
-| `IRT_B_OUT_OF_RANGE` | Cứng | Độ khó (irt_b) ngoài khoảng cho phép [−4, +4] |
-| `SKILL_CEFR_MISMATCH` | Cứng | Kỹ năng hoặc mức CEFR không hợp lệ |
-| `MISSING_EXPLANATION` | Cứng | Thiếu giải thích |
-| `DUPLICATE_EXACT` | Cứng | Trùng hệt một câu khác (ngân hàng / lô khác / cùng lô) |
-| `DUPLICATE_NEAR_HIGH` | Cứng | Gần như giống hệt một câu khác |
-| `WORKFLOW_INTEGRITY` | Cứng | Quy trình duyệt không toàn vẹn (ví dụ thiếu người duyệt/xác nhận) |
-| `DUPLICATE_NEAR_MID` | Mềm | Gần giống một câu khác |
-| `DUPLICATE_SEMANTIC` | Mềm | Có thể là diễn đạt lại của một câu khác |
-| `ANSWER_MISMATCH` | Mềm | AI chọn đáp án khác đáp án đang đặt |
-| `EXPLANATION_MISMATCH` | Mềm | Giải thích có thể không khớp đáp án |
+| `DUPLICATE_EXACT` | `HARD` | Trùng hệt một câu khác theo nội dung chuẩn hóa (T1) |
+| `DUPLICATE_NEAR` | `HARD` | Trùng rất gần một câu khác vượt ngưỡng cứng `pg_trgm` (T2) |
+| `DUPLICATE_NEAR_SUSPECT` | `SOFT` | Nghi ngờ trùng gần một câu khác (cờ mềm T2, kèm `suspectedDuplicateId`) |
+| `DUPLICATE_SEMANTIC_SUSPECT` | `SOFT` | Nghi ngờ trùng ngữ nghĩa theo embedding (cờ mềm T3, kèm `suspectedDuplicateId`) |
+| `INDEPENDENT_ANSWER_CHECKED` | `PASS` | Đã kiểm tra đáp án & giải thích độc lập (marker C3/stale) |
+| `INDEPENDENT_ANSWER_MISMATCH` | `SOFT` | Đáp án hoặc giải thích kiểm tra độc lập bị lệch (cờ mềm G5) |
+
+#### A.2. `CandidateRejectionReason` (trả về trong `rejected[].reasons` khi sinh lô AI hoặc upload Excel)
+| Mã (`CandidateRejectionReason`) | Nguồn phát sinh | Nhãn hiển thị |
+|---|---|---|
+| `CANDIDATE_INVALID` | Cấu trúc ứng viên | Dữ liệu câu hỏi không đúng cấu trúc hợp lệ |
+| `CONTENT_REQUIRED` | Kiểm trường | Thiếu hoặc rỗng nội dung câu hỏi |
+| `EXPLANATION_REQUIRED` | Kiểm trường | Thiếu hoặc rỗng lời giải thích |
+| `OPTIONS_INVALID` | Kiểm phương án | Không đủ đúng 4 phương án A, B, C, D không rỗng |
+| `OPTIONS_DUPLICATE` | Kiểm phương án | Có ít nhất hai phương án trả lời trùng nhau |
+| `ANSWER_INVALID` | Kiểm đáp án | Đáp án đúng không thuộc A, B, C, D |
+| `SKILL_INVALID` | Kiểm kỹ năng | Kỹ năng không hợp lệ (`VOCABULARY` \| `GRAMMAR`) |
+| `SKILL_MISMATCH` | Sinh lô AI | Kỹ năng câu sinh không khớp kỹ năng yêu cầu của lô |
+| `CEFR_INVALID` | Kiểm CEFR | Mức CEFR không thuộc thang cho phép |
+| `CEFR_MISMATCH` | Sinh lô AI | Mức CEFR câu sinh không khớp mục tiêu của lô |
+| `TOPIC_INVALID` | Kiểm chủ đề | Nhãn chủ đề không hợp lệ hoặc vượt quá 50 ký tự |
+| `IRT_B_INVALID` | Kiểm độ khó | Độ khó `irt_b` không hợp lệ hoặc ngoài khoảng [−4, +4] |
+| `UNSUPPORTED_CELL_VALUE` | Parse Excel | Ô Excel chứa kiểu dữ liệu không hỗ trợ (công thức/lỗi) |
+| `DUPLICATE_IN_FILE` | Parse Excel | Trùng câu hỏi ngay trong cùng tệp Excel tải lên |
+| `DUPLICATE_IN_BATCH` | Sinh lô AI | Trùng câu hỏi ngay trong cùng lô AI đang sinh |
 
 ### 10.2. Phụ lục B — Đối chiếu ID/route cũ ↔ mới (để đọc các file Tuan4/Tuan5 cũ)
 | Mã Tuan4 | Mã S | Route cũ | Route chuẩn của file này |
@@ -1230,15 +1244,15 @@ Cuối cùng liệt kê: các điểm TODO-CONFIRM đã dùng mặc định, cá
 | UCGV15 | Xác nhận câu (GV B) | S34, S35 | `GET /teacher/tasks/confirms[:batchId]`, `POST /teacher/items/:id/confirm` hoặc `/remove`, `POST /teacher/tasks/confirms/:batchId/confirm-all` | BR-16, 24, 26 |
 | UCADM04 | Xem hồ sơ SV (Admin) | S13, S14 | như UCGV09 | BR-16 |
 | UCADM05 | Báo cáo tổng thể | S36, S12 | `GET /reports/…?examRoundId=` | BR-13 |
-| UCADM06 | Quản lý/giám sát ngân hàng | S08, S10 | `GET /items`, `GET /item-batches/:id/ai-rejected` | BR-16, 21, 29, 30 |
+| UCADM06 | Quản lý/giám sát ngân hàng | S08, S10 | `GET /items`, `GET /item-batches/rejected-stats` | BR-16, 21, 29, 30 |
 | UCADM08 | Import tài khoản SV/GV | S19 | `POST /users/import/upload|save?kind=`, `GET|DELETE /users/import/grid` | BR-01…05, 15 |
 | UCADM09 | Quản lý tài khoản | S24 | `GET|POST|PATCH /students`, `/teachers`, `POST …/lock|unlock|resend-temporary-password`, `PATCH /users/:id/role` | BR-01, 02, 16…20 |
-| UCADM11 | Tạo lô bằng AI | S26, S29 | `POST /item-batches`, `GET /item-batches/:id` | BR-21, 29, 30 |
-| UCADM12 | Import đề từ file | S27, S29 | `POST /item-imports/upload|save`, `GET|DELETE /item-imports/grid` | BR-21, 29, 30 |
-| UCADM13 | Giao việc và theo dõi lô | S28, S29, S30, S31 | `GET /item-batches/:id`, `GET /teachers`, `POST …/assign-preview`, `POST …/assign`, `POST …/reassign`, `POST …/reassign-confirmer`, `POST …/cancel-pending`, `PATCH …/deadlines` | BR-22…24, 29 |
+| UCADM11 | Tạo lô bằng AI | S26, S29 | `POST /item-batches/generate`, `POST /item-batches/:id/retry-generation\|retry-checks`, `GET /item-batches/:id` | BR-21, 29, 30 |
+| UCADM12 | Import đề từ file | S27, S29 | `GET /item-batches/import/template`, `POST /item-batches/import/upload|save`, `GET|DELETE /item-batches/import/grid` | BR-21, 29, 30 |
+| UCADM13 | Giao việc và theo dõi lô | S28, S29, S30, S31 | `GET /item-batches/:id`, `GET /item-batches/rejected-stats`, `GET /teachers`, `POST …/assign-preview`, `POST …/assign`, `POST …/reassign`, `POST …/reassign-confirmer`, `POST …/cancel-pending`, `POST …/refresh-status`, `PATCH …/deadlines` | BR-22…24, 29 |
 | UCADM14 | Kiểm tra C3 và Import | S32 | `POST\|GET …/final-check`, `POST /item-batches/:id/items/:itemId/flag-decision`, `POST …/import` | BR-28, 29, 30 |
 | UCADM15 | Quản lý kỳ thi | S20, S21, S22 | `POST|GET|PATCH /exam-rounds`, `POST …/publish|close` | BR-07, 08, 12 |
-| UCADM16 | Import danh sách thi | S23 | `POST …/participants/import/upload|save`, `GET|DELETE …/import/grid`, `DELETE …/participants/:studentId` | BR-03, 04, 07, 09 |
+| UCADM16 | Import danh sách thi | S23 | `GET …/participants/import/template`, `POST …/participants/import/upload|save`, `GET|DELETE …/import/grid`, `DELETE …/participants/:studentId` | BR-03, 04, 07, 09 |
 | UCADM17 | Theo dõi dự thi | S22 | `GET /exam-rounds/:id/participants`, `GET …/participants/export` `⚠️ ĐX` | BR-07, 10, 11 |
 
 Ghi chú: UC `UCADM02/03/07`, `UCGV03/05/06/10` đã bỏ hoặc ngoài phạm vi, không có màn hình.
@@ -1257,7 +1271,7 @@ Ghi chú: UC `UCADM02/03/07`, `UCGV03/05/06/10` đã bỏ hoặc ngoài phạm v
 | `LanguageProfile` | `cefrLevel`, `cefrConfidence`, `theta`, `standardError`, `confidenceInterval95`, `boundaryEffect`, `skillProfiles` (JSON), `errorPatterns` (JSON), `aiRecommendations`, `testMetadata` | S05, S14 |
 | `Item` | `content`, `options` (JSON), `correctAnswer`, `skill`, `topicTag`, `cefrTarget`, `irtB` (∈ [−4, +4]), `status`, `approvedBy`/`approvedAt` (Admin Import), `batchId` (bắt buộc), `reviewerId` (GV A được giao; GV B nằm tại `ItemBatch.confirmerId`), `firstReview`/`secondReview` (JSON: `dueAt`, `action`, `reviewedAt`/`confirmedAt`, `comment`, `originalSnapshot` ở vòng 1), `firstReminderSent`/`secondReminderSent` (cờ kỹ thuật, không hiển thị) | S08, S10, S11, S35 |
 | `Explanation` | `content` (một bản cho mỗi `Item`) | S06, S10, S11 |
-| `ItemBatch` | `source` (`ItemBatchSource`), `name?`, `confirmerId?` (một GV B chung cho lô), `status`, `skill?`, `cefrTarget?`, `topicTag?`, `requestedCount?` (chỉ lô AI), `createdBy` | S28, S29, S30 |
+| `ItemBatch` | `source` (`ItemBatchSource`), `name?`, `confirmerId?` (một GV B chung cho lô), `status`, `failureReason?`, `aiCallCount`, `aiCallLimit`, `skill?`, `cefrTarget?`, `topicTag?`, `requestedCount?` (chỉ lô AI), `createdBy` | S28, S29, S30 |
 | `ItemCheckResult` | `checkpoint` (C1/C2/C3), `level` (PASS/SOFT/HARD), `reasonCodes[]`, `suspectedDuplicateId?` | S10, S27, S29, S32 (chỉ Admin) |
 | `ItemReviewEvent` | `batchId`, `action` (`ReviewAction`), `actorId`, `itemId` (nullable cho sự kiện cấp lô), `details?` (JSON), `createdAt` | S10 "Lịch sử" (chỉ Admin) |
 

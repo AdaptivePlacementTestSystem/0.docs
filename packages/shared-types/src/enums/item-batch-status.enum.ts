@@ -9,4 +9,5 @@ export enum ItemBatchStatus {
   DONE = 'DONE',
   FAILED = 'FAILED',
   PARTIAL = 'PARTIAL',
+  PARTIALLY_IMPORTED = 'PARTIALLY_IMPORTED',
 }

@@ -153,6 +153,8 @@ Cài Docker; chép cấu hình compose, Nginx, vector, `deploy.sh` vào `~/place
 
 > Ghi chú: ★ là khuyến nghị của người soạn, **không phải quyết định**. Đánh dấu `☑` một phương án mỗi mục.
 
+> Cập nhật 28/11/2026 (Q1–Q8 & chốt nhóm): Xem tiến độ đóng Q1 (`prisma/migrations` đã có 18 migration trên nhánh `chore/sync-prisma-schema-q1-q8`), mục tiêu kiểm thử Wave 0C (`prisma migrate deploy && npx prisma db seed` trên container PostgreSQL trống) và phân tích topology 1 tiến trình ở [20261127_BANG_CHOT_PHUONG_DANG_Q1_Q8 (1).md](file:///D:/DaiHoc/TLCN/workspace_docs/20261127_BANG_CHOT_PHUONG_DANG_Q1_Q8%20(1).md).
+
 ### 7.1. Quyết định thiết kế / kỹ thuật
 
 #### ☐ Q1 — Cơ sở dữ liệu staging sẽ trống: tạo migration khởi tạo thế nào? 🔴

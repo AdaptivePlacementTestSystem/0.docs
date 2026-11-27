@@ -149,6 +149,7 @@ class Item {
   - reviewerId: UUID {nullable}
   - firstReview: FirstReviewDetail {nullable}
   - secondReview: SecondReviewDetail {nullable}
+  - generatedFromRefIds: UUID[]
   + probability(theta: float): float
   + fisherInformation(theta): float
   + transitionTo(next: ItemStatus): void
@@ -173,9 +174,38 @@ class ItemBatch {
   - source: ItemBatchSource
   - status: ItemBatchStatus
   - confirmerId: UUID {nullable}
+  - importOperationId: UUID {nullable}
+  - importGroupId: UUID {nullable}
+  - importPart: int {nullable}
+  - aiCallCount: int = 0
+  - aiCallLimit: int = 250
+  - failureReason: String {nullable}
   + transitionTo(next): void
   + canAssign(): boolean
   + canFinalize(): boolean
+}
+class ItemBatchJob {
+  - id: UUID
+  - batchId: UUID
+  - kind: String
+  - status: String
+  - attempts: int
+  - availableAt: DateTime
+  - leaseToken: UUID {nullable}
+  - leaseUntil: DateTime {nullable}
+  - lastError: String {nullable}
+}
+class ReviewNoticeOutbox {
+  - id: UUID
+  - batchId: UUID
+  - recipientId: UUID
+  - status: String
+  - attempts: int
+  - availableAt: DateTime
+  - leaseToken: UUID {nullable}
+  - leaseUntil: DateTime {nullable}
+  - lastError: String {nullable}
+  - sentAt: DateTime {nullable}
 }
 class FirstReviewDetail <<DataType>> {
   - dueAt: DateTime
@@ -264,6 +294,7 @@ enum ReviewAction {
   IMPORT
   ASSIGN
   REASSIGN
+  REASSIGN_CONFIRMER
   ACCEPT_FLAG
   UPDATE_DUE_DATE
   CANCEL_PENDING
@@ -320,6 +351,9 @@ ItemBatch "1" *-- "1..*" Item
 Item "1" *-- "0..1" FirstReviewDetail
 Item "1" *-- "0..1" SecondReviewDetail
 Item "0..1" --> "0..*" ItemReviewEvent
+ItemBatch "1" *-- "0..*" ItemBatchJob
+ItemBatch "1" *-- "0..*" ReviewNoticeOutbox
+ReviewNoticeOutbox "0..*" --> "1" User : recipient
 Admin --> ItemBatch : creates
 Teacher --> Item : reviews / confirms
 @enduml

@@ -311,7 +311,7 @@
 												<UML:TaggedValue tag="mt" value="Chon file .xlsx (Skill, CEFR, Topic, Cau hoi, A-D, Dap an, Giai thich, irt_b) va Click Tai len()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="upload(file) - POST /item-imports/upload" xmi.id="EAID_F9823470_A0D6_4DDC_AC9C_9FD6F94C8F6F" visibility="public" sender="EAID_89233776_0131_44FC_BEE5_95B797F29727" receiver="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9">
+										<UML:Message name="upload(file) - POST /item-batches/import/upload" xmi.id="EAID_F9823470_A0D6_4DDC_AC9C_9FD6F94C8F6F" visibility="public" sender="EAID_89233776_0131_44FC_BEE5_95B797F29727" receiver="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -352,7 +352,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-150;PtEndX=0;PtEndY=-150;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_713C10B4_BE18_40CB_928E_44E40393A5B8"/>
-												<UML:TaggedValue tag="mt" value="upload(file) - POST /item-imports/upload"/>
+												<UML:TaggedValue tag="mt" value="upload(file) - POST /item-batches/import/upload"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Guard RBAC: chi ADMIN (GV bi 403); kiem tra .xlsx, dung luong, so dong (IMPORT_FILE_INVALID)()" xmi.id="EAID_F476B920_A7ED_4DEF_94D6_107D9E6CD4A2" visibility="public" sender="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9" receiver="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9">
@@ -839,7 +839,7 @@
 												<UML:TaggedValue tag="mt" value="Tai them file khac (lap lai tu upload) hoac xoa dong / xoa ca luoi()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="removeRow(rowKey) / clearGrid() - DELETE /item-imports/grid" xmi.id="EAID_11912E23_750F_4FC4_A37A_29A80038D63B" visibility="public" sender="EAID_89233776_0131_44FC_BEE5_95B797F29727" receiver="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9">
+										<UML:Message name="removeRow(rowKey) / clearGrid() - DELETE /item-batches/import/grid" xmi.id="EAID_11912E23_750F_4FC4_A37A_29A80038D63B" visibility="public" sender="EAID_89233776_0131_44FC_BEE5_95B797F29727" receiver="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -880,7 +880,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-750;PtEndX=0;PtEndY=-750;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_713C10B4_BE18_40CB_928E_44E40393A5B8"/>
-												<UML:TaggedValue tag="mt" value="removeRow(rowKey) / clearGrid() - DELETE /item-imports/grid"/>
+												<UML:TaggedValue tag="mt" value="removeRow(rowKey) / clearGrid() - DELETE /item-batches/import/grid"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xoa dong khoi luoi, lam moi TTL" xmi.id="EAID_39EBBB57_5D64_4DAF_AD28_027C6173E7CF" visibility="public" sender="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9" receiver="EAID_55020D0E_6B19_4883_B95A_EC8843DA0F8E">
@@ -971,7 +971,7 @@
 												<UML:TaggedValue tag="mt" value="Click Luu()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="save() - POST /item-imports/save" xmi.id="EAID_35306D5D_0B6D_4178_B80B_F622C0F8C912" visibility="public" sender="EAID_89233776_0131_44FC_BEE5_95B797F29727" receiver="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9">
+										<UML:Message name="save() - POST /item-batches/import/save" xmi.id="EAID_35306D5D_0B6D_4178_B80B_F622C0F8C912" visibility="public" sender="EAID_89233776_0131_44FC_BEE5_95B797F29727" receiver="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1012,7 +1012,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-900;PtEndX=0;PtEndY=-900;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_713C10B4_BE18_40CB_928E_44E40393A5B8"/>
-												<UML:TaggedValue tag="mt" value="save() - POST /item-imports/save"/>
+												<UML:TaggedValue tag="mt" value="save() - POST /item-batches/import/save"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="loadGrid(adminId)" xmi.id="EAID_F6FE0F67_50F8_4344_8614_5A8E40D1D62A" visibility="public" sender="EAID_5A0794E8_72A6_4515_A7CE_7B31FC7DB8F9" receiver="EAID_55020D0E_6B19_4883_B95A_EC8843DA0F8E">

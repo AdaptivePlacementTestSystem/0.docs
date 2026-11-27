@@ -1,8 +1,13 @@
+> **Chốt nhóm cập nhật ngày 28/11/2026 (`decisions/20261128_BAN_CHOT_QUYET_DINH_THONG_NHAT_NHOM.md`):**
+> - **AI Pilot & hạn mức (`DECISIONS_LOG:207–215`):** Gọi **Gemini trực tiếp qua endpoint tương thích OpenAI** (không có LiteLLM dự phòng ở chế độ thử); embedding mặc định pilot `gemini-embedding-001@768`; tối đa **50 câu/lô** và **250 lượt AI/lô** (`ai_call_count/ai_call_limit` trong PostgreSQL); G5 chạy 2 lượt gọi AI độc lập; few-shot 3–5 câu mẫu đã duyệt từ DB (`generated_from_ref_ids`). **Lưu ý:** smoke test sinh/C1 thật chưa thành công nên toàn bộ cấu hình AI giữ trạng thái **pilot / chưa kiểm chứng runtime**.
+> - **Hàng đợi & Outbox:** Sinh/kiểm lô chạy qua bảng hàng đợi PostgreSQL có lease `item_batch_jobs`; thông báo đổi GV B dùng `review_notice_outbox` (`lease_token`, `lease_until`, `last_error`, `sent_at`, `DEAD`).
+> - **Schema & Mã chuẩn:** `ReviewAction` chốt 12 giá trị (thêm `REASSIGN_CONFIRMER`, `CANCEL_PENDING`; bỏ `EDIT`, `EXTEND`, `FORCE_SEND`); `ItemBatch.failure_reason` lưu lý do `FAILED` song song `ItemBatchJob.last_error`; chuẩn hóa 6 `ItemCheckReasonCode` + 15 `CandidateRejectionReason` + `AI_BUDGET_EXCEEDED` và bảng route thực tế `/item-batches/generate`, `/item-batches/import/*`, `/item-batches/rejected-stats`.
+
 > **Điều chỉnh thiết kế đích 27/11:** Xem `decisions/20261127_BO_SUNG_Q1_Q8_VONG_DOI_LO_VA_API.md`: thay B/cancel-pending có reason và audit; preview BE theo skill/CEFR với batchRevision; không C3/import khi còn chờ A/B; C3 stale quyết lại cờ; partial import chỉ sau ít nhất một câu import; lô rỗng do lỗi FAILED. Các API này chưa được xác nhận đã triển khai.
 
 # Kế hoạch: Admin tạo đề (AI hoặc import file) → AI check → GV A duyệt → GV B confirm → Admin kiểm tra và import
 
-> **Quyết định cập nhật ngày 26/11/2026:** Một B chung cho lô; B thấy ngay từng câu A đã duyệt; xác nhận tất cả giới hạn theo lô. Câu bị loại không giao lại; câu chưa bị loại có thể giao lại theo audit. Cho phép import một phần câu đủ điều kiện. Admin đặt hạn A/B khi giao, email nhắc lúc 08:00 giờ Việt Nam ngày trước hạn. Quá hạn chỉ cảnh báo và để Admin xử lý thủ công. T3/G5 lỗi hoặc chưa cấu hình thì dừng và cho thử lại; dùng LiteLLM, tạm cấu hình ngưỡng T2 0,65/0,85 và T3 0,90. Các ghi chú cũ trái với quyết định này đã bị thay thế.
+> **Quyết định cập nhật ngày 26/11/2026:** Một B chung cho lô; B thấy ngay từng câu A đã duyệt; xác nhận tất cả giới hạn theo lô. Câu bị loại không giao lại; câu chưa bị loại có thể giao lại theo audit. Cho phép import một phần câu đủ điều kiện. Admin đặt hạn A/B khi giao, email nhắc lúc 08:00 giờ Việt Nam ngày trước hạn. Quá hạn chỉ cảnh báo và để Admin xử lý thủ công. T3/G5 lỗi hoặc chưa cấu hình thì dừng và cho thử lại; cấu hình ngưỡng khởi điểm pilot T2 0,65/0,85 và T3 0,90 (`SOFT`). Các ghi chú cũ trái với quyết định này và bản chốt 28/11 đã bị thay thế.
 
 > **Ngày lập:** 2026-10-14 (Tuần 5). **Phiên bản 5 (viết lại toàn bộ theo luồng mới).** Các bản trước lưu ở `_BACKUP_20261014_KE_HOACH_SINH_VA_DUYET_DE_AI_V1…V4.md`.
 > **Cập nhật 03/11/2026 (họp GVHD):** bỏ khái niệm **gói** (`ItemPackage`, `PackageStatus`, gửi gói, ép gửi gói, DC-42). Giao việc và duyệt theo **từng câu**: mỗi câu có GV A (`reviewer_id`) và GV B (`confirmer_id`), kết quả hai vòng nằm trong `items.first_review`, `items.second_review` (JSON). Bỏ bảng `item_packages`, `item_review_assignments`, `item_batch_assignments`. Chi tiết: `D:\TLCN\20261103_QUYET_DINH_THAY_DOI_THIET_KE_CLASS_DIAGRAM.md`, `design/class/Mo_ta_So_do_Lop_ClassDiagram.md`. Chỗ ghi **⚠ chờ xác nhận** là điểm quyết định 03/11 chưa nói rõ, AI chỉ viết tạm trung lập.
@@ -76,18 +81,18 @@ Một chiều, **không có đường quay lại**. Chỉ `FINAL_APPROVED` đư�
 ## 3. Tạo đề (Admin)
 
 ### 3.1. Bằng AI (lô sinh)
-Đầu vào: `skill`, `cefr_level`, `topic_tag` (tùy chọn), **N**. (Nhóm GV **chưa chọn ở bước này**, chỉ chọn lúc Giao việc, DC-41.)
-Chạy nền BullMQ; Admin nhận `batchId` và xem tiến độ.
+Đầu vào: `skill`, `cefr_level`, `topic_tag` (tùy chọn), **N** (tối đa **50 câu/lô**). (Nhóm GV **chưa chọn ở bước này**, chỉ chọn lúc Giao việc, DC-41.)
+Chạy nền qua hàng đợi PostgreSQL có lease (`item_batch_jobs`, kind `GENERATE`/`CHECK`); Admin nhận `batchId` và xem tiến độ.
 
 | Bước | Việc | Tốn API? |
 |---|---|---|
-| G1 | Lấy k = 3–5 câu mẫu cùng bộ lọc từ ngân hàng tham chiếu (few-shot); `k` cấu hình | Không |
-| G2 | **Sinh dư** `N' = ⌈N × (1 + overRate)⌉`, chia thành các lời gọi nhỏ; mỗi lời gọi trả **một mảng JSON** gồm nội dung, 4 đáp án, đáp án đúng, `irt_b` gợi ý và **giải thích** | **Có** (lời gọi chính) |
+| G1 | Lấy k = 3–5 câu mẫu đã duyệt cùng bộ lọc từ DB hiện tại (few-shot); ghi `items.generated_from_ref_ids` | Không |
+| G2 | **Sinh dư** `N' = ⌈N × (1 + overRate)⌉` (pilot khởi điểm `overRate = 0.25`), chia thành các lời gọi nhỏ (`chunkSize = 10`); mỗi lời gọi trả **một mảng JSON** gồm nội dung, 4 đáp án, đáp án đúng, `irt_b` gợi ý và **giải thích** | **Có** (lời gọi chính) |
 | C1 | **AI check lần 1** (Mục 4.1) | Chỉ ở tầng cuối |
-| G6 | **Bù thiếu:** còn ít hơn N thì sinh thêm **chỉ phần thiếu**, tối đa R vòng (cấu hình); hết R vòng ⇒ báo "thiếu x câu" | Có, nhỏ |
+| G6 | **Bù thiếu:** còn ít hơn N thì sinh thêm **chỉ phần thiếu**, tối đa R vòng (pilot `2`); hết R vòng ⇒ báo "thiếu x câu" | Có, nhỏ |
 | G7 | Cắt về N; `irt_b` khởi tạo = trung bình `irt_b` của k mẫu, `calibrated=false`, `source=AI_GENERATED`; lưu `Explanation` | Không |
 
-Kiểm soát chi phí: trần số lời gọi/token mỗi lô; ghi tên và phiên bản mô hình thật cho từng lời gọi (TC2.3); đi qua **LLM Gateway có dự phòng**; cache theo hash prompt; không bịa số chi phí, đo ở lần chạy thử đầu.
+Kiểm soát chi phí (`DECISIONS_LOG:207–215`): trần **250 lượt gọi AI mỗi lô** (`item_batches.ai_call_count / ai_call_limit`, cấp lượt nguyên tử trong PostgreSQL cho sinh, embedding, G5, C2/C3 và retry); ghi tên và phiên bản mô hình thật cho từng lời gọi (TC2.3); chế độ thử hiện gọi **Gemini trực tiếp qua endpoint tương thích OpenAI** (không có LiteLLM dự phòng ở chế độ thử; trạng thái pilot / chưa kiểm chứng runtime).
 
 ### 3.2. Bằng import file (Admin)
 - Dùng **lưới tạm** DC-22 (tải nhiều file, dòng lỗi bị loại + popup, bấm **Lưu** mới ghi). Cột `.xlsx` (đề xuất): `Skill`, `CEFR`, `Topic`, `Câu hỏi`, `A`, `B`, `C`, `D`, `Đáp án`, `Giải thích` (tùy chọn), `Độ khó (irt_b)` (tùy chọn).
@@ -113,8 +118,8 @@ Lý do làm đầy đủ ở đây: câu hỏng loại sớm nhất tiết kiệ
 | 1. Luật cứng | Đủ 4 đáp án khác nhau, đúng 1 đáp án đúng, độ dài hợp lệ, `irt_b` ∈ [−4,+4], đúng `skill`/`cefr`, có giải thích | Không | Hỏng ⇒ `AI_REJECTED` |
 | 2. Trùng T1 | Băm chuẩn hóa so với: ngân hàng, câu đang trong mọi lô khác, các câu cùng lô | Không | Trùng ⇒ `AI_REJECTED` |
 | 3. Trùng T2 | `pg_trgm` trên nội dung + đáp án | Không | ≥ ngưỡng cao: `AI_REJECTED`; giữa hai ngưỡng: **cờ mềm** |
-| 4. Trùng T3 | Embedding (chỉ câu còn lại), cosine tính trong ứng dụng | **Có** (embedding) | ≥ ngưỡng: **cờ mềm** kèm câu bị nghi trùng |
-| 5. G5 | Kiểm đáp án độc lập: đưa câu + 4 đáp án (không kèm đáp án đúng) cho AI tự chọn; cùng lời gọi hỏi "giải thích có ủng hộ đáp án vừa chọn không" | **Có** (gộp nhóm) | Lệch ⇒ **cờ mềm** (không loại: AI có thể sai, người sẽ xem) |
+| 4. Trùng T3 | Embedding `gemini-embedding-001@768` (pilot, chỉ câu còn lại), cosine tính trong ứng dụng | **Có** (embedding) | ≥ 0,90 (pilot): **cờ mềm `DUPLICATE_SEMANTIC_SUSPECT`** kèm câu bị nghi trùng |
+| 5. G5 | Kiểm đáp án độc lập (**2 lượt gọi AI riêng**): lượt 1 chọn đáp án không nhận lời giải/đáp án gốc; lượt 2 kiểm lời giải với đáp án vừa chọn | **Có** (2 lượt) | Khớp ⇒ `INDEPENDENT_ANSWER_CHECKED` (`PASS`); lệch ⇒ thêm `INDEPENDENT_ANSWER_MISMATCH` (`SOFT`, không tự loại) |
 
 ### 4.2. C2 — khi Admin import file có sẵn (đầu vào do người soạn, chưa biết đáp án có đúng không)
 Khác C1: **không sinh dư, không bù thiếu** (câu do người đưa vào, không loại số lượng bừa); **luôn có kiểm trùng nội bộ file/lưới**. Vẫn chạy đủ tầng 1–5 vì nguồn file chưa được máy kiểm; nhưng:
@@ -164,7 +169,7 @@ Chọn **O2** vì: (1) giữ luồng một chiều như bạn đã chốt ở #1
 
 **Sau khi giao:** ghi `reviewer_id` và hai hạn trên từng câu, `confirmer_id` chung trên lô, `ASSIGN` một dòng mỗi câu; lô `IN_REVIEW`; gửi email giao việc và đặt lịch nhắc.
 
-**Giao lại:** Admin đổi A của các câu `DRAFT` với reason, audit `REASSIGN` theo câu. Thay B chung là thao tác riêng, có reason và event cấp lô; giữ hạn, kết quả cũ và hủy quyền Teacher Review của B cũ. Ghi outbox trong transaction, gửi thông báo sau commit; email có thể gửi lặp khi retry. Đổi hạn là thao tác riêng.
+**Giao lại:** Admin đổi A của các câu `DRAFT` với reason, audit `REASSIGN` theo câu. Thay B chung là thao tác riêng (`reassign-confirmer`), có reason và event `REASSIGN_CONFIRMER` cấp lô (`item_id = NULL`); giữ hạn, kết quả cũ và hủy quyền Teacher Review của B cũ. Ghi `review_notice_outbox` (có lease/lastError/DEAD) trong transaction, gửi thông báo sau commit (*at-least-once*). Đổi hạn là thao tác riêng (`UPDATE_DUE_DATE`).
 
 ---
 
@@ -243,25 +248,25 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 
 **Schema:**
 - `ItemStatus`: `DRAFT`, `FIRST_APPROVED`, `SECOND_APPROVED`, `FINAL_APPROVED`, `REJECTED`, `AI_REJECTED`; bỏ `PENDING_REVIEW`, `APPROVED`. `ItemSource`: `AI_GENERATED`, `IMPORTED`.
-- `item_batches` có `confirmer_id` cho một GV B chung và `status` gồm `PARTIALLY_IMPORTED`.
-- `items` có `reviewer_id` cho GV A, `first_review`, `second_review` và cờ nhắc từng vòng. Cột `items.confirmer_id` cũ chỉ giữ tạm để tương thích, không là nguồn sự thật. Tham chiếu: `design/class/schema.prisma`.
-- `items.content_hash`, `items.batch_id`, `item_embeddings` (itemId, vector `Float[]`, model, createdAt), `item_check_results` (itemId, checkpoint `C1|C2|C3`, content_hash, level `PASS|SOFT|HARD`, reason_codes, checkedAt).
-- `item_review_events` theo thiết kế đích thêm `CANCEL_PENDING`; `CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING` và `REASSIGN` B là event cấp lô có `item_id = NULL` và `details`. `ASSIGN`, `REASSIGN` A và `IMPORT` ghi theo câu. Schema/runtime còn nợ đồng bộ.
+- `item_batches` có `confirmer_id` cho một GV B chung, `import_operation_id`, `import_group_id`, `import_part`, `ai_call_count`, `ai_call_limit = 250`, `failure_reason VARCHAR(100)` (lý do khi `FAILED`) và `status` gồm `PARTIALLY_IMPORTED`.
+- `items` có `reviewer_id` cho GV A, `first_review`, `second_review`, `generated_from_ref_ids UUID[]`, cờ nhắc hạn và cờ thông báo giao việc. Cột `items.confirmer_id` cũ chỉ giữ tạm để tương thích, không là nguồn sự thật. Tham chiếu: `design/class/schema.prisma`.
+- `item_batch_jobs` (hàng đợi PG có lease cho `GENERATE`/`CHECK` và `last_error`), `review_notice_outbox` (transactional outbox đổi B có `lease_token`, `lease_until`, `last_error`, `sent_at`, `DEAD`), `item_embeddings`, `item_check_results` (`ItemCheckReasonCode`).
+- `item_review_events` chốt **12 `ReviewAction`** (thêm `REASSIGN_CONFIRMER`, `CANCEL_PENDING`; không dùng `EDIT`); `CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING` và `REASSIGN_CONFIRMER` là event cấp lô có `item_id = NULL` và `details`. `ASSIGN`, `REASSIGN` A và `IMPORT` ghi theo câu.
 - Chỉ mục: băm chuẩn hóa (T1), GIN `pg_trgm` (T2). `CREATE EXTENSION pg_trgm`.
 
-**API:**
+**API (route thực tế đồng bộ 28/11):**
 
 | Nhóm | Endpoint | Role |
 |---|---|---|
-| Lô | `POST /item-batches` (AI), `POST /item-imports/upload`, `GET`/`DELETE /item-imports/grid[/:rowKey]`, `POST /item-imports/save`, `GET /item-batches[/:id]`, `GET /item-batches/:id/ai-rejected` | Admin |
+| Lô | `POST /item-batches/generate` (AI), `GET /item-batches/import/template`, `POST /item-batches/import/upload`, `GET`/`DELETE /item-batches/import/grid[/:rowKey]`, `POST /item-batches/import/save` *(legacy `preview`)*, `GET /item-batches[/:id]`, `GET /item-batches/rejected-stats`, `POST /item-batches/:id/{retry-generation, retry-checks, refresh-status}` | Admin |
 | Giao việc | `POST /item-batches/:id/assign-preview`, `/assign`, `/reassign`, `/reassign-confirmer`, `/cancel-pending`; `PATCH /item-batches/:id/deadlines` | Admin |
 | Kiểm tra / import | `POST` và `GET /item-batches/:id/final-check`, `POST /item-batches/:id/import`, `POST /item-batches/:id/items/:itemId/flag-decision` | Admin |
-| Chặng A | `GET /teacher/tasks/reviews[/:batchId]`, `PATCH /teacher/items/:id`, `POST /teacher/items/:id/approve` hoặc `/reject` | GV A |
-| Chặng B | `GET /teacher/tasks/confirms[/:batchId]`, `POST /teacher/items/:id/confirm` hoặc `/remove`, `POST /teacher/tasks/confirms/:batchId/confirm-all` | GV B |
+| Chặng A | `GET /teacher/tasks/reviews[/:batchId]`, `PATCH /teacher/items/:id`, `POST /teacher/items/:id/approve` hoặc `/reject` | GV A (`@Roles(TEACHER)`) |
+| Chặng B | `GET /teacher/tasks/confirms[/:batchId]`, `POST /teacher/items/:id/confirm` hoặc `/remove`, `POST /teacher/tasks/confirms/:batchId/confirm-all` | GV B (`@Roles(TEACHER)`) |
 
-Các route trên là **hợp đồng đích**; mã hiện tại và spec OpenAPI còn cần đồng bộ.
+**Mã lỗi:** `VALIDATION_FAILED` (400 — thiếu/rỗng comment hoặc reason sau trim), `NOT_ASSIGNED` (403), `CONFIRMER_IN_REVIEW_GROUP` (409), `FINAL_CHECK_REQUIRED` (409), `FINAL_CHECK_STALE` (409), `BATCH_NOT_READY_TO_FINALIZE` (409), `DUPLICATE_AFTER_EDIT` (422), `INVALID_AFTER_EDIT` (422), `BATCH_BUDGET_EXCEEDED` (409), `AI_BUDGET_EXCEEDED` (409 / `lastError`), `IMPORT_GRID_EXPIRED` (410).
 
-**Mã lỗi:** `VALIDATION_FAILED` (400 — thiếu/rỗng comment hoặc reason sau trim), `NOT_ASSIGNED` (403), `CONFIRMER_IN_REVIEW_GROUP` (409), `FINAL_CHECK_REQUIRED` (409), `FINAL_CHECK_STALE` (409), `BATCH_NOT_READY_TO_FINALIZE` (409), `DUPLICATE_AFTER_EDIT` (422), `INVALID_AFTER_EDIT` (422), `BATCH_BUDGET_EXCEEDED` (409), `IMPORT_GRID_EXPIRED` (410).
+*(Từ điển mã kiểm AI `ItemCheckReasonCode` 6 mã và validation `CandidateRejectionReason` 15 mã chuẩn hóa tại `@apt/shared-types` v3.1.0 và Phụ lục A UI Spec).*
 
 ---
 
@@ -286,10 +291,10 @@ Các route trên là **hợp đồng đích**; mã hiện tại và spec OpenAPI
 | Q-4 | Giờ chốt "ngày hạn" 23:59:59 giờ Việt Nam; nhắc ngay nếu hạn < 24 giờ lúc giao | Như đề xuất |
 | Q-5 | Giới hạn: số GV tối thiểu nhóm A (1 hay ≥2); Admin có bắt buộc chọn B trước khi giao không | A ≥ 1; B bắt buộc |
 | Q-6 | Tên trạng thái phụ `AI_REJECTED` và `IMPORTED` (đổi từ `MANUAL`) | Như đề xuất |
-| Q-7 | Các ngưỡng/tham số: `overRate`, cỡ mỗi lời gọi, ngưỡng T2 và T3 (cứng, mềm), số vòng bù R, trần lời gọi mỗi lô, số ngày dọn `AI_REJECTED` | Đặt trong cấu hình; hiệu chỉnh sau thử nghiệm nhỏ |
-| Q-8 | Nguồn ngân hàng tham chiếu cho few-shot và **điều khoản bản quyền** phân phối lại cho SV | Kiểm bộ Tuần 3 (CEFR-J, CLOTH); hỏi GVHD nếu cần |
-| Q-9 | **Mô hình embedding**, hạn mức, chi phí: chưa kiểm chứng | Xác minh trong tài liệu nhà cung cấp, qua LLM Gateway, trước khi code |
-| Q-10 | `pg_trgm` bật được trên image Postgres staging không | Kiểm sớm; nếu không thì T2 tính trong ứng dụng |
+| Q-7 | Các ngưỡng/tham số: **đã chốt giới hạn 50 câu/lô và 250 lượt AI/lô**; các ngưỡng khởi điểm (`overRate=0.25`, `chunkSize=10`, `maxRefillRounds=2`, T2 `0.65`/`0.85`, T3 `0.90` `SOFT`, lưu `AI_REJECTED` 90 ngày không auto-delete) giữ ở **trạng thái pilot / chưa kiểm chứng** | Đã cập nhật cấu hình pilot; hiệu chỉnh sau smoke test thật |
+| Q-8 | Nguồn ngân hàng tham chiếu cho few-shot (lấy 3–5 câu đã duyệt từ DB hiện tại) và **điều khoản bản quyền** | Cần rà bằng chứng bản quyền trước phát hành |
+| Q-9 | **Mô hình embedding**: mặc định pilot `gemini-embedding-001@768` qua **Gemini trực tiếp endpoint OpenAI-compatible** (không LiteLLM dự phòng ở chế độ thử) | **Trạng thái pilot / chưa kiểm chứng** đến khi smoke test sinh/C1 đạt |
+| Q-10 | `pg_trgm` đã có trong migration `20261126120400_enable_pg_trgm` | Kiểm chứng `migrate deploy` trên container staging Wave 0C |
 | Q-11 | Phạm vi và thời gian: sinh đề AI nay vào TL, làm đủ T3 và G5 | Cập nhật `COMMITMENT_BASELINE.md` trước khi ký; ghi rủi ro trễ |
 | Q-12 | Khoảng `irt_b` −4…+4 khác `CLAUDE.md`: sửa `CLAUDE.md` và kiểm tác động chọn câu CAT | Sửa `CLAUDE.md`, kiểm test CAT |
 
