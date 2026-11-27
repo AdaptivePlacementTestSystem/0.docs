@@ -35,6 +35,9 @@ workspace-setup/**/assets/*.docx
 *.7z
 *.rar
 
+# --- Bản nháp mới giữ tại máy; file đã theo dõi vẫn theo dõi ---
+/drafts/
+
 # --- Bản sao lưu và file tạm sinh ra khi AI/EA sửa file ---
 _BACKUP_*
 *.backup.*
