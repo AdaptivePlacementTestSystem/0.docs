@@ -80,6 +80,6 @@ Chuẩn hóa hoàn toàn theo code thực tế của module `item-generation`:
 - **Điểm nợ chưa khóa schema trong đợt này:**
   - Bảng **nhật ký lần lưu roster** (`DECISIONS_LOG.md:196–198`) sẽ được bổ sung từ nhánh `feat/admin-exam-rounds` của Phương trước khi mở Wave 1 cho module `exam-round`.
 - **Việc cần kiểm chứng / hoàn tất ngoài tự động hóa text:**
-  1. Chạy `prisma migrate deploy && npx prisma db seed` trên PostgreSQL container trống (Wave 0C) khi bật Docker.
+  1. **Wave 0C trên PostgreSQL 16 trống đã kiểm chứng đạt (`28/11`):** `prisma migrate deploy` (18/18 migrations), `prisma migrate status` sạch, `psql` (`pg_trgm`, 12 `ReviewAction`, `review_notice_outbox`, `item_batches.failure_reason`, `item_batch_jobs`), `prisma db seed` chạy sạch 2 lượt trên `postgres:16-alpine`; vẫn **chưa** triển khai thực tế lên server staging.
   2. Chạy smoke test thật với Gemini (`generate`, `C1`, `gemini-embedding-001@768`) và Brevo SMTP + SPF/DKIM.
   3. Kiểm tra giao diện trên Figma/Stitch, rà soát trực quan lần cuối 2 file `.docx` đã xuất lại TOC & 5 ảnh PNG, và cấu hình GitHub Ruleset / GVHD `COMMITMENT_BASELINE.md`.
