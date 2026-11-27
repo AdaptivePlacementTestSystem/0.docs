@@ -1,3 +1,5 @@
+> **Điều chỉnh thiết kế đích 27/11:** Xem `decisions/20261127_BO_SUNG_Q1_Q8_VONG_DOI_LO_VA_API.md`: thay B/cancel-pending có reason và audit; preview BE theo skill/CEFR với batchRevision; không C3/import khi còn chờ A/B; C3 stale quyết lại cờ; partial import chỉ sau ít nhất một câu import; lô rỗng do lỗi FAILED. Các API này chưa được xác nhận đã triển khai.
+
 # Kế hoạch: Admin tạo đề (AI hoặc import file) → AI check → GV A duyệt → GV B confirm → Admin kiểm tra và import
 
 > **Quyết định cập nhật ngày 26/11/2026:** Một B chung cho lô; B thấy ngay từng câu A đã duyệt; xác nhận tất cả giới hạn theo lô. Câu bị loại không giao lại; câu chưa bị loại có thể giao lại theo audit. Cho phép import một phần câu đủ điều kiện. Admin đặt hạn A/B khi giao, email nhắc lúc 08:00 giờ Việt Nam ngày trước hạn. Quá hạn chỉ cảnh báo và để Admin xử lý thủ công. T3/G5 lỗi hoặc chưa cấu hình thì dừng và cho thử lại; dùng LiteLLM, tạm cấu hình ngưỡng T2 0,65/0,85 và T3 0,90. Các ghi chú cũ trái với quyết định này đã bị thay thế.
@@ -158,11 +160,11 @@ Chọn **O2** vì: (1) giữ luồng một chiều như bạn đã chốt ở #1
 2. Đặt hạn cho hai vòng tại thời điểm giao: `first_review.dueAt` và `second_review.dueAt`; hạn B không tính lại khi A duyệt.
 3. Hệ thống hiện **xem trước phân bổ** (bảng GV – số câu, theo từng kỹ năng/CEFR); Admin bấm **Xác nhận giao**.
 
-**Cách chia đều (nhóm A):** sắp xếp các câu `DRAFT` theo (`skill`, `cefr`, thứ tự sinh); câu thứ i giao cho A thứ `i mod M` (M = số GV A). Nhờ sắp theo (`skill`, `cefr`) trước, mỗi GV nhận **mức trộn đều** các loại câu. Số câu mỗi GV chênh nhau tối đa 1 (100 câu / 5 GV = 20; 103 câu: 3 người 21, 2 người 20).
+**Cách chia đều đích:** backend preview sắp `DRAFT` theo (`skill`, `cefrTarget`, `createdAt`, `id`) và chia vòng tròn liên tục. Mỗi GV chênh tối đa 1 câu tổng và theo từng cặp skill/CEFR; không bảo đảm mỗi người có đủ các nhóm. Preview trả `batchRevision`; assign kiểm revision, tập DRAFT và quyền trong transaction. Admin được chỉnh trước khi xác nhận.
 
 **Sau khi giao:** ghi `reviewer_id` và hai hạn trên từng câu, `confirmer_id` chung trên lô, `ASSIGN` một dòng mỗi câu; lô `IN_REVIEW`; gửi email giao việc và đặt lịch nhắc.
 
-**Giao lại:** Admin chuyển các câu `DRAFT` của một A trong lô sang A khác; B chung và các kết quả đã duyệt giữ nguyên. Ghi `REASSIGN` mỗi câu và gửi thông báo cho A mới; hạn giữ nguyên, Admin dùng chức năng đổi hạn riêng khi cần.
+**Giao lại:** Admin đổi A của các câu `DRAFT` với reason, audit `REASSIGN` theo câu. Thay B chung là thao tác riêng, có reason và event cấp lô; giữ hạn, kết quả cũ và hủy quyền Teacher Review của B cũ. Ghi outbox trong transaction, gửi thông báo sau commit; email có thể gửi lặp khi retry. Đổi hạn là thao tác riêng.
 
 ---
 
@@ -191,7 +193,7 @@ Chọn **O2** vì: (1) giữ luồng một chiều như bạn đã chốt ở #1
 2. Khi các câu đang duyệt đã được xử lý, lô sẵn sàng kiểm tra cuối; quá hạn không tự hoàn tất câu.
 3. Admin bấm **Kiểm tra** (C3, Mục 4.3), đọc báo cáo, xử lý lỗi mềm.
 4. Admin bấm **Import** ⇒ các câu qua (và lỗi mềm Admin chấp nhận) thành `FINAL_APPROVED`, ghi `approved_by`, `approved_at`; câu có hiệu lực cho CAT, `calibrated=false`.
-5. Câu chưa xử lý không được import; có thể import một phần câu đủ điều kiện với lô `PARTIALLY_IMPORTED`. Chỉ chuyển `DONE` khi mọi câu ở trạng thái cuối.
+5. Không C3/import khi còn `DRAFT`/`FIRST_APPROVED`; Admin có thể chủ động `cancel-pending` kèm reason, audit cấp lô và tách khỏi thống kê loại chất lượng. `PARTIALLY_IMPORTED` chỉ sau khi import ít nhất một câu và còn `SECOND_APPROVED`. C3 stale phải chạy lại và quyết lại cờ. Lô có item đã kết thúc hết có thể `DONE` kể cả 0 câu import; lô rỗng do lỗi là `FAILED`.
 
 ---
 
@@ -244,7 +246,7 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 - `item_batches` có `confirmer_id` cho một GV B chung và `status` gồm `PARTIALLY_IMPORTED`.
 - `items` có `reviewer_id` cho GV A, `first_review`, `second_review` và cờ nhắc từng vòng. Cột `items.confirmer_id` cũ chỉ giữ tạm để tương thích, không là nguồn sự thật. Tham chiếu: `design/class/schema.prisma`.
 - `items.content_hash`, `items.batch_id`, `item_embeddings` (itemId, vector `Float[]`, model, createdAt), `item_check_results` (itemId, checkpoint `C1|C2|C3`, content_hash, level `PASS|SOFT|HARD`, reason_codes, checkedAt).
-- `item_review_events`: `APPROVE|REJECT|CONFIRM|REMOVE|CONFIRM_ALL|IMPORT|ASSIGN|REASSIGN|ACCEPT_FLAG|UPDATE_DUE_DATE`; `CONFIRM_ALL` và `UPDATE_DUE_DATE` là event cấp lô có `item_id = NULL` và `details`.
+- `item_review_events` theo thiết kế đích thêm `CANCEL_PENDING`; `CONFIRM_ALL`, `UPDATE_DUE_DATE`, `CANCEL_PENDING` và `REASSIGN` B là event cấp lô có `item_id = NULL` và `details`. `ASSIGN`, `REASSIGN` A và `IMPORT` ghi theo câu. Schema/runtime còn nợ đồng bộ.
 - Chỉ mục: băm chuẩn hóa (T1), GIN `pg_trgm` (T2). `CREATE EXTENSION pg_trgm`.
 
 **API:**
@@ -252,12 +254,12 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 | Nhóm | Endpoint | Role |
 |---|---|---|
 | Lô | `POST /item-batches` (AI), `POST /item-imports/upload`, `GET`/`DELETE /item-imports/grid[/:rowKey]`, `POST /item-imports/save`, `GET /item-batches[/:id]`, `GET /item-batches/:id/ai-rejected` | Admin |
-| Giao việc | `POST /item-batches/:id/assign`, `POST /item-batches/:id/reassign` (`fromAssigneeId`, `toAssigneeId`), `PATCH /item-batches/:id/deadlines` (bắt buộc `reason`) | Admin |
-| Kiểm tra / import | `POST /item-batches/:id/final-check`, `POST /item-batches/:id/import`, `POST /item-batches/:id/items/:itemId/flag-decision` | Admin |
-| Chặng A | `GET /teacher-review`, `PATCH /teacher-review/:id`, `POST /teacher-review/:id/decision` | GV A |
-| Chặng B | `GET /teacher-review`, `POST /teacher-review/:id/decision`, `POST /teacher-review/:batchId/confirm-all` | GV B |
+| Giao việc | `POST /item-batches/:id/assign-preview`, `/assign`, `/reassign`, `/reassign-confirmer`, `/cancel-pending`; `PATCH /item-batches/:id/deadlines` | Admin |
+| Kiểm tra / import | `POST` và `GET /item-batches/:id/final-check`, `POST /item-batches/:id/import`, `POST /item-batches/:id/items/:itemId/flag-decision` | Admin |
+| Chặng A | `GET /teacher/tasks/reviews[/:batchId]`, `PATCH /teacher/items/:id`, `POST /teacher/items/:id/approve` hoặc `/reject` | GV A |
+| Chặng B | `GET /teacher/tasks/confirms[/:batchId]`, `POST /teacher/items/:id/confirm` hoặc `/remove`, `POST /teacher/tasks/confirms/:batchId/confirm-all` | GV B |
 
-Các route review nêu trên phản ánh mã hiện tại; spec OpenAPI còn cần đồng bộ.
+Các route trên là **hợp đồng đích**; mã hiện tại và spec OpenAPI còn cần đồng bộ.
 
 **Mã lỗi:** `NOT_ASSIGNED` (403), `CONFIRMER_IN_REVIEW_GROUP` (409), `FINAL_CHECK_REQUIRED` (409), `FINAL_CHECK_STALE` (409), `BATCH_NOT_READY_TO_FINALIZE` (409), `DUPLICATE_AFTER_EDIT` (422), `INVALID_AFTER_EDIT` (422), `BATCH_BUDGET_EXCEEDED` (409), `IMPORT_GRID_EXPIRED` (410).
 

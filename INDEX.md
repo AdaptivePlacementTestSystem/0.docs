@@ -12,7 +12,7 @@
 | design/ui | mô tả luồng/màn hình cho AI, danh sách màn hình | Giao diện theo role |
 | design/catengine | `Luong_Hoat_Dong_CATEngine.md` | Luồng CAT Engine |
 | plans | nghiệp vụ import/kỳ thi, sinh và duyệt đề AI; `KE_HOACH_OPENAPI_SWAGGER_BE_X2.md` (OpenAPI/Swagger, BE-X2); `cicd/`; `item-bank-data/` | Kế hoạch |
-| decisions | bản chốt 16/10, phân tích shared-types | Quyết định chính thức |
+| decisions | bản chốt 16/10, phân tích shared-types, [bổ sung Q1–Q8 và API 27/11](decisions/20261127_BO_SUNG_Q1_Q8_VONG_DOI_LO_VA_API.md) | Quyết định và ghi nhận bổ sung; đối chiếu nguồn, trạng thái xác nhận và nợ đồng bộ |
 | process | rubric, playbook, quy trình nhóm | Quy trình |
 | tracking | log, dashboard, baseline, weekly-log, mẫu, `status-reports/`, `survey/` | Theo dõi (log thật chỉ lưu máy, #37; bản chính ở `0.docs/tracking` cạnh plugin) |
 | drafts | tài liệu CHƯA chốt | Xem `drafts/README.md` |

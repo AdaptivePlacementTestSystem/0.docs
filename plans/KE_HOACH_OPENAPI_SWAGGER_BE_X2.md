@@ -7,6 +7,12 @@
 - Cập nhật kiểm tra 27/11/2026: backend OpenAPI branch `feat/be-x2-openapi`, commit `944f1132a4fe525f7bf681f780fb7156e7bfd542`; frontend OpenAPI branch `feat/be-x2-openapi`, commit `7a1a15b`. Cả hai worktree sạch tại thời điểm kiểm tra, nhưng đây là nhánh riêng, chưa merge vào source branch hiện hành. Backend spec tại commit này ghi 45 operation có schema thành công/status không body; mốc 47 thuộc snapshot lịch sử commit 0dac52b trên nhánh khác; coverage có inventory và một số breaking-change checks. Shared types local trên `main` có `ItemBatchStatus.PARTIALLY_IMPORTED` và `ReviewAction.UPDATE_DUE_DATE`, chưa commit/tag; BE/FE package hiện hành vẫn pin Git tag `v3.0.0`, nên các enum local chưa tự đến consumer.
 - Giới hạn: OpenAPI branch được dựng từ base backend `9b41f7b`, không bao gồm workflow Q1–Q8 mới trong item-generation; không coi 45 operation tại commit 944f113 là coverage của item-generation hoặc bằng chứng runtime. CI GitHub chưa xác minh.
 
+## Bổ sung phạm vi Q1–Q8 theo quyết định 27/11
+
+Thiết kế đích cần tích hợp controller/DTO trước khi sinh OpenAPI: nhóm `/teacher/tasks/reviews`, `/teacher/tasks/confirms`, `/teacher/items/:id/...`; preview và assign với `batchRevision`; giao lại A, thay B, đổi hạn, hủy tồn đọng và đọc báo cáo C3. Đặc tả cần schema request/response, phân quyền, lỗi `409 CONFIRMER_IN_REVIEW_GROUP`, hành vi đồng thời, C3 stale và audit cấp lô. Các route này là yêu cầu đích; không nhận là đã triển khai trên nhánh OpenAPI hoặc runtime.
+
+Shared types cần đối chiếu schema backend sau khi triển khai `CANCEL_PENDING`, bổ sung các giá trị cần dùng và kiểm tra tương thích; quy trình phát hành cần commit/tag và nâng pin consumer theo phối hợp nhóm. Chưa có quyết định phát hành tag mới; không nâng dependency chỉ dựa vào thay đổi local.
+
 ## 1. Vấn đề
 
 FE và BE lệch định dạng response (đã gặp 2 lần). #122 chỉ dùng chung Enum, ErrorCode, ApiError qua `@apt/shared-types`, còn DTO response vẫn đồng bộ bằng tay vì BE chưa có Swagger (nợ từ #51). Giải pháp là một nguồn sự thật cho hợp đồng API, sinh từ mã backend, và FE sinh kiểu từ đó để lệch thì **lỗi biên dịch**, không giữ nguyên hai repo riêng.

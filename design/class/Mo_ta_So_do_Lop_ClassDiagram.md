@@ -1,5 +1,7 @@
 # MÔ TẢ SƠ ĐỒ LỚP (CLASS DIAGRAM) — HỆ THỐNG PLACEMENT TEST THÍCH ỨNG
 
+> **Thiết kế đích 27/11 — sơ đồ và schema còn nợ đồng bộ:** bổ sung `ReviewAction.CANCEL_PENDING` cấp lô, `REASSIGN` B cấp lô, `batchRevision` phục vụ preview/assign và transactional outbox theo `decisions/20261127_BO_SUNG_Q1_Q8_VONG_DOI_LO_VA_API.md`. Các thuộc tính/cấu trúc lưu trữ cụ thể của revision/outbox chưa được xác nhận trong schema backend; không coi sơ đồ hoặc migration đã hoàn thành. `design/class/schema.prisma` vẫn là bản tham chiếu đối chiếu mã hiện hành.
+
 > **Phiên bản:** Tuần 7 (2026-10-26). Mô tả bản Class Diagram **gọn** `TLCN.drawio.xml` (3 trang: Tổng thể, Core CAT/Testing, Item Authoring/Review) và ảnh xem trước `TLCN-Trang-1.png`…`TLCN-Trang-3.png`.
 > Bản mô tả cũ (47 lớp, theo `Trang-1` một trang) và sơ đồ cũ đã chuyển vào `_ARCHIVE_20261026/design/class/`.
 > Ảnh PNG dựng bằng script (đường thẳng, có chỗ cắt qua hộp); **ảnh cuối cần xuất lại từ draw.io** sau khi chỉnh đường nối.
