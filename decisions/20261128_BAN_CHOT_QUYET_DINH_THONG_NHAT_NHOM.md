@@ -82,4 +82,4 @@ Chuẩn hóa hoàn toàn theo code thực tế của module `item-generation`:
 - **Việc cần kiểm chứng / hoàn tất ngoài tự động hóa text:**
   1. Chạy `prisma migrate deploy && npx prisma db seed` trên PostgreSQL container trống (Wave 0C) khi bật Docker.
   2. Chạy smoke test thật với Gemini (`generate`, `C1`, `gemini-embedding-001@768`) và Brevo SMTP + SPF/DKIM.
-  3. Xuất lại ảnh PNG từ draw.io GUI (`TLCN-Trang-1..3.png`, `TLCN_ComponentDiagram.png`, `TLCN_DeploymentDiagram.png`), đồng bộ 2 file `.docx` (`SRS_TLCN_v3.0.docx`, `20261016_MoHinhHoaYeuCau.docx`), kiểm tra Figma/Stitch, và cấu hình GitHub Ruleset / GVHD `COMMITMENT_BASELINE.md`.
+  3. Kiểm tra giao diện trên Figma/Stitch, rà soát trực quan lần cuối 2 file `.docx` đã xuất lại TOC & 5 ảnh PNG, và cấu hình GitHub Ruleset / GVHD `COMMITMENT_BASELINE.md`.

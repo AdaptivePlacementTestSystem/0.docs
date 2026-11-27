@@ -153,7 +153,7 @@ Cài Docker; chép cấu hình compose, Nginx, vector, `deploy.sh` vào `~/place
 
 > Ghi chú: ★ là khuyến nghị của người soạn, **không phải quyết định**. Đánh dấu `☑` một phương án mỗi mục.
 
-> Cập nhật 28/11/2026 (Q1–Q8 & chốt nhóm): Xem tiến độ đóng Q1 (`prisma/migrations` đã có 18 migration trên nhánh `chore/sync-prisma-schema-q1-q8`), mục tiêu kiểm thử Wave 0C (`prisma migrate deploy && npx prisma db seed` trên container PostgreSQL trống) và phân tích topology 1 tiến trình ở [20261127_BANG_CHOT_PHUONG_DANG_Q1_Q8 (1).md](file:///D:/DaiHoc/TLCN/workspace_docs/20261127_BANG_CHOT_PHUONG_DANG_Q1_Q8%20(1).md).
+> Cập nhật 28/11/2026 (Q1–Q8 & chốt nhóm): Đã khóa 18 migration trong `prisma/migrations` trên nhánh `chore/sync-prisma-schema-q1-q8` (`prisma validate` đạt); kiểm thử Wave 0C (`prisma migrate deploy && npx prisma db seed` trên container PostgreSQL 16 trống) **chưa thực thi được từ session tự động** do Windows service `com.docker.service` đang dừng và đòi quyền UAC quản trị — cần thành viên bật Docker Desktop và chạy lại kiểm thử Wave 0C trước khi mở PR. Xem thêm phân tích topology 1 tiến trình ở [20261127_BANG_CHOT_PHUONG_DANG_Q1_Q8 (1).md](file:///D:/DaiHoc/TLCN/workspace_docs/20261127_BANG_CHOT_PHUONG_DANG_Q1_Q8%20(1).md).
 
 ### 7.1. Quyết định thiết kế / kỹ thuật
 
