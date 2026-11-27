@@ -1279,7 +1279,7 @@
 												<UML:TaggedValue tag="mt" value="Voi tung cau co mem: Click Chap nhan (cho Import) hoac Loai"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="decideSoftFlag(itemId, ACCEPT hoac REJECT) - POST /items/:id/decision" xmi.id="EAID_469A244D_DE0E_496F_945E_43CDF700B7E0" visibility="public" sender="EAID_0B15460E_1203_4F50_B224_073205350EF2" receiver="EAID_737B5C35_ED32_4A9B_BE4F_0ED5AF80DC4C">
+										<UML:Message name="decideSoftFlag(itemId, IMPORT or REJECT (comment required for REJECT)) - POST /item-batches/:id/items/:itemId/flag-decision" xmi.id="EAID_469A244D_DE0E_496F_945E_43CDF700B7E0" visibility="public" sender="EAID_0B15460E_1203_4F50_B224_073205350EF2" receiver="EAID_737B5C35_ED32_4A9B_BE4F_0ED5AF80DC4C">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1320,7 +1320,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1250;PtEndX=0;PtEndY=-1250;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_E7721042_FD93_4A64_B139_F7ED70996815"/>
-												<UML:TaggedValue tag="mt" value="decideSoftFlag(itemId, ACCEPT hoac REJECT) - POST /items/:id/decision"/>
+												<UML:TaggedValue tag="mt" value="decideSoftFlag(itemId, IMPORT or REJECT (comment required for REJECT)) - POST /item-batches/:id/items/:itemId/flag-decision"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Loai: updateStatus(REJECTED); Chap nhan: ghi item_review_events ACCEPT_FLAG" xmi.id="EAID_911CDBAF_4AFE_4A46_8521_1ECD96C80135" visibility="public" sender="EAID_737B5C35_ED32_4A9B_BE4F_0ED5AF80DC4C" receiver="EAID_37688729_B89C_4648_B0B7_458B84EDA070">
@@ -1851,7 +1851,7 @@
 												<UML:TaggedValue tag="mt" value="Xac nhan transaction thanh cong()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="updateStatus(DONE) neu moi cau o trang thai cuoi; cau chua xu ly nam lai lo" xmi.id="EAID_DF6568B4_A562_4699_AD9D_8E1F541BB0C3" visibility="public" sender="EAID_737B5C35_ED32_4A9B_BE4F_0ED5AF80DC4C" receiver="EAID_829F20ED_BC85_4C10_8CB1_17B3A4462084">
+										<UML:Message name="updateStatus(PARTIALLY_IMPORTED) if items remain; DONE only when all are terminal" xmi.id="EAID_DF6568B4_A562_4699_AD9D_8E1F541BB0C3" visibility="public" sender="EAID_737B5C35_ED32_4A9B_BE4F_0ED5AF80DC4C" receiver="EAID_829F20ED_BC85_4C10_8CB1_17B3A4462084">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1892,7 +1892,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1900;PtEndX=0;PtEndY=-1900;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_E7721042_FD93_4A64_B139_F7ED70996815"/>
-												<UML:TaggedValue tag="mt" value="updateStatus(DONE) neu moi cau o trang thai cuoi; cau chua xu ly nam lai lo"/>
+												<UML:TaggedValue tag="mt" value="updateStatus(PARTIALLY_IMPORTED) if items remain; DONE only when all are terminal"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_E63BB90F_B18E_4E57_AC1F_4C6E8A5D33E9" visibility="public" sender="EAID_829F20ED_BC85_4C10_8CB1_17B3A4462084" receiver="EAID_737B5C35_ED32_4A9B_BE4F_0ED5AF80DC4C">

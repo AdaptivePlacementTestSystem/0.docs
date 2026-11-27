@@ -17,7 +17,7 @@
 | 2026-10-27 | Thêm lại `irtA`, `TestMetadata`, method Admin/Teacher; bỏ `ItemBatch.createdAt`; thêm Mục 8–12 (quy tắc nghiệp vụ, đối chiếu `schema.prisma`, dữ liệu minh họa, module, tệp sinh tự động); sinh lại `ClassDiagram.puml/.mmd`; `schema.prisma` thêm khóa ngoại `ItemReviewEvent.packageId` |
 | 2026-11-02 | Đăng xếp lại vị trí và đường nối trên draw.io, bỏ ký hiệu `?` (dùng `{nullable}`); thêm `Item.originalSnapshot` và `TestSession.responses`; `schema.prisma` thêm `Item.originalSnapshot`; sinh lại `ClassDiagram.puml/.mmd`; ảnh PNG dựng lại bằng script |
 | 2026-11-03 | Theo họp GVHD: bỏ `ItemPackage`, `PackageStatus`; thêm `Item.reviewerId/confirmerId` (cột khóa ngoại) và `Item.firstReview/secondReview` (JSON, kiểu `FirstReviewDetail`/`SecondReviewDetail`); `originalSnapshot` chuyển vào `FirstReviewDetail`; `ReviewAction` bỏ `EXTEND`/`FORCE_SEND`, thêm `ASSIGN`; `Teacher` có `reviewItem`/`confirmItem`, bỏ `submitPackage`; `ExamRound ◆ TestSession` (Composition); `schema.prisma` bỏ ba model giao việc/gói; sinh lại `ClassDiagram.puml/.mmd` |
-| 2026-11-24 | Đồng bộ ký hiệu `ItemReviewEvent.itemId` có thể rỗng trên UML và draw.io theo mô tả Mục 3.6 và schema: `CONFIRM_ALL` có thể ghi sự kiện mức lô; `ASSIGN`/`REASSIGN` vẫn ghi theo từng câu. Ảnh PNG cần xuất lại. |
+| 2026-11-27 | Theo quyết định Q1–Q8: nguồn GV B duy nhất là `ItemBatch.confirmerId` (không còn `Item.confirmerId` trong mô hình chuẩn); `ItemBatchStatus` thêm `PARTIALLY_IMPORTED`; `ReviewAction` có `UPDATE_DUE_DATE`; audit batch bắt buộc `batchId`, `actorId`, `itemId` nullable cho CONFIRM_ALL/UPDATE_DUE_DATE. DDL thực tế được đối chiếu theo `backend/prisma/schema.prisma`, chưa xác nhận migration ở production. |
 
 ---
 # BẢNG MÔ TẢ 3 CLASS DIAGRAM (bản đề xuất đã rút gọn — Tuần 7)
@@ -75,7 +75,7 @@ Lớp cha của mọi tài khoản (hệ thống đơn trường, 3 role). Khôn
 | `+ reviewItem(item, action, comment): void` | GV A duyệt hoặc từ chối một câu được giao (`APPROVE`/`REJECT`); ghi vào `Item.firstReview` và `ItemReviewEvent` |
 | `+ confirmItem(item, action, comment): void` | GV B xác nhận hoặc loại một câu được giao (`CONFIRM`/`REMOVE`); ghi vào `Item.secondReview` và `ItemReviewEvent` |
 
-Khi Admin giao việc, giảng viên làm **GV A** (sửa, duyệt/từ chối từng câu) hoặc **GV B** (xác nhận/loại từng câu). Không còn gói: mỗi câu được giao riêng cho một GV A và một GV B (`Item.reviewerId`, `Item.confirmerId`). Theo SRS BR-25, câu cần được A duyệt trước khi B xác nhận; thời điểm câu `FIRST_APPROVED` hiện cho B — ngay sau khi A duyệt câu đó hay sau khi A xử lý hết phần được giao — ⚠ chờ xác nhận.
+Khi Admin giao việc, giảng viên làm **GV A** (sửa, duyệt/từ chối từng câu) hoặc **GV B** (xác nhận/loại từng câu). Không còn gói: mỗi câu có một GV A (`Item.reviewerId`), còn **một GV B chung cho toàn bộ lô** nằm ở `ItemBatch.confirmerId`; B không trùng bất kỳ A nào trong lô. B thấy câu ngay sau khi A duyệt thành `FIRST_APPROVED`. Chỉ giao lại A cho câu `DRAFT`; giữ B, hạn và kết quả đã duyệt. Câu `REJECTED`/`REMOVE` là kết thúc, không giao lại và không đưa về `DRAFT`.
 
 ### 1.4 `Admin` (kế thừa `User`) — quản trị viên trường
 Không có thuộc tính riêng: Admin chỉ khác ở **quyền**. Admin **không sửa nội dung câu hỏi**.
@@ -231,7 +231,6 @@ Kết quả cuối của một phiên, là dữ liệu xuất cho EduZ (JSON Pro
 | `irtA: float = 1.0 {Rasch}` | Độ phân biệt a, **cố định 1,0 cho mọi câu**: đây là điều kiện để mô hình là Rasch (1PL); nếu a thay đổi theo câu thì thành 2PL. `irtC` (đoán mò) không vẽ, thuộc Khóa luận |
 | `status: ItemStatus` | Vòng đời một chiều (xem 3.8); **chỉ `FINAL_APPROVED` được CAT chọn** |
 | `reviewerId: UUID {nullable}` | GV A được giao duyệt câu này; rỗng khi câu chưa được giao. Ở DB là **cột khóa ngoại** `reviewer_id` (`onDelete: Restrict`: không xóa được GV đang có việc) |
-| `confirmerId: UUID {nullable}` | GV B được giao xác nhận câu này; rỗng khi chưa giao. Cột khóa ngoại `confirmer_id` |
 | `firstReview: FirstReviewDetail {nullable}` | Kết quả vòng 1 của GV A (xem 3.4); rỗng khi chưa giao. Ở DB là cột JSON `first_review` |
 | `secondReview: SecondReviewDetail {nullable}` | Kết quả vòng 2 của GV B (xem 3.4). Cột JSON `second_review` |
 
@@ -254,6 +253,7 @@ Gom câu hỏi theo nguồn để kiểm và duyệt cùng nhau. Nguồn của c
 |---|---|
 | `name` (có thể rỗng) | Nhãn hiển thị (dùng cho lô seed theo bộ nguồn) |
 | `source: ItemBatchSource` | `AI_GENERATED` hoặc `IMPORTED` |
+| `confirmerId: UUID {nullable}` | Một GV B chung cho toàn bộ lô; được Admin chọn khi giao việc, có thể rỗng trước khi assign |
 | `status: ItemBatchStatus` | Vị trí của lô trong quy trình (xem 3.8) |
 
 > Ba cột `skill`, `cefrTarget`, `requestedCount` (đều có thể rỗng) (đích và số lượng yêu cầu của lô AI sinh) **không vẽ trên lược đồ**; chúng chỉ nằm ở DB, tạo sau. Chủ đề của từng câu được biểu diễn bằng `Item.topicTag?`.
@@ -284,7 +284,7 @@ Hai kiểu giá trị (`<<DataType>>`, Value Object), không có danh tính riê
 | `confirmedAt: DateTime {nullable}` | Lúc GV B xác nhận hoặc loại |
 | `comment: String {nullable}` | Nhận xét của GV B |
 
-`reviewerId` và `confirmerId` **không nằm trong hai kiểu này mà nằm trên `Item`** (quyết định chọn sau họp GVHD: ID người duyệt là cột khóa ngoại để DB chặn xóa GV đang có việc và truy vấn "hộp việc" dùng index thường).
+ID không nằm trong hai kiểu này: `Item.reviewerId` là GV A của câu, còn `ItemBatch.confirmerId` là GV B chung của lô. Mô hình chuẩn không còn `Item.confirmerId`; việc chuyển dữ liệu legacy phải theo migration riêng, không được giả định đã triển khai ở production.
 
 ### 3.5 `ItemCheckResult` — kết quả AI kiểm một câu
 Một dòng cho mỗi lần kiểm một câu ở một điểm kiểm.
@@ -316,10 +316,10 @@ Mỗi thao tác duyệt/giao việc để lại một dòng (truy vết, phục 
 | Enum | Giá trị | Ý nghĩa |
 |---|---|---|
 | `ItemBatchSource` | AI_GENERATED, IMPORTED | Lô do AI sinh / import từ file |
-| `ItemBatchStatus` | GENERATING / IMPORTING → CHECKING → READY_TO_ASSIGN → IN_REVIEW → READY_TO_FINALIZE → FINAL_CHECKED → DONE; FAILED, PARTIAL | Đang sinh hoặc đang import → AI đang kiểm → chờ giao việc → đang duyệt → chờ import cuối → đã kiểm C3 → xong; lỗi; xong một phần |
+| `ItemBatchStatus` | GENERATING / IMPORTING → CHECKING → READY_TO_ASSIGN → IN_REVIEW → READY_TO_FINALIZE → FINAL_CHECKED → PARTIALLY_IMPORTED / DONE; FAILED, PARTIAL | `PARTIALLY_IMPORTED` là đã nhập một phần; `PARTIAL` phản ánh sinh chưa đủ do hết ngân sách |
 | `CheckPoint` | C1, C2, C3 | Ba điểm kiểm AI |
 | `CheckLevel` | PASS, SOFT, HARD | Đạt / cảnh báo / lỗi nặng |
-| `ReviewAction` | APPROVE, REJECT, CONFIRM, REMOVE, CONFIRM_ALL, IMPORT, ASSIGN, REASSIGN, ACCEPT_FLAG | A duyệt / A từ chối / B xác nhận / B loại / B xác nhận hàng loạt / Admin import / Admin giao câu / giao lại / chấp nhận cảnh báo |
+| `ReviewAction` | APPROVE, REJECT, CONFIRM, REMOVE, CONFIRM_ALL, IMPORT, ASSIGN, REASSIGN, ACCEPT_FLAG, UPDATE_DUE_DATE | Quyết định duyệt và thao tác quản trị; `CONFIRM_ALL` và `UPDATE_DUE_DATE` ghi audit cấp lô |
 
 ### 3.8 `ItemStatus` — vòng đời câu hỏi
 | Giá trị | Ý nghĩa |
@@ -468,7 +468,7 @@ Lược đồ gọn là tập con của schema (quyết định #128, #130, #132
 | | `contentHash` | Mã băm nội dung chuẩn hóa, dùng phát hiện trùng (kiểm C1) và tái dùng kết quả kiểm |
 | | `approvedById`, `approvedAt` | Admin bấm Import; người duyệt thật nằm ở `ItemReviewEvent` |
 | | `batchId` | Khóa ngoại tới lô (bắt buộc) |
-| | `reviewerId`, `confirmerId` | Cột khóa ngoại tới `users` (`Restrict`), có trên sơ đồ; `index (reviewerId, status)`, `(confirmerId, status)` cho hộp việc |
+| | `reviewerId` | Khóa ngoại GV A tới `users`; GV B nằm tại `ItemBatch.confirmerId`. Cột `Item.confirmerId` cũ chỉ giữ tương thích tạm thời |
 | | `firstReview`, `secondReview` | Cột JSON của `FirstReviewDetail`/`SecondReviewDetail` (có trên sơ đồ qua kiểu thuộc tính) |
 | | `firstReminderSent`, `secondReminderSent` | Cờ kỹ thuật cho job nhắc hạn: đã gửi email nhắc GV A/B chưa. Cột riêng để job không ghi đè JSON kết quả duyệt |
 | | `createdAt`, `updatedAt` | Mốc kiểm toán |

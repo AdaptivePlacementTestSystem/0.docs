@@ -431,7 +431,7 @@
           <mxGeometry height="22" width="180" y="150" as="geometry" />
         </mxCell>
         <mxCell id="Item" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b&gt;Item&lt;/b&gt;" vertex="1">
-          <mxGeometry height="432" width="310" x="1460" y="344" as="geometry" />
+          <mxGeometry height="410" width="310" x="1460" y="344" as="geometry" />
         </mxCell>
         <mxCell id="attr_159" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- id: UUID" vertex="1">
           <mxGeometry height="22" width="310" y="28" as="geometry" />
@@ -464,31 +464,28 @@
           <mxGeometry height="22" width="310" y="226" as="geometry" />
         </mxCell>
         <mxCell id="sep_177" parent="Item" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" value="" vertex="1">
-          <mxGeometry height="8" width="310" y="336" as="geometry" />
+          <mxGeometry height="8" width="310" y="314" as="geometry" />
         </mxCell>
         <mxCell id="meth_178" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ probability(theta: float): float" vertex="1">
-          <mxGeometry height="22" width="310" y="344" as="geometry" />
+          <mxGeometry height="22" width="310" y="322" as="geometry" />
         </mxCell>
         <mxCell id="meth_179" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ fisherInformation(theta): float" vertex="1">
-          <mxGeometry height="22" width="310" y="366" as="geometry" />
+          <mxGeometry height="22" width="310" y="344" as="geometry" />
         </mxCell>
         <mxCell id="meth_180" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ transitionTo(next: ItemStatus): void" vertex="1">
-          <mxGeometry height="22" width="310" y="388" as="geometry" />
+          <mxGeometry height="22" width="310" y="366" as="geometry" />
         </mxCell>
         <mxCell id="attr_reviewerId_p1" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- reviewerId: UUID {nullable}" vertex="1">
           <mxGeometry height="22" width="310" y="248" as="geometry" />
         </mxCell>
-        <mxCell id="attr_confirmerId_p1" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- confirmerId: UUID {nullable}" vertex="1">
+        <mxCell id="attr_firstReview_p1" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- firstReview: FirstReviewDetail {nullable}" vertex="1">
           <mxGeometry height="22" width="310" y="270" as="geometry" />
         </mxCell>
-        <mxCell id="attr_firstReview_p1" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- firstReview: FirstReviewDetail {nullable}" vertex="1">
+        <mxCell id="attr_secondReview_p1" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- secondReview: SecondReviewDetail {nullable}" vertex="1">
           <mxGeometry height="22" width="310" y="292" as="geometry" />
         </mxCell>
-        <mxCell id="attr_secondReview_p1" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- secondReview: SecondReviewDetail {nullable}" vertex="1">
-          <mxGeometry height="22" width="310" y="314" as="geometry" />
-        </mxCell>
         <mxCell id="meth_isOverdue_p1" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ isOverdue(round: int, at: DateTime): boolean" vertex="1">
-          <mxGeometry height="22" width="310" y="410" as="geometry" />
+          <mxGeometry height="22" width="310" y="388" as="geometry" />
         </mxCell>
         <mxCell id="Explanation" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b&gt;Explanation&lt;/b&gt;" vertex="1">
           <mxGeometry height="94" width="190" x="1600" y="186" as="geometry" />
@@ -527,7 +524,7 @@
           <mxGeometry height="22" width="140" y="84" as="geometry" />
         </mxCell>
         <mxCell id="ItemBatch" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b&gt;ItemBatch&lt;/b&gt;" vertex="1">
-          <mxGeometry height="190" width="250" x="1500" y="838" as="geometry" />
+          <mxGeometry height="212" width="250" x="1500" y="838" as="geometry" />
         </mxCell>
         <mxCell id="attr_202" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- id: UUID" vertex="1">
           <mxGeometry height="22" width="250" y="28" as="geometry" />
@@ -541,17 +538,20 @@
         <mxCell id="attr_205" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- status: ItemBatchStatus" vertex="1">
           <mxGeometry height="22" width="250" y="94" as="geometry" />
         </mxCell>
+        <mxCell id="new_batch_confirmer_0" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- confirmerId: UUID {nullable}" vertex="1">
+          <mxGeometry height="22" width="250" y="116" as="geometry" />
+        </mxCell>
         <mxCell id="sep_211" parent="ItemBatch" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" value="" vertex="1">
-          <mxGeometry height="8" width="250" y="116" as="geometry" />
+          <mxGeometry height="8" width="250" y="138" as="geometry" />
         </mxCell>
         <mxCell id="meth_212" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ transitionTo(next): void" vertex="1">
-          <mxGeometry height="22" width="250" y="124" as="geometry" />
-        </mxCell>
-        <mxCell id="meth_213" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ canAssign(): boolean" vertex="1">
           <mxGeometry height="22" width="250" y="146" as="geometry" />
         </mxCell>
-        <mxCell id="meth_214" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ canFinalize(): boolean" vertex="1">
+        <mxCell id="meth_213" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ canAssign(): boolean" vertex="1">
           <mxGeometry height="22" width="250" y="168" as="geometry" />
+        </mxCell>
+        <mxCell id="meth_214" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ canFinalize(): boolean" vertex="1">
+          <mxGeometry height="22" width="250" y="190" as="geometry" />
         </mxCell>
         <mxCell id="ItemBatchSource" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;Enumeration&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;ItemBatchSource&lt;/b&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="84" width="160" x="1580" y="1100" as="geometry" />
@@ -563,7 +563,7 @@
           <mxGeometry height="22" width="160" y="62" as="geometry" />
         </mxCell>
         <mxCell id="ItemBatchStatus" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;Enumeration&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;ItemBatchStatus&lt;/b&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="260" width="170" x="1810" y="820" as="geometry" />
+          <mxGeometry height="282" width="170" x="1810" y="820" as="geometry" />
         </mxCell>
         <mxCell id="attr_217" parent="ItemBatchStatus" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="GENERATING" vertex="1">
           <mxGeometry height="22" width="170" y="40" as="geometry" />
@@ -595,8 +595,11 @@
         <mxCell id="attr_226" parent="ItemBatchStatus" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="PARTIAL" vertex="1">
           <mxGeometry height="22" width="170" y="238" as="geometry" />
         </mxCell>
+        <mxCell id="new_batch_partial_0" parent="ItemBatchStatus" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="PARTIALLY_IMPORTED" vertex="1">
+          <mxGeometry height="22" width="170" y="260" as="geometry" />
+        </mxCell>
         <mxCell id="ItemReviewEvent" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b&gt;ItemReviewEvent&lt;/b&gt;" vertex="1">
-          <mxGeometry height="160" width="180" x="1180" y="1080" as="geometry" />
+          <mxGeometry height="182" width="180" x="1180" y="1080" as="geometry" />
         </mxCell>
         <mxCell id="attr_252" parent="ItemReviewEvent" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- id: UUID" vertex="1">
           <mxGeometry height="22" width="180" y="28" as="geometry" />
@@ -616,8 +619,11 @@
         <mxCell id="attr_257" parent="ItemReviewEvent" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- createdAt: DateTime" vertex="1">
           <mxGeometry height="22" width="180" y="138" as="geometry" />
         </mxCell>
+        <mxCell id="new_event_details_0" parent="ItemReviewEvent" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- details: Json {nullable}" vertex="1">
+          <mxGeometry height="22" width="180" y="160" as="geometry" />
+        </mxCell>
         <mxCell id="ReviewAction" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;Enumeration&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;ReviewAction&lt;/b&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="238" width="160" x="1260" y="795" as="geometry" />
+          <mxGeometry height="260" width="160" x="1260" y="795" as="geometry" />
         </mxCell>
         <mxCell id="attr_258" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="APPROVE" vertex="1">
           <mxGeometry height="22" width="160" y="40" as="geometry" />
@@ -642,6 +648,9 @@
         </mxCell>
         <mxCell id="attr_267" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="ACCEPT_FLAG" vertex="1">
           <mxGeometry height="22" width="160" y="216" as="geometry" />
+        </mxCell>
+        <mxCell id="new_update_due_0" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="UPDATE_DUE_DATE" vertex="1">
+          <mxGeometry height="22" width="160" y="238" as="geometry" />
         </mxCell>
         <mxCell id="attr_ASSIGN_p1" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="ASSIGN" vertex="1">
           <mxGeometry height="22" width="160" y="172" as="geometry" />
@@ -1582,7 +1591,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="Item" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b&gt;Item&lt;/b&gt;" vertex="1">
-          <mxGeometry height="388" width="310" x="60" y="240" as="geometry" />
+          <mxGeometry height="366" width="310" x="60" y="240" as="geometry" />
         </mxCell>
         <mxCell id="attr_1" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- id: UUID" vertex="1">
           <mxGeometry height="22" width="310" y="28" as="geometry" />
@@ -1615,13 +1624,13 @@
           <mxGeometry height="22" width="310" y="226" as="geometry" />
         </mxCell>
         <mxCell id="sep_19" parent="Item" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" value="" vertex="1">
-          <mxGeometry height="8" width="310" y="336" as="geometry" />
+          <mxGeometry height="8" width="310" y="314" as="geometry" />
         </mxCell>
         <mxCell id="meth_20" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ transitionTo(next: ItemStatus): void" vertex="1">
-          <mxGeometry height="22" width="310" y="344" as="geometry" />
+          <mxGeometry height="22" width="310" y="322" as="geometry" />
         </mxCell>
-        <mxCell id="attr_reviewerId_p3" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- reviewerId: UUID {nullable}" vertex="1"><mxGeometry as="geometry" height="22" width="310" y="248" /></mxCell><mxCell id="attr_confirmerId_p3" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- confirmerId: UUID {nullable}" vertex="1"><mxGeometry as="geometry" height="22" width="310" y="270" /></mxCell><mxCell id="attr_firstReview_p3" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- firstReview: FirstReviewDetail {nullable}" vertex="1"><mxGeometry as="geometry" height="22" width="310" y="292" /></mxCell><mxCell id="attr_secondReview_p3" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- secondReview: SecondReviewDetail {nullable}" vertex="1"><mxGeometry as="geometry" height="22" width="310" y="314" /></mxCell><mxCell id="meth_isOverdue_p3" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ isOverdue(round: int, at: DateTime): boolean" vertex="1">
-          <mxGeometry height="22" width="310" y="366" as="geometry" />
+        <mxCell id="attr_reviewerId_p3" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- reviewerId: UUID {nullable}" vertex="1"><mxGeometry as="geometry" height="22" width="310" y="248" /></mxCell><mxCell id="attr_firstReview_p3" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- firstReview: FirstReviewDetail {nullable}" vertex="1"><mxGeometry as="geometry" height="22" width="310" y="270" /></mxCell><mxCell id="attr_secondReview_p3" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- secondReview: SecondReviewDetail {nullable}" vertex="1"><mxGeometry as="geometry" height="22" width="310" y="292" /></mxCell><mxCell id="meth_isOverdue_p3" parent="Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ isOverdue(round: int, at: DateTime): boolean" vertex="1">
+          <mxGeometry height="22" width="310" y="344" as="geometry" />
         </mxCell>
         <mxCell id="ItemStatus" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;Enumeration&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;ItemStatus&lt;/b&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="174.0" width="180" x="60" y="60" as="geometry" />
@@ -1699,7 +1708,7 @@
           <mxGeometry height="22" width="140" y="84.0" as="geometry" />
         </mxCell>
         <mxCell id="ItemBatch" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b&gt;ItemBatch&lt;/b&gt;" vertex="1">
-          <mxGeometry height="190" width="290" x="60" y="780" as="geometry" />
+          <mxGeometry height="212" width="290" x="60" y="780" as="geometry" />
         </mxCell>
         <mxCell id="attr_48" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- id: UUID" vertex="1">
           <mxGeometry height="22" width="290" y="28" as="geometry" />
@@ -1713,17 +1722,20 @@
         <mxCell id="attr_51" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- status: ItemBatchStatus" vertex="1">
           <mxGeometry height="22" width="290" y="94" as="geometry" />
         </mxCell>
+        <mxCell id="new_batch_confirmer_2" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- confirmerId: UUID {nullable}" vertex="1">
+          <mxGeometry height="22" width="290" y="116" as="geometry" />
+        </mxCell>
         <mxCell id="sep_57" parent="ItemBatch" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#000000;" value="" vertex="1">
-          <mxGeometry height="8" width="290" y="116" as="geometry" />
+          <mxGeometry height="8" width="290" y="138" as="geometry" />
         </mxCell>
         <mxCell id="meth_58" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ transitionTo(next): void" vertex="1">
-          <mxGeometry height="22" width="290" y="124" as="geometry" />
-        </mxCell>
-        <mxCell id="meth_59" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ canAssign(): boolean" vertex="1">
           <mxGeometry height="22" width="290" y="146" as="geometry" />
         </mxCell>
-        <mxCell id="meth_60" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ canFinalize(): boolean" vertex="1">
+        <mxCell id="meth_59" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ canAssign(): boolean" vertex="1">
           <mxGeometry height="22" width="290" y="168" as="geometry" />
+        </mxCell>
+        <mxCell id="meth_60" parent="ItemBatch" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ canFinalize(): boolean" vertex="1">
+          <mxGeometry height="22" width="290" y="190" as="geometry" />
         </mxCell>
         <mxCell id="ItemBatchSource" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;Enumeration&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;ItemBatchSource&lt;/b&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="84.0" width="180" x="400" y="780" as="geometry" />
@@ -1735,7 +1747,7 @@
           <mxGeometry height="22" width="180" y="62.0" as="geometry" />
         </mxCell>
         <mxCell id="ItemBatchStatus" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;Enumeration&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;ItemBatchStatus&lt;/b&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="260.0" width="190" x="620" y="780" as="geometry" />
+          <mxGeometry height="282" width="190" x="620" y="780" as="geometry" />
         </mxCell>
         <mxCell id="attr_63" parent="ItemBatchStatus" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="GENERATING" vertex="1">
           <mxGeometry height="22" width="190" y="40.0" as="geometry" />
@@ -1767,8 +1779,11 @@
         <mxCell id="attr_72" parent="ItemBatchStatus" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="PARTIAL" vertex="1">
           <mxGeometry height="22" width="190" y="238.0" as="geometry" />
         </mxCell>
+        <mxCell id="new_batch_partial_2" parent="ItemBatchStatus" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="PARTIALLY_IMPORTED" vertex="1">
+          <mxGeometry height="22" width="190" y="260" as="geometry" />
+        </mxCell>
         <mxCell id="ItemReviewEvent" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b&gt;ItemReviewEvent&lt;/b&gt;" vertex="1">
-          <mxGeometry height="160" width="250" x="360" y="1340" as="geometry" />
+          <mxGeometry height="182" width="250" x="360" y="1340" as="geometry" />
         </mxCell>
         <mxCell id="attr_98" parent="ItemReviewEvent" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- id: UUID" vertex="1">
           <mxGeometry height="22" width="250" y="28" as="geometry" />
@@ -1787,6 +1802,9 @@
         </mxCell>
         <mxCell id="attr_103" parent="ItemReviewEvent" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- createdAt: DateTime" vertex="1">
           <mxGeometry height="22" width="250" y="138" as="geometry" />
+        </mxCell>
+        <mxCell id="new_event_details_2" parent="ItemReviewEvent" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="- details: Json {nullable}" vertex="1">
+          <mxGeometry height="22" width="250" y="160" as="geometry" />
         </mxCell>
         <mxCell id="FirstReviewDetail" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;DataType&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;FirstReviewDetail&lt;/b&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="150" width="300" x="-420" y="240" as="geometry" />
@@ -1822,7 +1840,7 @@
           <mxGeometry height="22" width="300" y="106" as="geometry" />
         </mxCell>
         <mxCell id="ReviewAction" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;" value="&lt;b style=&quot;font-style: normal;&quot;&gt;&amp;lt;&amp;lt;Enumeration&amp;gt;&amp;gt;&lt;/b&gt;&lt;div&gt;&lt;b style=&quot;font-style: normal;&quot;&gt;ReviewAction&lt;/b&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="238.0" width="180" x="660" y="1240" as="geometry" />
+          <mxGeometry height="260" width="180" x="660" y="1240" as="geometry" />
         </mxCell>
         <mxCell id="attr_104" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="APPROVE" vertex="1">
           <mxGeometry height="22" width="180" y="40.0" as="geometry" />
@@ -1847,6 +1865,9 @@
         </mxCell>
         <mxCell id="attr_113" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="ACCEPT_FLAG" vertex="1">
           <mxGeometry height="22" width="180" y="216.0" as="geometry" />
+        </mxCell>
+        <mxCell id="new_update_due_2" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="UPDATE_DUE_DATE" vertex="1">
+          <mxGeometry height="22" width="180" y="238" as="geometry" />
         </mxCell>
         <mxCell id="attr_ASSIGN_p3" parent="ReviewAction" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="ASSIGN" vertex="1">
           <mxGeometry height="22" width="180" y="172.0" as="geometry" />
@@ -1911,7 +1932,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="note_scope_d2" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=14;verticalAlign=top;align=left;spacingTop=-6;spacingLeft=8;spacingRight=8;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;" vertex="1" value="&lt;b&gt;Chuẩn quy trình duyệt (OOP &amp;amp; Domain Model):&lt;/b&gt;&lt;br&gt;• Không còn gói duyệt (bỏ ItemPackage, 03/11/2026): Admin giao từng câu cho GV A (reviewerId) và GV B (confirmerId); kết quả hai vòng duyệt nằm trong Item.firstReview / Item.secondReview.&lt;br&gt;• ItemCheckResult ghi kết quả kiểm C1/C2/C3 cho từng Item.&lt;br&gt;• ItemReviewEvent là nhật ký kiểm toán (Item 1 — 0..* ItemReviewEvent).&lt;br&gt;• Vector embedding nằm ở bảng ItemEmbedding riêng, không thuộc Item.&lt;br&gt;• Không vẽ (chỉ có ở schema, là chi tiết lưu trữ): ItemEmbedding; cờ nhắc hạn firstReminderSent / secondReminderSent trên Item.">
+        <mxCell id="note_scope_d2" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=14;verticalAlign=top;align=left;spacingTop=-6;spacingLeft=8;spacingRight=8;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;" vertex="1" value="&lt;b&gt;Review workflow:&lt;/b&gt;&lt;br&gt;Item.reviewerId assigns Teacher A; ItemBatch.confirmerId assigns one Teacher B for the batch.&lt;br&gt;Review details are stored in Item.firstReview and Item.secondReview.&lt;br&gt;ItemReviewEvent can record item or batch events; batch events have nullable itemId.&lt;br&gt;Embeddings and reminder flags are stored separately.">
           <mxGeometry as="geometry" x="920" y="60" width="460" height="170" />
         </mxCell>
         <mxCell id="meth_is_passed_d2" parent="ItemCheckResult" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontColor=#000000;" value="+ isPassed(): boolean" vertex="1">

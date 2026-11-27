@@ -502,7 +502,7 @@
 												<UML:TaggedValue tag="mt" value="Hien thi cac ky (chi ky dang mo moi bat nut Bat dau)()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Chon ky dang mo va Click Bat dau bai thi Placement Test()" xmi.id="EAID_4D77D567_2997_491D_B0DB_C10BFEA4262E" visibility="public" sender="EAID_B27431EC_370A_4C97_B8FB_303D61127127" receiver="EAID_E4B8F447_4EAB_4E90_BA63_126C42F39C60">
+										<UML:Message name="Chon ky; mo /student/exams/[roundId]/take; GET /exam-rounds/:roundId/session/current()" xmi.id="EAID_4D77D567_2997_491D_B0DB_C10BFEA4262E" visibility="public" sender="EAID_B27431EC_370A_4C97_B8FB_303D61127127" receiver="EAID_E4B8F447_4EAB_4E90_BA63_126C42F39C60">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -543,7 +543,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-400;PtEndX=0;PtEndY=-400;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_62A0ED78_7737_4AFA_8BBE_45D89E394DC5"/>
-												<UML:TaggedValue tag="mt" value="Chon ky dang mo va Click Bat dau bai thi Placement Test()"/>
+												<UML:TaggedValue tag="mt" value="Chon ky; mo /student/exams/[roundId]/take; GET /exam-rounds/:roundId/session/current()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="startSession(studentId, examRoundId)" xmi.id="EAID_D615B410_D8CC_4C8C_B228_CA935BB8D930" visibility="public" sender="EAID_E4B8F447_4EAB_4E90_BA63_126C42F39C60" receiver="EAID_F6640576_D6D1_408E_884B_AD8CFB4CA3C6">
@@ -1866,7 +1866,7 @@
 												<UML:TaggedValue tag="mt" value="Tra ve ket qua cuoi (theta, SE, cap CEFR)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Hien thi Hoan thanh bai thi - ket qua()" xmi.id="EAID_C2D7DF83_FF18_44DC_8E69_86260959E177" visibility="public" sender="EAID_E4B8F447_4EAB_4E90_BA63_126C42F39C60" receiver="EAID_B27431EC_370A_4C97_B8FB_303D61127127">
+										<UML:Message name="Hoan thanh; chuyen /student/results/[sessionId]()" xmi.id="EAID_C2D7DF83_FF18_44DC_8E69_86260959E177" visibility="public" sender="EAID_E4B8F447_4EAB_4E90_BA63_126C42F39C60" receiver="EAID_B27431EC_370A_4C97_B8FB_303D61127127">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1907,7 +1907,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1950;PtEndX=0;PtEndY=-1950;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_62A0ED78_7737_4AFA_8BBE_45D89E394DC5"/>
-												<UML:TaggedValue tag="mt" value="Hien thi Hoan thanh bai thi - ket qua()"/>
+												<UML:TaggedValue tag="mt" value="Hoan thanh; chuyen /student/results/[sessionId]()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 									</UML:Interaction.message>

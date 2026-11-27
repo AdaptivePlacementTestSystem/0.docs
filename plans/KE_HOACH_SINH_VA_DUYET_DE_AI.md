@@ -1,5 +1,7 @@
 # Kế hoạch: Admin tạo đề (AI hoặc import file) → AI check → GV A duyệt → GV B confirm → Admin kiểm tra và import
 
+> **Quyết định cập nhật ngày 26/11/2026:** Một B chung cho lô; B thấy ngay từng câu A đã duyệt; xác nhận tất cả giới hạn theo lô. Câu bị loại không giao lại; câu chưa bị loại có thể giao lại theo audit. Cho phép import một phần câu đủ điều kiện. Admin đặt hạn A/B khi giao, email nhắc lúc 08:00 giờ Việt Nam ngày trước hạn. Quá hạn chỉ cảnh báo và để Admin xử lý thủ công. T3/G5 lỗi hoặc chưa cấu hình thì dừng và cho thử lại; dùng LiteLLM, tạm cấu hình ngưỡng T2 0,65/0,85 và T3 0,90. Các ghi chú cũ trái với quyết định này đã bị thay thế.
+
 > **Ngày lập:** 2026-10-14 (Tuần 5). **Phiên bản 5 (viết lại toàn bộ theo luồng mới).** Các bản trước lưu ở `_BACKUP_20261014_KE_HOACH_SINH_VA_DUYET_DE_AI_V1…V4.md`.
 > **Cập nhật 03/11/2026 (họp GVHD):** bỏ khái niệm **gói** (`ItemPackage`, `PackageStatus`, gửi gói, ép gửi gói, DC-42). Giao việc và duyệt theo **từng câu**: mỗi câu có GV A (`reviewer_id`) và GV B (`confirmer_id`), kết quả hai vòng nằm trong `items.first_review`, `items.second_review` (JSON). Bỏ bảng `item_packages`, `item_review_assignments`, `item_batch_assignments`. Chi tiết: `D:\TLCN\20261103_QUYET_DINH_THAY_DOI_THIET_KE_CLASS_DIAGRAM.md`, `design/class/Mo_ta_So_do_Lop_ClassDiagram.md`. Chỗ ghi **⚠ chờ xác nhận** là điểm quyết định 03/11 chưa nói rõ, AI chỉ viết tạm trung lập.
 > **Trạng thái:** ⛔ **CHỜ BẠN DUYỆT.** Chưa sửa SRS, Use Case, Class Diagram, Prisma, Sequence, màn hình. Tên bảng, endpoint, UC, màn hình, tên trạng thái phụ và mọi con số ngưỡng là **đề xuất của AI**; chỉ những dòng ghi nguồn "Bạn" là quyết định của bạn.
@@ -18,18 +20,18 @@
 | DC-30 | **Lọc trùng nhiều tầng, dùng chung** mọi điểm AI check (Mục 4). Chấp nhận tốn API nhưng tiết kiệm nhất có thể. | Bạn | #105 |
 | DC-31 | **Giải thích AI sinh cùng lúc sinh câu hỏi**, lưu bảng `explanations` (xác nhận lại #60/#63). | Đã chốt trước | #105 |
 | DC-32 | Không ai thêm từng câu bằng form (bỏ UCGV03). `ItemSource`: `MANUAL` → `IMPORTED` (tên mới là đề xuất). | Bạn + AI đặt tên | #106 |
-| DC-33 | **B xử lý từng câu: Xác nhận hoặc Loại bỏ** (`REJECTED`, không lưu lý do, #56) **và có nút "Xác nhận tất cả câu còn lại"**. **Không có trả về cho A.** B không sửa nội dung. A được sửa nội dung, đáp án, giải thích. | Bạn | #109, #112 |
+| DC-33 | B xác nhận hoặc loại từng câu, hoặc xác nhận hàng loạt trong lô. Loại bắt buộc comment; B không sửa, không trả về A. A chỉ sửa khi câu DRAFT và lô IN_REVIEW. | Bạn | #109, #112; cập nhật 26/11 |
 | DC-34 | `irt_b` hợp lệ khi lọc: **−4 đến +4** (cấu hình); khác `CLAUDE.md` (−2.5…+1.5) ⇒ sửa `CLAUDE.md`. | Bạn | #107 |
 | DC-35 | **Làm đủ T3 (embedding) và G5 (kiểm đáp án độc lập) từ đầu.** | Bạn | #107 |
 | DC-37 | **Hạn do Admin đặt, tính từ ngày giao**, Admin chỉnh được. Chi tiết Mục 6.3. | Bạn + AI chi tiết | #108 |
-| DC-38 | **Nhắc việc trước hạn 24 giờ.** | Bạn | #108 |
+| DC-38 | Nhắc lúc 08:00 giờ Việt Nam ngày trước hạn. | Bạn | #108; cập nhật 26/11 |
 | DC-39 | **Trạng thái `Item`:** `DRAFT` → `FIRST_APPROVED` → `SECOND_APPROVED` → `FINAL_APPROVED` (thay `APPROVED` cũ); `REJECTED` (người loại); thêm `AI_REJECTED` (máy loại, **tên là đề xuất**). | Bạn + AI thêm `AI_REJECTED` | #109, #112 |
-| DC-40 | **Hai nhóm tách riêng:** nhóm **A** (nhiều GV duyệt) và **B** (**một GV đại diện, như trưởng bộ môn**). B do **Admin chọn khi bấm Giao việc**, B không thuộc nhóm A. *(03/11/2026: nay ghi vào từng câu qua `confirmer_id`; ⚠ chờ xác nhận: B vẫn là một GV chung cho cả lô, hay Admin chọn B khác nhau theo câu.)* | Bạn | #111 |
+| DC-40 | Nhóm A và một GV B chung toàn lô tách riêng; B do Admin chọn và lưu tại `ItemBatch.confirmerId`. | Bạn | #111; cập nhật 26/11 |
 | DC-41 | **Giao việc sau khi AI check xong**, Admin xem kết quả rồi bấm "Giao việc"; hệ thống **chia đều** cho nhóm A (Mục 5). | Bạn | #111 |
 | ~~DC-42~~ | ~~A duyệt xong toàn bộ phần của mình thì gửi một lần, thành một gói riêng cho B.~~ **Bị thay (03/11/2026):** không còn gói; B xử lý từng câu được giao, mỗi vòng có hạn riêng cho từng câu. | Bạn + GVHD | #111 (cũ); họp 03/11/2026 |
-| DC-46 *(số do `DECISIONS_LOG` cấp)* | **Giao việc và duyệt theo từng câu, bỏ gói.** `Item` mang `reviewer_id`, `confirmer_id` (cột khóa ngoại) và `first_review`, `second_review` (JSON). Bỏ `item_packages`, `item_review_assignments`, `item_batch_assignments`; ghi "ai giao, lúc nào" bằng `ItemReviewEvent` `ASSIGN` (một dòng mỗi câu). | Bạn + GVHD | họp 03/11/2026 |
+| DC-46 *(số do `DECISIONS_LOG` cấp)* | Giao và duyệt theo câu: `Item.reviewer_id`, `ItemBatch.confirmer_id`, `first_review`, `second_review`; ghi `ASSIGN` mỗi câu. | Bạn + GVHD | họp 03/11; cập nhật 26/11 |
 | DC-43 | **Câu A loại** ⇒ `REJECTED`, giữ trong lô, Admin xem danh sách và thống kê, không dùng lại. **Câu AI loại** ⇒ `AI_REJECTED`, lưu nội dung và lý do, chỉ Admin xem, không đưa cho GV. | Bạn | #112 |
-| DC-44 | **Admin chỉ import khi cả lô đã confirm xong hoặc quá hạn.** Trước khi import, Admin bấm **Kiểm tra** (AI check lần 3). | Bạn | #112 |
+| DC-44 | Admin kiểm tra C3 rồi import câu đủ điều kiện; có thể import một phần, câu chưa xử lý không được import. | Bạn | #112; cập nhật 26/11 |
 | DC-45 | **Ba điểm AI check, mỗi điểm tối ưu riêng** (Mục 4). **Câu rớt ở lần 3:** lỗi cứng tự `AI_REJECTED`, lỗi mềm Admin quyết. | Bạn **ủy quyền** AI cân nhắc, **chờ bạn xác nhận** | #113 |
 
 **Hệ quả vai trò (sửa DC-18):** GV có thêm **duyệt (A)** và, nếu được Admin chọn, **confirm (B)** các câu được giao. GV **không** import, không tạo lô, không duyệt tùy ý. Admin: tạo lô, import file, giao việc, giao lại, chỉnh hạn, kiểm tra, import cuối; không sửa nội dung câu. *(03/11/2026: không còn "ép gửi gói".)*
@@ -46,7 +48,7 @@ Admin tạo lô (AI sinh) ──┐
                          ├─► [C1/C2: AI check] ──┬─ qua ─► DRAFT ─► (Admin Giao việc) ─► A duyệt ─► FIRST_APPROVED ─► B confirm ─► SECOND_APPROVED
 Admin import file ───────┘                       └─ rớt ─► AI_REJECTED                          └─ A loại ─► REJECTED              └─ B loại ─► REJECTED
 
-SECOND_APPROVED ─(cả lô xong hoặc quá hạn)─► Admin bấm Kiểm tra (C3) ─┬─ qua ─────────────► Admin Import ─► FINAL_APPROVED
+SECOND_APPROVED ─► Admin bấm Kiểm tra (C3) ───────────────────────────┬─ qua ─────────────► Admin Import ─► FINAL_APPROVED
                                                                       ├─ lỗi cứng ───────► AI_REJECTED
                                                                       └─ lỗi mềm ────────► Admin quyết: Import hoặc Loại (REJECTED)
 ```
@@ -57,15 +59,15 @@ Một chiều, **không có đường quay lại**. Chỉ `FINAL_APPROVED` đư�
 | Trạng thái | Ý nghĩa | Ai/cái gì chuyển |
 |---|---|---|
 | `DRAFT` (đã có) | Đã qua AI check, chờ Admin giao việc, hoặc đã giao và chờ A duyệt | Hệ thống (sau C1/C2) |
-| `FIRST_APPROVED` (**thêm**) | A đã duyệt câu; chờ B xác nhận (⚠ chờ xác nhận: B thấy câu ngay khi A duyệt câu đó, hay phải chờ A xong hết các câu được giao) | A bấm Duyệt |
+| `FIRST_APPROVED` (**thêm**) | A đã duyệt câu; B thấy ngay và có thể xác nhận | A bấm Duyệt |
 | `SECOND_APPROVED` (**thêm**) | B đã confirm; chờ Admin kiểm tra và import | B bấm Xác nhận (từng câu hoặc "tất cả còn lại") |
 | `FINAL_APPROVED` (**đổi tên từ `APPROVED`**) | Đã vào ngân hàng, dùng cho CAT, cấm sửa (#64) | Admin bấm Import |
-| `REJECTED` (đã có) | **Người** loại: A, B hoặc Admin lúc quyết lỗi mềm. Không lưu lý do (#56) | A, B, Admin |
+| `REJECTED` (đã có) | Người loại: A, B hoặc Admin lúc quyết lỗi mềm; bắt buộc comment, không giao lại | A, B, Admin |
 | `AI_REJECTED` (**thêm, đề xuất**) | **Máy** loại ở C1, C2 hoặc C3; lưu mã lý do (lý do của hệ thống, khác với #56 vốn nói về lý do của người) | Hệ thống |
 | ~~`PENDING_REVIEW`~~, ~~`APPROVED`~~ | **Bỏ** | — |
 
 ### 2.3. Trạng thái của lô (`item_batches.status`, đề xuất)
-`GENERATING|IMPORTING` → `CHECKING` → `READY_TO_ASSIGN` → `IN_REVIEW` → `READY_TO_FINALIZE` (mọi câu đã xong vòng 2, tức `SECOND_APPROVED` hoặc `REJECTED`, **hoặc** các câu còn lại đã quá hạn) → `FINAL_CHECKED` (sau khi Admin bấm Kiểm tra) → `DONE`. Lỗi: `FAILED`; hết ngân sách: `PARTIAL`.
+`GENERATING|IMPORTING` → `CHECKING` → `READY_TO_ASSIGN` → `IN_REVIEW` → `READY_TO_FINALIZE` → `FINAL_CHECKED` → `PARTIALLY_IMPORTED` nếu nhập một phần, hoặc `DONE` khi mọi câu kết thúc. Lỗi: `FAILED`; hết ngân sách sinh: `PARTIAL`. Quá hạn không tự hoàn tất câu.
 
 ---
 
@@ -153,14 +155,14 @@ Chọn **O2** vì: (1) giữ luồng một chiều như bạn đã chốt ở #1
 
 **Các bước Admin:**
 1. Bấm **Giao việc**. Chọn **nhóm A** (một hoặc nhiều GV, khuyên ≥ 2 để chia việc), chọn **GV B** (một người, **không được nằm trong nhóm A**, vi phạm ⇒ `409`).
-2. Đặt hạn: **`reviewDays`** (hạn vòng 1 cho A, tính từ ngày giao) và **`confirmDays`** (hạn vòng 2 cho B). Mỗi số ≥ 1. Hệ thống tính ra `first_review.dueAt` và `second_review.dueAt` cho **từng câu**; hai số này chỉ là đầu vào lúc giao, không còn lưu ở bảng riêng. ⚠ chờ xác nhận: `confirmDays` tính từ ngày giao (vì `second_review.dueAt` có ngay lúc giao) hay từ lúc A duyệt câu đó.
+2. Đặt hạn cho hai vòng tại thời điểm giao: `first_review.dueAt` và `second_review.dueAt`; hạn B không tính lại khi A duyệt.
 3. Hệ thống hiện **xem trước phân bổ** (bảng GV – số câu, theo từng kỹ năng/CEFR); Admin bấm **Xác nhận giao**.
 
 **Cách chia đều (nhóm A):** sắp xếp các câu `DRAFT` theo (`skill`, `cefr`, thứ tự sinh); câu thứ i giao cho A thứ `i mod M` (M = số GV A). Nhờ sắp theo (`skill`, `cefr`) trước, mỗi GV nhận **mức trộn đều** các loại câu. Số câu mỗi GV chênh nhau tối đa 1 (100 câu / 5 GV = 20; 103 câu: 3 người 21, 2 người 20).
 
-**Sau khi giao:** ghi vào từng câu `reviewer_id`, `confirmer_id`, `first_review.dueAt`, `second_review.dueAt`; ghi `ItemReviewEvent` `ASSIGN` (một dòng mỗi câu, `actorId` = Admin); lô `IN_REVIEW`; A nhận thông báo (trong ứng dụng, email tùy chọn) "Bạn có x câu cần duyệt, hạn dd/mm"; đặt lịch nhắc (Mục 6.3).
+**Sau khi giao:** ghi `reviewer_id` và hai hạn trên từng câu, `confirmer_id` chung trên lô, `ASSIGN` một dòng mỗi câu; lô `IN_REVIEW`; gửi email giao việc và đặt lịch nhắc.
 
-**Giao lại:** Admin chuyển các câu chưa xử lý của một A cho A khác (hoặc đổi B của câu chưa xử lý ở vòng 2), với ràng buộc B ∉ nhóm A; hạn tính lại từ ngày giao lại; ghi `ItemReviewEvent` `REASSIGN` (một dòng mỗi câu). ⚠ chờ xác nhận: Admin có chỉnh tay giao từng câu sau khi hệ thống chia đều hay không (quyết định 03/11 nói "Admin phân công trực tiếp từng câu"; thuật toán chia đều ở trên giữ làm mặc định).
+**Giao lại:** Admin chuyển các câu `DRAFT` của một A trong lô sang A khác; B chung và các kết quả đã duyệt giữ nguyên. Ghi `REASSIGN` mỗi câu và gửi thông báo cho A mới; hạn giữ nguyên, Admin dùng chức năng đổi hạn riêng khi cần.
 
 ---
 
@@ -168,29 +170,28 @@ Chọn **O2** vì: (1) giữ luồng một chiều như bạn đã chốt ở #1
 
 ### 6.1. GV A duyệt
 1. A mở "Hộp việc → Cần duyệt": **chỉ thấy câu giao cho mình**, kèm cờ mềm, giải thích, hạn còn lại.
-2. Với mỗi câu A được **sửa** nội dung/đáp án/giải thích, rồi chọn **Duyệt** (`FIRST_APPROVED`) hoặc **Từ chối** (`REJECTED`, không lưu lý do).
+2. A sửa câu `DRAFT` của mình khi lô `IN_REVIEW`, rồi chọn **Duyệt** (`FIRST_APPROVED`) hoặc **Từ chối** (`REJECTED`, bắt buộc comment).
 3. Sau mỗi lần sửa, hệ thống chạy lại **luật cứng + T1–T2** trên bản sửa (rẻ); hỏng/trùng ⇒ chặn Duyệt, báo lý do.
 4. Kết quả vòng 1 ghi vào `first_review` của câu (`action`, `reviewedAt`, `comment`, `originalSnapshot` chụp lần sửa đầu, ghi một lần). **Không còn bước "Gửi cho B"**.
-5. **Lệch tài liệu cần nhóm xác nhận:** SRS BR-25 và Mục 9b.13 hiện ghi A không sửa lại câu đã Duyệt hoặc Từ chối; bản kế hoạch trước đây để mở sau khi bỏ gói. Chưa được xem khác biệt này là một quyết định mới.
+5. Câu đã duyệt hoặc từ chối không còn cho A sửa; câu bị loại không giao lại.
 
 ### 6.2. GV B confirm
-1. B mở "Hộp việc → Cần confirm": thấy **danh sách câu được giao cho mình** (câu `FIRST_APPROVED`, ⚠ chờ xác nhận về thời điểm như Mục 2.2), chỉ đọc. Mỗi câu hiện cờ và dấu **"A đã sửa"** kèm bản gốc so với bản sửa.
-2. B xử lý **từng câu: Xác nhận** (`SECOND_APPROVED`) **hoặc Loại bỏ** (`REJECTED`), hoặc bấm **"Xác nhận tất cả câu còn lại"** (xác nhận hết câu chưa quyết được giao cho B; ghi log hành động hàng loạt `CONFIRM_ALL`; ⚠ chờ xác nhận phạm vi: theo lô hay theo toàn bộ hộp việc).
+1. B thấy câu `FIRST_APPROVED` của lô mình ngay sau khi A duyệt, chỉ đọc; có cờ và bản gốc nếu A đã sửa.
+2. B xác nhận (`SECOND_APPROVED`) hoặc loại (`REJECTED`, bắt buộc comment); `CONFIRM_ALL` chỉ áp dụng câu `FIRST_APPROVED` trong lô `IN_REVIEW` của B và ghi một event cấp lô với danh sách ID và số lượng.
 3. B **không sửa**, **không trả về** A (DC-33). B ≠ A đã bảo đảm lúc giao.
 4. Kết quả vòng 2 ghi vào `second_review` (`action` `CONFIRM`/`REMOVE`, `confirmedAt`, `comment`).
 
 ### 6.3. Hạn và nhắc
-- **A:** `first_review.dueAt` = cuối ngày (ngày giao + `reviewDays`). **B:** `second_review.dueAt` của từng câu (⚠ chờ xác nhận mốc tính, xem Mục 5 và Q-3). Giờ chốt 23:59:59 giờ Việt Nam (cấu hình) — **đề xuất, chờ bạn xác nhận**.
-- **Admin chỉnh hạn** (cả `reviewDays`, `confirmDays`; chỉ áp dụng cho câu chưa xử lý ở vòng tương ứng) ⇒ tính lại `dueAt` của các câu đó, hủy và tạo lại lịch nhắc. ⚠ chờ xác nhận: `ReviewAction` đã bỏ `EXTEND`, chưa quy định thao tác chỉnh hạn được ghi kiểm toán bằng giá trị nào.
-- **Nhắc:** job trễ BullMQ chạy lúc `due_at − 24 giờ`, nếu nhóm (lô, bước, GV) còn câu chưa xong thì gửi **một** thông báo gộp (trong ứng dụng + email `MailPort`); hạn còn < 24 giờ lúc giao/chỉnh ⇒ nhắc ngay một lần (đề xuất); kèm đối chiếu lazy khi mở hộp việc phòng mất job. Cờ "đã nhắc" lưu ở cột `items.first_reminder_sent` / `items.second_reminder_sent` (cột riêng, không nằm trong JSON kết quả duyệt).
-- **Quá hạn:** chỉ hiển thị "quá hạn" cho Admin và GV (tính lazy), **không tự đổi trạng thái hay tự giao lại**. Admin chọn: chỉnh hạn, giao lại, hoặc loại câu (đề xuất, Q-2). **Không còn "ép gửi gói"** (đã bỏ cùng gói).
+- Hạn A/B được xác định tại thời điểm giao. Nhắc bằng email lúc 08:00 giờ Việt Nam ngày trước hạn.
+- Admin đổi hạn cho việc chưa xử lý phải nhập lý do; ghi một audit `UPDATE_DUE_DATE` cấp lô với hạn cũ/mới, actor, lý do và số câu; đặt lại lịch nhắc.
+- Quá hạn chỉ cảnh báo để Admin xử lý thủ công; không tự loại, import hoặc giao lại.
 
 ### 6.4. Sau khi B confirm
 1. Câu `SECOND_APPROVED` nằm chờ trong lô. **Chưa** vào ngân hàng.
-2. Khi **mọi câu đã xong vòng 2 (`SECOND_APPROVED` hoặc `REJECTED`) hoặc các câu còn lại đã quá hạn** ⇒ lô `READY_TO_FINALIZE`. Admin thấy thống kê: bao nhiêu câu `SECOND_APPROVED`, `REJECTED` bởi A/B, `AI_REJECTED`, chưa xử lý.
+2. Khi các câu đang duyệt đã được xử lý, lô sẵn sàng kiểm tra cuối; quá hạn không tự hoàn tất câu.
 3. Admin bấm **Kiểm tra** (C3, Mục 4.3), đọc báo cáo, xử lý lỗi mềm.
 4. Admin bấm **Import** ⇒ các câu qua (và lỗi mềm Admin chấp nhận) thành `FINAL_APPROVED`, ghi `approved_by`, `approved_at`; câu có hiệu lực cho CAT, `calibrated=false`.
-5. Câu **chưa xử lý** khi quá hạn (còn `DRAFT` hoặc `FIRST_APPROVED` chưa được B xử lý) **không** được import; nằm lại trong lô, Admin giao lại với hạn mới hoặc loại. Lô `DONE` khi mọi câu ở trạng thái cuối (`FINAL_APPROVED`, `REJECTED`, `AI_REJECTED`).
+5. Câu chưa xử lý không được import; có thể import một phần câu đủ điều kiện với lô `PARTIALLY_IMPORTED`. Chỉ chuyển `DONE` khi mọi câu ở trạng thái cuối.
 
 ---
 
@@ -199,7 +200,7 @@ Chọn **O2** vì: (1) giữ luồng một chiều như bạn đã chốt ở #1
 | Loại bởi | Trạng thái | Lưu gì | Ai xem | Dùng lại? |
 |---|---|---|---|---|
 | Máy ở C1, C2, C3 | `AI_REJECTED` | Nội dung + **mã lý do** + câu bị nghi trùng (nếu có) | Chỉ Admin (tab "AI đã loại") | Không; Admin dùng để chỉnh ngưỡng. Dọn sau N ngày (cấu hình) |
-| GV A hoặc GV B | `REJECTED` | Nội dung; **không lưu lý do** (#56) | Admin (danh sách và thống kê theo GV) | Không; Admin muốn bù thì tạo lô mới |
+| GV A hoặc GV B | `REJECTED` | Nội dung và comment bắt buộc | Admin (danh sách và thống kê theo GV) | Không; Admin muốn bù thì tạo lô mới |
 | Admin (lỗi mềm ở C3) | `REJECTED` | Như trên | Admin | Không |
 
 Câu `AI_REJECTED` **không** được đưa cho GV. Thống kê bắt buộc: tỷ lệ loại theo tầng AI, theo A, theo B, để hiệu chỉnh.
@@ -219,7 +220,7 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 **L-1. Tạo lô bằng AI (UCADM11).** Ad nhập skill, CEFR, topic, N ⇒ H kiểm giới hạn, tạo lô (`GENERATING`), đẩy job ⇒ Worker: G1 → G2 → **C1** → G6 → G7 ⇒ lô `READY_TO_ASSIGN` (hoặc `PARTIAL`/`FAILED`) ⇒ thông báo Ad. Mỗi lời gọi ghi mô hình, token.
 **L-2. Tạo lô bằng import file (UCADM12, đề xuất).** Ad tải một hoặc nhiều file vào lưới (C2 tầng 1–4 chạy ngay) ⇒ xem lưới/popup ⇒ **Lưu** ⇒ H tạo lô `IMPORTED`, chạy C2 tầng 5 ⇒ `READY_TO_ASSIGN`.
 **L-3. Xem kết quả và giao việc (UCADM13, đề xuất).** Ad xem số câu qua, danh sách AI đã loại, cờ ⇒ **Giao việc** (chọn A, B, `reviewDays`, `confirmDays`) ⇒ xem trước phân bổ ⇒ xác nhận ⇒ H ghi người duyệt/xác nhận và hạn vào từng câu, ghi `ASSIGN`, lô `IN_REVIEW`, thông báo và đặt lịch nhắc.
-**L-4. A duyệt câu (UCGV14).** A sửa/duyệt/từ chối từng câu (H kiểm lại cứng + T1–T2 sau sửa) ⇒ ghi `first_review`; câu `FIRST_APPROVED` chờ B xác nhận. Không có bước gửi gói. ⚠ Thời điểm hiển thị câu cho B vẫn chờ xác nhận (Mục 2.2).
+**L-4. A duyệt câu (UCGV14).** A sửa/duyệt/từ chối từng câu (H kiểm lại cứng + T1–T2 sau sửa) ⇒ ghi `first_review`; B thấy câu `FIRST_APPROVED` ngay sau khi A duyệt.
 **L-5. B confirm (UCGV15).** B mở danh sách câu được giao ⇒ xử lý từng câu hoặc "xác nhận tất cả còn lại" ⇒ ghi `second_review`.
 **L-6. Theo dõi, chỉnh hạn, giao lại.** Ad xem tiến độ theo GV/câu, chỉnh hạn, giao lại.
 **L-7. Kiểm tra và import (UCADM14, đề xuất).** Lô `READY_TO_FINALIZE` ⇒ Ad bấm **Kiểm tra** (C3) ⇒ xem báo cáo ⇒ quyết lỗi mềm ⇒ **Import** (H chạy lại T1–T2 nhanh) ⇒ `FINAL_APPROVED`.
@@ -240,10 +241,10 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 
 **Schema:**
 - `ItemStatus`: `DRAFT`, `FIRST_APPROVED`, `SECOND_APPROVED`, `FINAL_APPROVED`, `REJECTED`, `AI_REJECTED`; bỏ `PENDING_REVIEW`, `APPROVED`. `ItemSource`: `AI_GENERATED`, `IMPORTED`.
-- `item_batches` (id, source, createdBy, skill, cefrTarget, topicTag, requestedCount, `status`, createdAt). **Không còn** `item_batch_assignments`, `item_review_assignments`, `item_packages` (bỏ 03/11/2026).
-- `items`: thêm `reviewer_id`, `confirmer_id` (UUID, khóa ngoại tới `users`, `Restrict`, nullable cho tới khi giao), `first_review` (JSON, kiểu `FirstReviewDetail`: `dueAt`, `action`, `reviewedAt`, `comment`, `originalSnapshot`), `second_review` (JSON, kiểu `SecondReviewDetail`: `dueAt`, `action`, `confirmedAt`, `comment`), `first_reminder_sent`, `second_reminder_sent` (boolean, cờ kỹ thuật cho job nhắc hạn); chỉ mục `(reviewer_id, status)`, `(confirmer_id, status)`. Bỏ `items.package_id` và cột `original_snapshot` riêng (đã gom vào `first_review`). Tham chiếu: `design/class/schema.prisma`.
+- `item_batches` có `confirmer_id` cho một GV B chung và `status` gồm `PARTIALLY_IMPORTED`.
+- `items` có `reviewer_id` cho GV A, `first_review`, `second_review` và cờ nhắc từng vòng. Cột `items.confirmer_id` cũ chỉ giữ tạm để tương thích, không là nguồn sự thật. Tham chiếu: `design/class/schema.prisma`.
 - `items.content_hash`, `items.batch_id`, `item_embeddings` (itemId, vector `Float[]`, model, createdAt), `item_check_results` (itemId, checkpoint `C1|C2|C3`, content_hash, level `PASS|SOFT|HARD`, reason_codes, checkedAt).
-- `item_review_events` (tùy chọn, truy vết): `APPROVE|REJECT|CONFIRM|REMOVE|CONFIRM_ALL|IMPORT|ASSIGN|REASSIGN|ACCEPT_FLAG`. `ASSIGN`/`REASSIGN` ghi một dòng cho mỗi câu; `package_id` đã bỏ.
+- `item_review_events`: `APPROVE|REJECT|CONFIRM|REMOVE|CONFIRM_ALL|IMPORT|ASSIGN|REASSIGN|ACCEPT_FLAG|UPDATE_DUE_DATE`; `CONFIRM_ALL` và `UPDATE_DUE_DATE` là event cấp lô có `item_id = NULL` và `details`.
 - Chỉ mục: băm chuẩn hóa (T1), GIN `pg_trgm` (T2). `CREATE EXTENSION pg_trgm`.
 
 **API:**
@@ -251,12 +252,12 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 | Nhóm | Endpoint | Role |
 |---|---|---|
 | Lô | `POST /item-batches` (AI), `POST /item-imports/upload`, `GET`/`DELETE /item-imports/grid[/:rowKey]`, `POST /item-imports/save`, `GET /item-batches[/:id]`, `GET /item-batches/:id/ai-rejected` | Admin |
-| Giao việc | `POST /item-batches/:id/assign` `{reviewerIds, confirmerId, reviewDays, confirmDays}`, `GET /item-batches/:id/assign-preview`, `POST /item-batches/:id/reassign`, `PATCH /item-batches/:id/deadlines` | Admin |
-| Kiểm tra / import | `POST /item-batches/:id/final-check`, `GET /item-batches/:id/final-check`, `POST /item-batches/:id/import`, `POST /items/:id/decision` (chấp nhận hoặc loại lỗi mềm) | Admin |
-| Chặng A | `GET /me/review-tasks`, `PATCH /items/:id`, `POST /items/:id/approve`, `POST /items/:id/reject` | GV A |
-| Chặng B | `GET /me/confirm-tasks`, `POST /items/:id/confirm`, `POST /items/:id/remove`, `POST /item-batches/:id/confirm-all` | GV B |
+| Giao việc | `POST /item-batches/:id/assign`, `POST /item-batches/:id/reassign` (`fromAssigneeId`, `toAssigneeId`), `PATCH /item-batches/:id/deadlines` (bắt buộc `reason`) | Admin |
+| Kiểm tra / import | `POST /item-batches/:id/final-check`, `POST /item-batches/:id/import`, `POST /item-batches/:id/items/:itemId/flag-decision` | Admin |
+| Chặng A | `GET /teacher-review`, `PATCH /teacher-review/:id`, `POST /teacher-review/:id/decision` | GV A |
+| Chặng B | `GET /teacher-review`, `POST /teacher-review/:id/decision`, `POST /teacher-review/:batchId/confirm-all` | GV B |
 
-*(03/11/2026: bỏ `POST /item-packages/mine/send`, `POST /item-packages/:id/force-send`; `GET /me/confirm-packages` và `POST /item-packages/:id/confirm-all` đổi tên thành `GET /me/confirm-tasks` và `POST /item-batches/:id/confirm-all`. ⚠ chờ xác nhận: tên route và phạm vi `confirm-all` là đề xuất tạm, chưa được duyệt.)*
+Các route review nêu trên phản ánh mã hiện tại; spec OpenAPI còn cần đồng bộ.
 
 **Mã lỗi:** `NOT_ASSIGNED` (403), `CONFIRMER_IN_REVIEW_GROUP` (409), `FINAL_CHECK_REQUIRED` (409), `FINAL_CHECK_STALE` (409), `BATCH_NOT_READY_TO_FINALIZE` (409), `DUPLICATE_AFTER_EDIT` (422), `INVALID_AFTER_EDIT` (422), `BATCH_BUDGET_EXCEEDED` (409), `IMPORT_GRID_EXPIRED` (410).
 
@@ -279,7 +280,7 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 |---|---|---|
 | Q-1 | **Xác nhận O2** cho câu rớt C3 (Mục 4.4): lỗi cứng tự `AI_REJECTED`, lỗi mềm Admin quyết | O2 |
 | Q-2 | Quá hạn: câu chưa xử lý nằm lại lô và Admin xử lý thủ công (giao lại, chỉnh hạn, loại; không còn ép gửi gói) | Đúng như Mục 6.3, 6.4 |
-| Q-3 | Không còn gói nên mốc "ngày gửi gói" mất nghĩa. Hạn vòng 2 của B tính từ **ngày Admin giao việc** hay từ **lúc A duyệt câu đó**? | ⚠ chờ xác nhận (cần chọn một) |
+| Q-3 | Mốc tính hạn vòng 2 | Đã chốt: thời điểm Admin giao việc |
 | Q-4 | Giờ chốt "ngày hạn" 23:59:59 giờ Việt Nam; nhắc ngay nếu hạn < 24 giờ lúc giao | Như đề xuất |
 | Q-5 | Giới hạn: số GV tối thiểu nhóm A (1 hay ≥2); Admin có bắt buộc chọn B trước khi giao không | A ≥ 1; B bắt buộc |
 | Q-6 | Tên trạng thái phụ `AI_REJECTED` và `IMPORTED` (đổi từ `MANUAL`) | Như đề xuất |
@@ -301,7 +302,7 @@ Ký hiệu: **A**=GV duyệt, **B**=GV confirm, **Ad**=Admin, **H**=hệ thống
 - **Import:** chỉ khi lô `READY_TO_FINALIZE` (mọi câu đã xong vòng 2 hoặc các câu còn lại đã quá hạn) và C3 còn hiệu lực; câu chưa xử lý không được import; hai Admin import cùng lúc không tạo trùng.
 - **Lọc trùng:** giống hệt (T1), gần giống chữ (T2), diễn đạt lại (T3 cảnh báo), trùng giữa hai file trong lưới, trùng với câu đang chờ ở lô khác.
 - **Trạng thái:** chỉ `FINAL_APPROVED` được CAT chọn; `FINAL_APPROVED` không sửa; chuyển trạng thái chỉ đi một chiều.
-- **Hạn và nhắc:** hạn = ngày giao + số ngày (mốc của vòng 2: ⚠ chờ xác nhận, Q-3); Admin đổi số ngày ⇒ hạn việc chưa xử lý đổi theo; nhắc đúng 24 giờ trước hạn, mỗi nhóm một lần, không nhắc khi đã xong; hạn < 24 giờ lúc giao ⇒ nhắc ngay.
+- **Hạn và nhắc:** hạn hai vòng xác định khi giao; Admin đổi hạn với lý do và audit; nhắc lúc 08:00 giờ Việt Nam ngày trước hạn.
 - **Quyền:** GV chỉ thấy câu của mình; GV thường gọi API Admin ⇒ 403; GV không import (UC bỏ).
 - **Chi phí:** vượt trần lời gọi/token ⇒ dừng và báo; cùng prompt không gọi lại; Gateway chuyển nhà cung cấp khi hết hạn mức (nhà cung cấp giả khi test).
 - **Khoảng `irt_b`:** −4 và +4 hợp lệ, ngoài biên bị loại.

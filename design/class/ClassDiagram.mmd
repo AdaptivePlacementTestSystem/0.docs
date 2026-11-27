@@ -148,7 +148,6 @@ classDiagram
     - irtA: float = 1.0
     - status: ItemStatus
     - reviewerId: UUID
-    - confirmerId: UUID
     - firstReview: FirstReviewDetail
     - secondReview: SecondReviewDetail
     +probability(theta: float) float
@@ -174,6 +173,7 @@ classDiagram
     - name: String
     - source: ItemBatchSource
     - status: ItemBatchStatus
+    - confirmerId: UUID
     +transitionTo(next) void
     +canAssign() boolean
     +canFinalize() boolean
@@ -195,11 +195,12 @@ classDiagram
   }
   class ItemReviewEvent {
     - id: UUID
-    - itemId: UUID {nullable}
+    - itemId: UUID
     - batchId: UUID
     - actorId: UUID
     - action: ReviewAction
     - createdAt: DateTime
+    - details: Json
   }
 
   %% ===== Enum =====
@@ -254,6 +255,7 @@ classDiagram
     DONE
     FAILED
     PARTIAL
+    PARTIALLY_IMPORTED
   }
   class ItemStatus {
     <<enumeration>>
@@ -275,6 +277,7 @@ classDiagram
     ASSIGN
     REASSIGN
     ACCEPT_FLAG
+    UPDATE_DUE_DATE
   }
   class SessionState {
     <<enumeration>>

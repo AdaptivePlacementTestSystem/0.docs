@@ -147,7 +147,7 @@
 										<UML:TaggedValue tag="$ea_xref_property" value="$XREFPROP=$XID={FBF01E5F-0B2C-45B2-9BC5-3BEAC073F043}$XID;$NAM=Stereotypes$NAM;$TYP=element property$TYP;$VIS=Public$VIS;$PAR=0$PAR;$DES=@STEREO;Name=entity;FQName=EAUML::entity;@ENDSTEREO;$DES;$CLT={700FCFA8-7E11-4552-AFCD-F32E590236EC}$CLT;$SUP=&lt;none&gt;$SUP;$ENDXREF;"/>
 									</UML:ModelElement.taggedValue>
 								</UML:ClassifierRole>
-								<UML:ClassifierRole name="Item (confirmer_id, second_review)" xmi.id="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" visibility="public" base="EAID_11111111_5487_4080_A7F4_41526CB0AA00">
+								<UML:ClassifierRole name="ItemBatch (confirmer_id) / Item (second_review)" xmi.id="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" visibility="public" base="EAID_11111111_5487_4080_A7F4_41526CB0AA00">
 									<UML:ModelElement.stereotype>
 										<UML:Stereotype name="entity"/>
 									</UML:ModelElement.stereotype>
@@ -282,7 +282,7 @@
 												<UML:TaggedValue tag="mt" value="Mo Hop viec - Can duyet()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="listReviewTasks(assigneeId) - GET /me/review-tasks" xmi.id="EAID_53A94882_2ED0_469E_BE2B_E56AE8E73657" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="listReviewTasks(assigneeId) - GET /teacher-review" xmi.id="EAID_53A94882_2ED0_469E_BE2B_E56AE8E73657" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -323,7 +323,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-150;PtEndX=0;PtEndY=-150;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="listReviewTasks(assigneeId) - GET /me/review-tasks"/>
+												<UML:TaggedValue tag="mt" value="listReviewTasks(assigneeId) - GET /teacher-review"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Guard RBAC: role TEACHER; chi tra ve cau duoc giao cho minh (NOT_ASSIGNED 403)()" xmi.id="EAID_5BC2984F_DC25_4EB0_90BB_759E1BA5116D" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
@@ -590,7 +590,7 @@
 												<UML:TaggedValue tag="mt" value="Mo mot cau, sua noi dung / dap an / giai thich va Click Luu sua()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="updateItem(itemId, data) - PATCH /items/:id" xmi.id="EAID_465C37BD_A55E_49B8_9D43_975C7DEDDBD4" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="updateItem(itemId, data) - PATCH /teacher-review/:id" xmi.id="EAID_465C37BD_A55E_49B8_9D43_975C7DEDDBD4" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -631,7 +631,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-500;PtEndX=0;PtEndY=-500;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="updateItem(itemId, data) - PATCH /items/:id"/>
+												<UML:TaggedValue tag="mt" value="updateItem(itemId, data) - PATCH /teacher-review/:id"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="recheckAfterEdit(item): luat cung + trung T1-T2 tren ban sua" xmi.id="EAID_38574459_F352_4B1D_83E6_1E96887F52A4" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_10849100_E946_41E6_8494_0B8A3E14F52F">
@@ -1030,7 +1030,7 @@
 												<UML:TaggedValue tag="mt" value="Click Duyet cau hop le"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="approveItem(itemId) - POST /items/:id/approve" xmi.id="EAID_3AFE1774_1549_4385_9653_3D2B6A78F19F" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="decide(itemId, APPROVE) - POST /teacher-review/:id/decision" xmi.id="EAID_3AFE1774_1549_4385_9653_3D2B6A78F19F" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1071,7 +1071,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1000;PtEndX=0;PtEndY=-1000;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="approveItem(itemId) - POST /items/:id/approve"/>
+												<UML:TaggedValue tag="mt" value="decide(itemId, APPROVE) - POST /teacher-review/:id/decision"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="updateStatus(FIRST_APPROVED)" xmi.id="EAID_F2EE9FCA_A564_4917_9A16_C2F370513625" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
@@ -1206,7 +1206,7 @@
 												<UML:TaggedValue tag="mt" value="ghi first_review (action=APPROVE, reviewedAt, comment) va item_review_events APPROVE"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Voi cau khong dat: Click Tu choi (khong luu ly do)" xmi.id="EAID_ABED5E15_917B_42E1_9206_C9C6B3A47DF8" visibility="public" sender="EAID_C1C56E6E_5EF8_46ED_8C50_4A72903D3ABF" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
+										<UML:Message name="Voi cau khong dat: Click Tu choi (bat buoc comment)" xmi.id="EAID_ABED5E15_917B_42E1_9206_C9C6B3A47DF8" visibility="public" sender="EAID_C1C56E6E_5EF8_46ED_8C50_4A72903D3ABF" receiver="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1247,10 +1247,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1200;PtEndX=0;PtEndY=-1200;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Voi cau khong dat: Click Tu choi (khong luu ly do)"/>
+												<UML:TaggedValue tag="mt" value="Voi cau khong dat: Click Tu choi (bat buoc comment)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="rejectItem(itemId) - POST /items/:id/reject" xmi.id="EAID_5794215C_7654_436A_A1EE_758FB1A7246B" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="decide(itemId, REJECT, comment) - POST /teacher-review/:id/decision" xmi.id="EAID_5794215C_7654_436A_A1EE_758FB1A7246B" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1291,7 +1291,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-1250;PtEndX=0;PtEndY=-1250;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="rejectItem(itemId) - POST /items/:id/reject"/>
+												<UML:TaggedValue tag="mt" value="decide(itemId, REJECT, comment) - POST /teacher-review/:id/decision"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="updateStatus(REJECTED); ghi first_review (action=REJECT, reviewedAt, comment) va item_review_events REJECT" xmi.id="EAID_FE85447A_1CE2_491F_935A_2CBE050F12B9" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
@@ -1514,7 +1514,7 @@
 												<UML:TaggedValue tag="mt" value="Mo Hop viec - Can confirm()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="listConfirmTasks(confirmerId) - GET /me/confirm-tasks [cho xac nhan: ten route]" xmi.id="EAID_FA6EA7B3_7A0B_48D0_8DE2_6F6420FB0681" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="listConfirmTasks(confirmerId) - GET /teacher-review" xmi.id="EAID_FA6EA7B3_7A0B_48D0_8DE2_6F6420FB0681" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1555,10 +1555,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2100;PtEndX=0;PtEndY=-2100;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="listConfirmTasks(confirmerId) - GET /me/confirm-tasks [cho xac nhan: ten route]"/>
+												<UML:TaggedValue tag="mt" value="listConfirmTasks(confirmerId) - GET /teacher-review"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="Guard RBAC: role TEACHER; chi tra ve cau duoc giao cho minh (confirmer_id), chi doc (NOT_ASSIGNED 403)()" xmi.id="EAID_C13395AD_C7A3_48CA_828F_EB0664F21F23" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="Guard RBAC: TEACHER; batch.confirmerId = userId; chi doc()" xmi.id="EAID_C13395AD_C7A3_48CA_828F_EB0664F21F23" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1599,10 +1599,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2150;PtEndX=0;PtEndY=-2150;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="Guard RBAC: role TEACHER; chi tra ve cau duoc giao cho minh (confirmer_id), chi doc (NOT_ASSIGNED 403)()"/>
+												<UML:TaggedValue tag="mt" value="Guard RBAC: TEACHER; batch.confirmerId = userId; chi doc()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="findByConfirmer(confirmerId): FIRST_APPROVED required for confirmation [visibility timing pending]" xmi.id="EAID_3218E14E_8ABA_4ABF_8E0A_68A838C2B27B" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC">
+										<UML:Message name="findByBatchConfirmer(confirmerId, FIRST_APPROVED): visible immediately" xmi.id="EAID_3218E14E_8ABA_4ABF_8E0A_68A838C2B27B" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1619,7 +1619,7 @@
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="43"/>
 												<UML:TaggedValue tag="ea_sourceName" value="ItemReviewService"/>
-												<UML:TaggedValue tag="ea_targetName" value="Item (confirmer_id, second_review)"/>
+												<UML:TaggedValue tag="ea_targetName" value="ItemBatch (confirmer_id) / Item (second_review)"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_sourceID" value="6"/>
@@ -1643,7 +1643,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2200;PtEndX=0;PtEndY=-2200;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="findByConfirmer(confirmerId): FIRST_APPROVED required for confirmation [visibility timing pending]"/>
+												<UML:TaggedValue tag="mt" value="findByBatchConfirmer(confirmerId, FIRST_APPROVED): visible immediately"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Tra ve cac cau duoc giao cho B()" xmi.id="EAID_138FEBFB_DC1B_4079_8C36_C5D8B6D698FD" visibility="public" sender="EAID_6457678E_50C6_4A71_9F55_B7B89721DBEC" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
@@ -1662,7 +1662,7 @@
 												<UML:TaggedValue tag="privatedata3" value="Call"/>
 												<UML:TaggedValue tag="privatedata4" value="1"/>
 												<UML:TaggedValue tag="ea_localid" value="44"/>
-												<UML:TaggedValue tag="ea_sourceName" value="Item (confirmer_id, second_review)"/>
+												<UML:TaggedValue tag="ea_sourceName" value="ItemBatch (confirmer_id) / Item (second_review)"/>
 												<UML:TaggedValue tag="ea_targetName" value="ItemReviewService"/>
 												<UML:TaggedValue tag="ea_sourceType" value="Sequence"/>
 												<UML:TaggedValue tag="ea_targetType" value="Sequence"/>
@@ -1822,7 +1822,7 @@
 												<UML:TaggedValue tag="mt" value="Voi tung cau: Click Xac nhan"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="confirmItem(itemId) - POST /items/:id/confirm" xmi.id="EAID_AE75A560_9553_41EF_B90E_0B39F2D5855D" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="decide(itemId, CONFIRM) - POST /teacher-review/:id/decision" xmi.id="EAID_AE75A560_9553_41EF_B90E_0B39F2D5855D" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -1863,7 +1863,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2450;PtEndX=0;PtEndY=-2450;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="confirmItem(itemId) - POST /items/:id/confirm"/>
+												<UML:TaggedValue tag="mt" value="decide(itemId, CONFIRM) - POST /teacher-review/:id/decision"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="updateStatus(SECOND_APPROVED); ghi second_review (action=CONFIRM, confirmedAt, comment) va item_review_events CONFIRM" xmi.id="EAID_AE954B4D_F084_40DF_88FC_A36AA8183C6D" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
@@ -1998,7 +1998,7 @@
 												<UML:TaggedValue tag="mt" value="Voi cau khong dat: Click Loai bo (khong sua, khong tra ve A)"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="removeItem(itemId) - POST /items/:id/remove" xmi.id="EAID_BBD7A066_356F_4BBF_BCAB_D5C2535BCB7B" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="decide(itemId, REMOVE, comment) - POST /teacher-review/:id/decision" xmi.id="EAID_BBD7A066_356F_4BBF_BCAB_D5C2535BCB7B" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2039,7 +2039,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2650;PtEndX=0;PtEndY=-2650;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="removeItem(itemId) - POST /items/:id/remove"/>
+												<UML:TaggedValue tag="mt" value="decide(itemId, REMOVE, comment) - POST /teacher-review/:id/decision"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="updateStatus(REJECTED); ghi second_review (action=REMOVE, confirmedAt, comment) va item_review_events REMOVE" xmi.id="EAID_CF51B71C_B96A_46DA_AAB9_0043C5C9C90F" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
@@ -2174,7 +2174,7 @@
 												<UML:TaggedValue tag="mt" value="Click Xac nhan tat ca cau con lai"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="confirmAll(confirmerId) - POST /items/confirm-all [cho xac nhan: route va pham vi]" xmi.id="EAID_D1CC6F54_858A_4D92_A1FF_4D38A2538340" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
+										<UML:Message name="confirmAll(batchId) - POST /teacher-review/:batchId/confirm-all" xmi.id="EAID_D1CC6F54_858A_4D92_A1FF_4D38A2538340" visibility="public" sender="EAID_53FBF7B6_39F2_41DC_B72F_EFC23E98975D" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2215,10 +2215,10 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2850;PtEndX=0;PtEndY=-2850;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="confirmAll(confirmerId) - POST /items/confirm-all [cho xac nhan: route va pham vi]"/>
+												<UML:TaggedValue tag="mt" value="confirmAll(batchId) - POST /teacher-review/:batchId/confirm-all"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="updateStatus(SECOND_APPROVED) cho cac cau chua quyet cua B; ghi second_review va item_review_events CONFIRM_ALL" xmi.id="EAID_01FD839B_94D9_409D_8F65_2823B9374378" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
+										<UML:Message name="update FIRST_APPROVED in batch; one CONFIRM_ALL event with itemIds and count" xmi.id="EAID_01FD839B_94D9_409D_8F65_2823B9374378" visibility="public" sender="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93" receiver="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -2259,7 +2259,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-2900;PtEndX=0;PtEndY=-2900;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_17FBA880_39CB_47F6_B415_8E0BF05A4B49"/>
-												<UML:TaggedValue tag="mt" value="updateStatus(SECOND_APPROVED) cho cac cau chua quyet cua B; ghi second_review va item_review_events CONFIRM_ALL"/>
+												<UML:TaggedValue tag="mt" value="update FIRST_APPROVED in batch; one CONFIRM_ALL event with itemIds and count"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Xac nhan cap nhat()" xmi.id="EAID_D82709EC_EBA4_49F3_9C10_FE5018A1EFA3" visibility="public" sender="EAID_E0FBCAA9_2F92_4322_8EC3_A85245F1B549" receiver="EAID_C73C6A2D_B1F1_45A1_9D84_308662832C93">

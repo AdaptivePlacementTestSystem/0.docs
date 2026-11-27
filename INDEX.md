@@ -11,7 +11,7 @@
 | design/structure | `KE_HOACH_CAU_TRUC_DU_AN.md`, `CAU_TRUC_BACKEND_FRONTEND.md` | Cấu trúc dự án đích và thực tế |
 | design/ui | mô tả luồng/màn hình cho AI, danh sách màn hình | Giao diện theo role |
 | design/catengine | `Luong_Hoat_Dong_CATEngine.md` | Luồng CAT Engine |
-| plans | nghiệp vụ import/kỳ thi, sinh và duyệt đề AI; `cicd/`; `item-bank-data/` | Kế hoạch |
+| plans | nghiệp vụ import/kỳ thi, sinh và duyệt đề AI; `KE_HOACH_OPENAPI_SWAGGER_BE_X2.md` (OpenAPI/Swagger, BE-X2); `cicd/`; `item-bank-data/` | Kế hoạch |
 | decisions | bản chốt 16/10, phân tích shared-types | Quyết định chính thức |
 | process | rubric, playbook, quy trình nhóm | Quy trình |
 | tracking | log, dashboard, baseline, weekly-log, mẫu, `status-reports/`, `survey/` | Theo dõi (log thật chỉ lưu máy, #37; bản chính ở `0.docs/tracking` cạnh plugin) |

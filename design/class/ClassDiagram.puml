@@ -147,7 +147,6 @@ class Item {
   - irtA: float = 1.0 {Rasch}
   - status: ItemStatus
   - reviewerId: UUID {nullable}
-  - confirmerId: UUID {nullable}
   - firstReview: FirstReviewDetail {nullable}
   - secondReview: SecondReviewDetail {nullable}
   + probability(theta: float): float
@@ -173,6 +172,7 @@ class ItemBatch {
   - name: String
   - source: ItemBatchSource
   - status: ItemBatchStatus
+  - confirmerId: UUID {nullable}
   + transitionTo(next): void
   + canAssign(): boolean
   + canFinalize(): boolean
@@ -197,6 +197,7 @@ class ItemReviewEvent {
   - actorId: UUID
   - action: ReviewAction
   - createdAt: DateTime
+  - details: Json {nullable}
 }
 
 ' ===== Enum =====
@@ -244,6 +245,7 @@ enum ItemBatchStatus {
   DONE
   FAILED
   PARTIAL
+  PARTIALLY_IMPORTED
 }
 enum ItemStatus {
   DRAFT
@@ -263,6 +265,7 @@ enum ReviewAction {
   ASSIGN
   REASSIGN
   ACCEPT_FLAG
+  UPDATE_DUE_DATE
 }
 enum SessionState {
   WAITING_FOR_ANSWER
