@@ -1042,7 +1042,7 @@ Cờ mềm chưa quyết định (chưa được import): 2
 
 ---
 
-**Idempotency S23:** Yêu cầu thiết kế trong runbook ghi sinh `operationId` khi bấm Lưu và giữ nguyên khi bấm “Thử lại”. Kiểm tra mã tại nhánh kỳ thi cho thấy hiện tại FE lấy `operationId` từ snapshot lưới do backend trả về và gửi lại cùng mã khi lưu; thời điểm tạo mã cần được Phương xác nhận đối chiếu. Không coi hai mô tả là đã đồng bộ.
+**Idempotency S23 (Phương chốt 28/11):** Backend tạo và trả `operationId` theo snapshot lưới; FE lấy mã này khi bấm Lưu và giữ nguyên khi thử lại cùng snapshot. Không sinh mã mới riêng khi bấm Lưu.
 
 ---
 
