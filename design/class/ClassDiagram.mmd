@@ -38,6 +38,14 @@ classDiagram
     +registerStudent(s: Student) void
   }
 
+  class RosterImportEvent {
+    - operationId: UUID
+    - roundId: UUID
+    - adminId: UUID
+    - addedCount: int
+    - createdAt: DateTime
+  }
+
   %% ===== Phiên thi & CAT =====
   class TestSession {
     - id: UUID
@@ -345,6 +353,8 @@ classDiagram
   User <|-- Student
   User <|-- Teacher
   User <|-- Admin
+  ExamRound "1" -- "0..*" RosterImportEvent : round
+  User "1" -- "0..*" RosterImportEvent : admin
   ExamRound "0..*" -- "0..*" Student : registered
   ExamRound "1" *-- "0..*" TestSession
   Student "1" --> "0..*" TestSession

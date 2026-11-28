@@ -45,6 +45,14 @@ class ExamRound {
   + registerStudent(s: Student): void
 }
 
+class RosterImportEvent {
+  - operationId: UUID
+  - roundId: UUID
+  - adminId: UUID
+  - addedCount: int
+  - createdAt: DateTime
+}
+
 ' ===== Phiên thi & CAT =====
 class TestSession {
   - id: UUID
@@ -356,4 +364,6 @@ ItemBatch "1" *-- "0..*" ReviewNoticeOutbox
 ReviewNoticeOutbox "0..*" --> "1" User : recipient
 Admin --> ItemBatch : creates
 Teacher --> Item : reviews / confirms
+ExamRound "1" -- "0..*" RosterImportEvent : round
+User "1" -- "0..*" RosterImportEvent : admin
 @enduml

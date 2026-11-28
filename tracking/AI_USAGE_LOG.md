@@ -206,3 +206,5 @@
 - [ ] Đối chiếu công thức/thuật toán AI sinh với tài liệu chính thức (paper Rasch/EAP, RFC, docs thư viện) trước khi chấp nhận.
 - [ ] Kiểm tra license của bất kỳ đoạn code mẫu nào AI gợi ý copy gần nguyên văn.
 - [ ] Không đưa dữ liệu nhạy cảm (mật khẩu, API key, dữ liệu SV thật) vào prompt.
+
+| 2026-11-28 | Phương | Codex | Đồng bộ tài liệu roster và tracking | Đối chiếu patch BR-08/12, thêm schema và sơ đồ text, ghi số đo local | Đồng bộ schema, SRS/UI, số test và coverage | Phương kiểm tra lệch operationId, Word, draw.io/PNG và CI; chưa xác nhận review | BE 9c9f59d, FE 3b8f667; docs chưa commit |

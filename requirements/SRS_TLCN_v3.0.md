@@ -753,6 +753,17 @@ CREATE TABLE exam_round_participants (
     PRIMARY KEY (round_id, student_id)
 );
 
+-- Nhật ký idempotency khi lưu danh sách kỳ thi (Migration #19)
+CREATE TABLE roster_import_events (
+    operation_id UUID PRIMARY KEY,
+    round_id UUID NOT NULL REFERENCES exam_rounds(id) ON DELETE RESTRICT,
+    admin_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    added_count INTEGER NOT NULL,
+    created_at TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX roster_import_events_round_id_created_at_idx
+    ON roster_import_events (round_id, created_at);
+
 -- Ràng buộc DB: SV chỉ có phiên trong kỳ mà mình thuộc danh sách
 ALTER TABLE test_sessions
   ADD CONSTRAINT fk_session_participant
@@ -1298,12 +1309,14 @@ KỲ THI  [đề xuất]
   GET    /api/v1/exam-rounds/:id/participants/import/template           # ADMIN, tải mẫu Excel
   GET    /api/v1/exam-rounds/:id/participants/import/grid
   DELETE /api/v1/exam-rounds/:id/participants/import/grid[/:rowKey]
-  POST   /api/v1/exam-rounds/:id/participants/import/save
+  POST   /api/v1/exam-rounds/:id/participants/import/save                    # {operationId: UUID}, khóa idempotency toàn cục
   GET    /api/v1/exam-rounds/:id/participants                           # theo dõi dự thi (UCADM17)
   DELETE /api/v1/exam-rounds/:id/participants/:studentId                # gỡ SV khi kỳ chưa CLOSED
   GET    /api/v1/exam-rounds/:id/participants/export                    # ?format=csv|xlsx&status=&q=&studentIds=  xuất kết quả dự thi (ADMIN, đề xuất 18/10/2026)
   GET    /api/v1/exam-rounds/mine                                       # STUDENT: kỳ tôi thuộc + trạng thái hiệu lực
 ```
+
+Khi lưu roster, cùng `operationId` và cùng Admin/kỳ trả lại kết quả đã lưu; cùng mã với Admin hoặc kỳ khác trả `409 Conflict`. Kỳ đã đóng không tạo nhật ký lưu mới.
 
 Hợp đồng route `item-generation` phía Admin đã đối chiếu theo nhánh `feat/admin-ai-review` (`9aea9e8`); khi hợp nhất nhánh BE cần giữ duy nhất một controller Teacher Review (`@Roles(TEACHER)`) trên `/teacher/tasks/...` & `/teacher/items/:id/...`, loại bỏ controller trùng và route tương thích cũ `/teacher-review`. Cập nhật `openapi.json` sau khi hợp nhất BE.
 

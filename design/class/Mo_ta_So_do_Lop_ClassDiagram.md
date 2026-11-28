@@ -541,3 +541,10 @@ Tên module theo `CLAUDE.md`; các tên đánh dấu *(chờ duyệt)* là đề
 | `schema.prisma` | Bản tham chiếu của schema; bản thật ở `backend/backend/prisma` |
 
 Sinh lại: `python -I Tuan7/scripts/gen_uml.py docs-repo/design/class/TLCN.drawio.xml docs-repo/design/class/ClassDiagram.puml docs-repo/design/class/ClassDiagram.mmd`.
+
+
+### RosterImportEvent — nhật ký lưu danh sách kỳ thi
+
+`RosterImportEvent` (`roster_import_events`) có năm thuộc tính `operationId` (UUID, khóa chính), `roundId`, `adminId`, `addedCount` và `createdAt`. Mỗi bản ghi tham chiếu một `ExamRound` và một `User` thực hiện thao tác; hai khóa ngoại dùng `onDelete: Restrict`. Mỗi kỳ thi và mỗi người dùng có thể có nhiều bản ghi. `operationId` là khóa idempotency toàn cục.
+
+Các file `.puml` và `.mmd` được cập nhật theo yêu cầu đồng bộ; nguồn draw.io và script sinh sơ đồ chưa cập nhật, vì vậy chạy lại script cũ có thể ghi đè phần này.

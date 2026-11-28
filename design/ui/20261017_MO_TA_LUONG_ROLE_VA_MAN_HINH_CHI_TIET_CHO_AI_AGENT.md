@@ -1042,6 +1042,10 @@ Cờ mềm chưa quyết định (chưa được import): 2
 
 ---
 
+**Idempotency S23:** Yêu cầu thiết kế trong runbook ghi sinh `operationId` khi bấm Lưu và giữ nguyên khi bấm “Thử lại”. Kiểm tra mã tại nhánh kỳ thi cho thấy hiện tại FE lấy `operationId` từ snapshot lưới do backend trả về và gửi lại cùng mã khi lưu; thời điểm tạo mã cần được Phương xác nhận đối chiếu. Không coi hai mô tả là đã đồng bộ.
+
+---
+
 ### S24 — Quản lý tài khoản (Sinh viên | Giảng viên)
 **(a)** Route `/admin/users/students` và `/admin/users/teachers` (hai tab = hai route, dùng chung một component) · API `GET|POST|PATCH /students`, `/teachers`; `POST /users/:id/lock|unlock|resend-temporary-password` (dùng chung SV và GV); `PATCH /users/:id/role` · UC UCADM09.
 **(b)**
