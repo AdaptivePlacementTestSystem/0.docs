@@ -1,0 +1,338 @@
+# Nhóm Test Case Giảng viên — Báo cáo, Tra cứu SV & Duyệt câu hỏi 2 vòng (F-02, F-09, F-26, F-27, Q1–Q8)
+# Phụ trách: Đăng viết — Phương review
+
+- id: TCH_001
+  module: Language Profile
+  srs_ref: "F-02"
+  ac_ref: "AC-F02-01"
+  case_type: "positive"
+  description: "Giảng viên tra cứu được hồ sơ ngôn ngữ và lịch sử thi của sinh viên theo MSSV"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/language-profile/presentation/guards/profile-access.guard.spec.ts"
+  test_name: "cho phép Giảng viên xem hồ sơ của sinh viên"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Tài khoản role TEACHER đăng nhập hợp lệ; sinh viên tồn tại trong DB."
+  test_data:
+    - "GET /api/v1/placement-profiles/:studentCode với JWT của TEACHER."
+  steps:
+    - step: 1
+      detail: "Giảng viên gọi API xem hồ sơ sinh viên."
+      expected: "ProfileAccessGuard cho qua và trả dữ liệu hồ sơ của sinh viên."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_002
+  module: Language Profile
+  srs_ref: "F-02, SRS Mục 15.3"
+  ac_ref: "AC-F02-02"
+  case_type: "negative"
+  description: "Sinh viên A cố truy cập hồ sơ của Sinh viên B bị chặn 403 Forbidden"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/language-profile/presentation/guards/profile-access.guard.spec.ts"
+  test_name: "quăng ForbiddenException nếu sinh viên A cố truy cập hồ sơ của sinh viên B"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Tồn tại 2 sinh viên A và B."
+  test_data:
+    - "JWT của sinh viên A truy cập GET /api/v1/placement-profiles/:studentCodeB."
+  steps:
+    - step: 1
+      detail: "Sinh viên A gọi API tra cứu hồ sơ của sinh viên B."
+      expected: "ProfileAccessGuard ném ForbiddenException (HTTP 403)."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_003
+  module: Reporting
+  srs_ref: "F-09"
+  ac_ref: "AC-F09-01"
+  case_type: "positive"
+  description: "Báo cáo lớp mở cho TEACHER và ADMIN, hỗ trợ lọc đúng theo examRoundId (UUID)"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/reporting/presentation/reporting.controller.spec.ts"
+  test_name: "chỉ ADMIN xem được tổng quan; báo cáo lớp vẫn mở cho TEACHER và ADMIN"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Có dữ liệu phiên thi hoàn thành trong kỳ thi."
+  test_data:
+    - "GET /api/v1/reports/class-distribution?examRoundId=<UUID> bằng JWT TEACHER."
+  steps:
+    - step: 1
+      detail: "Giảng viên gọi API báo cáo lớp kèm lọc examRoundId."
+      expected: "Trả phân phối CEFR và errorPatterns của kỳ thi tương ứng; chặn TEACHER ở /reports/overview."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_004
+  module: Reporting
+  srs_ref: "F-09"
+  ac_ref: "AC-F09-02"
+  case_type: "negative"
+  description: "Từ chối tham số examRoundId không phải UUID hoặc tham số lạ trên API báo cáo"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/reporting/presentation/reporting.controller.spec.ts"
+  test_name: "examRoundId phải là UUID, không nhận tham số lạ"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "ValidationPipe whitelist/forbidNonWhitelisted đang bật."
+  test_data:
+    - "Query examRoundId='not-a-uuid' hoặc thêm query key lạ."
+  steps:
+    - step: 1
+      detail: "Gửi yêu cầu báo cáo với examRoundId sai định dạng UUID."
+      expected: "Trả HTTP 400 Bad Request."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_005
+  module: Item Review
+  srs_ref: "F-26"
+  ac_ref: "AC-F26-01"
+  case_type: "negative"
+  description: "Giảng viên không xem và không duyệt được câu hỏi nằm ngoài phân công của mình (403)"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-bank/presentation/item-bank-access.spec.ts"
+  test_name: "filters teachers and rejects an item outside their assignments"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Câu hỏi DRAFT được giao cho GV1, không giao cho GV2."
+  test_data:
+    - "GV2 truy cập chi tiết hoặc thao tác trên câu hỏi của GV1."
+  steps:
+    - step: 1
+      detail: "GV2 gọi API lấy danh sách và xem chi tiết câu hỏi thuộc phân công của GV1."
+      expected: "Danh sách lọc bỏ câu ngoài phân công; truy cập trực tiếp bị từ chối 403."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_006
+  module: Item Review
+  srs_ref: "F-26, Q1–Q8"
+  ac_ref: "AC-F26-02"
+  case_type: "positive"
+  description: "GV A duyệt câu DRAFT chuyển FIRST_APPROVED và câu hiển thị ngay trong hộp việc của GV B"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/teacher-review.use-case.spec.ts"
+  test_name: "hiển thị ngay câu đã duyệt trong hộp việc B"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô IN_REVIEW có GV A được giao câu DRAFT và GV B chung cấp lô."
+  test_data:
+    - "GV A thực hiện duyệt 1 câu DRAFT."
+  steps:
+    - step: 1
+      detail: "GV A duyệt câu hỏi và GV B mở hộp việc của lô."
+      expected: "Câu chuyển sang FIRST_APPROVED và xuất hiện ngay trong hộp việc của GV B dù A còn câu DRAFT khác."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_007
+  module: Item Review
+  srs_ref: "F-26, F-27, Q1–Q8"
+  ac_ref: "AC-F26-03"
+  case_type: "negative"
+  description: "Từ chối / loại bỏ câu hỏi bắt buộc phải có comment hợp lệ và lưu vào kết quả duyệt"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/teacher-review.use-case.spec.ts"
+  test_name: "lưu comment loại câu vào kết quả duyệt"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "GV A (hoặc GV B) đang xử lý câu được giao."
+  test_data:
+    - "Thao tác từ chối/loại có comment hợp lệ và thao tác thiếu/sai kiểu comment."
+  steps:
+    - step: 1
+      detail: "Gửi yêu cầu loại câu thiếu comment rồi gửi lại kèm comment hợp lệ."
+      expected: "Thiếu/sai kiểu comment bị từ chối; có comment hợp lệ thì chuyển REJECTED và lưu comment vào audit."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_008
+  module: Item Review
+  srs_ref: "F-26, BR-27"
+  ac_ref: "AC-F26-04"
+  case_type: "negative"
+  description: "GV A sửa nội dung câu DRAFT vi phạm luật cứng hoặc trùng T1–T2 bị chặn 422 (DUPLICATE_AFTER_EDIT / INVALID_AFTER_EDIT)"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "manual"
+  spec_ref: ""
+  test_name: ""
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "GV A đang sửa 1 câu DRAFT được giao."
+  test_data:
+    - "Nội dung sửa trùng hoàn toàn với câu đã có trong lô hoặc thiếu phương án/lời giải."
+  steps:
+    - step: 1
+      detail: "GV A gửi yêu cầu lưu sửa câu DRAFT với nội dung trùng hoặc sai luật cứng."
+      expected: "Hệ thống trả 422 (DUPLICATE_AFTER_EDIT / INVALID_AFTER_EDIT) và giữ nguyên nội dung cũ."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_009
+  module: Item Review
+  srs_ref: "F-27, Q1–Q8"
+  ac_ref: "AC-F27-01"
+  case_type: "positive"
+  description: "GV B xác nhận được từng câu FIRST_APPROVED ngay cả khi GV A vẫn còn câu DRAFT chưa xử lý"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/teacher-review.use-case.spec.ts"
+  test_name: "cho phép B xác nhận khi A còn câu chưa xử lý"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô có 1 câu FIRST_APPROVED và 1 câu DRAFT."
+  test_data:
+    - "GV B xác nhận câu FIRST_APPROVED."
+  steps:
+    - step: 1
+      detail: "GV B gửi lệnh xác nhận câu đã qua vòng A."
+      expected: "Câu chuyển sang SECOND_APPROVED và ghi sự kiện ItemReviewEvent."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_010
+  module: Item Review
+  srs_ref: "F-27, Q1–Q8"
+  ac_ref: "AC-F27-03"
+  case_type: "boundary"
+  description: "Thao tác confirm-all đồng thời chỉ ghi đúng 1 sự kiện audit cấp lô và chỉ áp cho câu đủ điều kiện"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/q1q8-postgres.e2e-spec.ts"
+  test_name: "records one batch audit under concurrent confirm-all"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "PostgreSQL test có lô đang IN_REVIEW với các câu FIRST_APPROVED."
+  test_data:
+    - "2 request confirm-all gửi song song từ GV B."
+  steps:
+    - step: 1
+      detail: "Gửi 2 request confirm-all đồng thời."
+      expected: "Các câu hợp lệ chuyển SECOND_APPROVED và chỉ ghi đúng 1 sự kiện CONFIRM_ALL cấp lô."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_011
+  module: Item Review
+  srs_ref: "F-27, SRS 9b.13"
+  ac_ref: "AC-F27-04"
+  case_type: "negative"
+  description: "Sau khi Admin đổi GV B (reassign-confirmer), GV B cũ bị thu hồi quyền xem và xác nhận ngay lập tức"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/reassign-confirmer-postgres.e2e-spec.ts"
+  test_name: "changes B atomically, revokes old B and records one pending notice"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô đang IN_REVIEW có GV B1, sau đó Admin đổi sang GV B2."
+  test_data:
+    - "GV B1 gọi lại API xem/xác nhận câu của lô."
+  steps:
+    - step: 1
+      detail: "Admin gọi reassign-confirmer đổi B1 → B2, sau đó B1 thử truy cập hộp việc lô."
+      expected: "Đổi B nguyên tử, ghi 1 thông báo outbox và B1 bị chặn quyền xem/xác nhận."
+      actual: ""
+      result: "Not executed"
+
+- id: TCH_012
+  module: Item Review
+  srs_ref: "F-26, F-27"
+  ac_ref: "AC-F27-02"
+  case_type: "negative"
+  description: "Cấm sửa nội dung câu hỏi đã FINAL_APPROVED (bất biến ngân hàng câu hỏi)"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-bank/application/use-cases/_legacy/item-lifecycle.spec.ts"
+  test_name: "CẤM sửa câu hỏi đã FINAL_APPROVED (ném BadRequestException theo Quyết định #64)"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Câu hỏi đã ở trạng thái FINAL_APPROVED."
+  test_data:
+    - "Yêu cầu sửa nội dung/đáp án câu FINAL_APPROVED."
+  steps:
+    - step: 1
+      detail: "Gọi use-case sửa câu hỏi đã FINAL_APPROVED."
+      expected: "Ném BadRequestException và không thay đổi dữ liệu câu hỏi."
+      actual: ""
+      result: "Not executed"

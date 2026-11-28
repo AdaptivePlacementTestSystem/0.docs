@@ -1,0 +1,282 @@
+# Nhóm Test Case Xác thực & Phân quyền (F-01, F-21, BR-14..BR-19)
+# Phụ trách: Phương & Đăng (làm chung, review chéo)
+
+- id: AUTH_001
+  module: Auth
+  srs_ref: "F-01"
+  ac_ref: "AC-F01-01"
+  case_type: "positive"
+  description: "Đăng nhập thành công bằng email & mật khẩu hợp lệ trả JWT và cờ mustChangePassword"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/auth/application/use-cases/login.use-case.spec.ts"
+  test_name: "đăng nhập đúng: trả token và cờ mustChangePassword"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Tài khoản đang hoạt động (isActive = true) có mật khẩu đã băm argon2 trong DB."
+  test_data:
+    - "Email và mật khẩu đúng định dạng của tài khoản hợp lệ."
+  steps:
+    - step: 1
+      detail: "Gọi POST /api/v1/auth/login với email và mật khẩu đúng."
+      expected: "Trả HTTP 200 kèm accessToken hợp lệ và trạng thái mustChangePassword chính xác."
+      actual: ""
+      result: "Not executed"
+
+- id: AUTH_002
+  module: Auth
+  srs_ref: "F-01, SRS Mục 15.3"
+  ac_ref: "AC-F01-02"
+  case_type: "negative"
+  description: "Email không tồn tại và sai mật khẩu trả cùng mã lỗi 401 để không lộ danh sách tài khoản"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/auth/application/use-cases/login.use-case.spec.ts"
+  test_name: "email không tồn tại và mật khẩu sai trả cùng một lỗi (không lộ email)"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Hệ thống xác thực đang hoạt động."
+  test_data:
+    - "Cặp 1: email không tồn tại; Cặp 2: email tồn tại + mật khẩu sai."
+  steps:
+    - step: 1
+      detail: "Gửi 2 yêu cầu đăng nhập với email không tồn tại và với email đúng nhưng sai mật khẩu."
+      expected: "Cả hai trả cùng mã lỗi 401 với thông điệp đồng nhất, không tiết lộ email có tồn tại hay không."
+      actual: ""
+      result: "Not executed"
+
+- id: AUTH_003
+  module: Auth
+  srs_ref: "F-01, SRS Mục 15.3"
+  ac_ref: "AC-F01-03"
+  case_type: "boundary"
+  description: "Chặn 429 Too Many Requests khi đăng nhập sai vượt ngưỡng giới hạn rate-limit"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/auth/infrastructure/throttling/login-failure-limiter.spec.ts"
+  test_name: "đếm lần sai thông tin, đặt TTL ở lần đầu, chặn 429 khi chạm ngưỡng"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Redis throttling hoạt động bình thường."
+  test_data:
+    - "Cùng một cặp IP + email gửi liên tiếp yêu cầu sai mật khẩu chạm ngưỡng cấu hình."
+  steps:
+    - step: 1
+      detail: "Gửi liên tiếp các yêu cầu đăng nhập sai từ cùng IP + email cho tới khi chạm ngưỡng."
+      expected: "Lần chạm ngưỡng trả HTTP 429 kèm thời gian chờ thử lại; IP khác không bị ảnh hưởng."
+      actual: ""
+      result: "Not executed"
+
+- id: AUTH_004
+  module: Auth
+  srs_ref: "F-01, BR-18"
+  ac_ref: "AC-F01-04"
+  case_type: "negative"
+  description: "Tài khoản bị khóa bị từ chối đăng nhập (403) và JWT cũ đang cầm bị vô hiệu (401) ngay lập tức"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/auth/infrastructure/providers/jwt.strategy.spec.ts"
+  test_name: "từ chối khi tài khoản bị khóa dù token còn hạn"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "User đã có JWT còn hạn nhưng sau đó bị Admin khóa (isActive = false)."
+  test_data:
+    - "Header Authorization: Bearer <JWT cũ còn hạn>."
+  steps:
+    - step: 1
+      detail: "Gọi API được bảo vệ bằng JWT cũ sau khi tài khoản đã bị khóa."
+      expected: "JwtStrategy từ chối với HTTP 401 Unauthorized ngay lập tức dù token chưa hết hạn."
+      actual: ""
+      result: "Not executed"
+
+- id: AUTH_005
+  module: Auth
+  srs_ref: "F-21"
+  ac_ref: "AC-F21-01"
+  case_type: "negative"
+  description: "Người dùng còn cờ mustChangePassword = true bị chặn 403 PASSWORD_CHANGE_REQUIRED ở endpoint thường"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/shared/guards/jwt-auth.guard.spec.ts"
+  test_name: "chặn 403 PASSWORD_CHANGE_REQUIRED khi còn cờ đổi mật khẩu và endpoint không được phép"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "User mới tạo có mustChangePassword = true và đã đăng nhập nhận JWT."
+  test_data:
+    - "Gọi endpoint nghiệp vụ không gắn @AllowWhenMustChangePassword."
+  steps:
+    - step: 1
+      detail: "Gửi yêu cầu tới endpoint thường với JWT của tài khoản chưa đổi mật khẩu lần đầu."
+      expected: "Guard chặn và trả HTTP 403 với mã lỗi PASSWORD_CHANGE_REQUIRED."
+      actual: ""
+      result: "Not executed"
+
+- id: AUTH_006
+  module: Auth
+  srs_ref: "F-21"
+  ac_ref: "AC-F21-02"
+  case_type: "positive"
+  description: "Đổi mật khẩu thành công lưu hash argon2, xóa cờ mustChangePassword và cấp token mới"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/auth/application/use-cases/change-password.use-case.spec.ts"
+  test_name: "đổi thành công: lưu hash argon2 qua repository và cấp token mới"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "User đã đăng nhập và biết mật khẩu hiện tại."
+  test_data:
+    - "Mật khẩu mới thỏa chính sách (>= 8 ký tự, chữ hoa, chữ thường, số, ký tự đặc biệt) khác mật khẩu cũ."
+  steps:
+    - step: 1
+      detail: "Gọi POST /api/v1/auth/change-password với mật khẩu hiện tại đúng và mật khẩu mới hợp lệ."
+      expected: "Lưu mật khẩu băm argon2, cập nhật mustChangePassword = false và cấp accessToken mới."
+      actual: ""
+      result: "Not executed"
+
+- id: AUTH_007
+  module: Auth
+  srs_ref: "F-01, F-21"
+  ac_ref: "AC-F01-05"
+  case_type: "negative"
+  description: "Từ chối mật khẩu mới thiếu ký tự đặc biệt theo chính sách mật khẩu"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "frontend/tests/unit/password-policy.test.ts"
+  test_name: "từ chối mật khẩu không có ký tự đặc biệt"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Form đổi mật khẩu / đặt lại mật khẩu đang mở."
+  test_data:
+    - "Mật khẩu thử: 'Abcdef12' (đủ 8 ký tự, có hoa/thường/số nhưng thiếu ký tự đặc biệt)."
+  steps:
+    - step: 1
+      detail: "Kiểm tra chính sách mật khẩu với chuỗi thiếu ký tự đặc biệt."
+      expected: "Validator từ chối và báo lỗi thiếu ký tự đặc biệt."
+      actual: ""
+      result: "Not executed"
+
+- id: AUTH_008
+  module: Auth
+  srs_ref: "F-01, BR-14, SD_08"
+  ac_ref: "AC-F01-06"
+  case_type: "negative"
+  description: "Quên mật khẩu luôn trả thành công dù email không tồn tại (chống dò email)"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/auth/application/use-cases/forgot-password.use-case.spec.ts"
+  test_name: "luôn trả success dù email không tồn tại (BR-14, SD_08)"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Dịch vụ gửi mail và Redis OTP sẵn sàng."
+  test_data:
+    - "Email chưa đăng ký: 'khongtontai@example.edu.vn'."
+  steps:
+    - step: 1
+      detail: "Gọi POST /api/v1/auth/forgot-password với email không tồn tại."
+      expected: "Hệ thống trả thông điệp thành công chung (200) nhưng không sinh OTP và không gửi email."
+      actual: ""
+      result: "Not executed"
+
+- id: AUTH_009
+  module: Auth
+  srs_ref: "F-01"
+  ac_ref: "AC-F01-06"
+  case_type: "boundary"
+  description: "Nhập sai OTP lần thứ 5 thì hủy OTP và từ chối đặt lại mật khẩu"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/auth/application/use-cases/reset-password.use-case.spec.ts"
+  test_name: "lần sai thứ 5: hủy OTP"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Đã có OTP hợp lệ lưu hash trong Redis với 4 lần nhập sai trước đó."
+  test_data:
+    - "Mã OTP 6 chữ số không khớp ở lần thử thứ 5."
+  steps:
+    - step: 1
+      detail: "Gọi POST /api/v1/auth/reset-password với mã OTP sai ở lần thử thứ 5."
+      expected: "Từ chối đặt lại mật khẩu và xóa/hủy mã OTP trong Redis."
+      actual: ""
+      result: "Not executed"
+
+- id: AUTH_010
+  module: Auth
+  srs_ref: "F-01, F-04, BR-16"
+  ac_ref: "AC-F04-01"
+  case_type: "negative"
+  description: "Chặn chéo role: ADMIN và TEACHER không được phép bắt đầu phiên thi của STUDENT"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/integration/exam-round-auth-postgres.e2e-spec.ts"
+  test_name: "blocks ADMIN and TEACHER from starting a student session"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "PostgreSQL test có tài khoản ADMIN, TEACHER và một kỳ thi đang OPEN."
+  test_data:
+    - "JWT hợp lệ của ADMIN và TEACHER gọi POST /api/v1/sessions."
+  steps:
+    - step: 1
+      detail: "Gửi POST /api/v1/sessions bằng JWT của ADMIN và TEACHER."
+      expected: "Hệ thống từ chối cả hai với HTTP 403 Forbidden."
+      actual: ""
+      result: "Not executed"
