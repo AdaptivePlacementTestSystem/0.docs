@@ -51,7 +51,7 @@ Sinh viên năm nhất tại các trường Cao đẳng/Đại học phải làm
 | **Nhóm** | **Mô tả** | **Quy mô** |
 | --- | --- | --- |
 | Sinh viên (STUDENT) | Năm nhất làm Placement Test; tài khoản do Admin tạo (từng người hoặc import; không tự đăng ký); đăng nhập email + mật khẩu | 50–500 người/đợt |
-| Giảng viên (TEACHER) | GV thường (tài khoản do Admin tạo, từng người hoặc import): xem kết quả — báo cáo lớp (lọc theo kỳ), tra cứu hồ sơ SV; đổi/quên mật khẩu. Khi Admin giao một lô câu hỏi: vai A (sửa/duyệt/từ chối câu được giao) hoặc vai B (xác nhận/loại từng câu được giao cho mình). GV không import đề, không tạo lô | 5–20 người (gộp GV + Admin, số liệu v2.6) |
+| Giảng viên (TEACHER) | GV thường (tài khoản do Admin tạo, từng người hoặc import): xem kết quả — báo cáo thống kê (lọc theo kỳ), tra cứu hồ sơ SV; đổi/quên mật khẩu. Khi Admin giao một lô câu hỏi: vai A (sửa/duyệt/từ chối câu được giao) hoặc vai B (xác nhận/loại từng câu được giao cho mình). GV không import đề, không tạo lô | 5–20 người (gộp GV + Admin, số liệu v2.6) |
 | Admin (ADMIN) | Admin của trường, siêu tập của Teacher: tạo lô câu hỏi (AI sinh hoặc import file), giao việc, theo dõi, kiểm tra và import cuối (không soạn, không sửa nội dung câu); quản lý kỳ thi + danh sách thi, tạo từng người hoặc import tài khoản, quản lý tài khoản SV/GV, nâng/thu hồi Admin; tài khoản đầu tiên tạo bằng seed | Trong tổng 5–20 người nêu trên |
 | EduZ System | Consume Language Profile qua API | Machine-to-machine |
 
@@ -808,7 +808,7 @@ Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tư�
 | F-06 | Language Profile v1 | JSON output: skill scores + error patterns | P0 |
 | F-07 | Profile API Endpoint | GET /api/v1/placement-profiles/{student_id} | P0 |
 | F-08 | Student Result Dashboard | Radar chart, CEFR level, gợi ý cải thiện | P1 |
-| F-09 | Teacher Class Report | Phân phối CEFR, error pattern toàn lớp, lọc theo kỳ thi, export CSV (GV thường và Admin xem) | P1 |
+| F-09 | Teacher Report | Phân phối CEFR, error pattern theo kỳ thi/toàn trường, export CSV (GV thường và Admin xem) | P1 |
 | F-10 | AI Question Tagging | AI gán topic_tag tự động | P2 |
 | F-18 | Tạo tài khoản SV và GV (từng người hoặc import) | Admin tạo từng người bằng form (SV: MSSV, họ tên, email; GV: Mã GV, họ tên, email) hoặc tải một/nhiều file .xlsx (chọn loại SV/GV) vào lưới tạm rồi bấm Lưu; cả hai cách sinh mật khẩu tạm, mustChangePassword = true, gửi email sau khi lưu (UCADM08, UCADM09; DC-24) | P0 (đề xuất) |
 | F-19 | Quản lý kỳ thi | Admin tạo/sửa/công bố/đóng kỳ; durationMinutes; trạng thái DRAFT/SCHEDULED/OPEN/CLOSED; theo dõi dự thi (UCADM15, UCADM17) | P0 (đề xuất) |
@@ -870,7 +870,7 @@ Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tư�
 | Sửa nội dung/đáp án/giải thích; Duyệt/Từ chối (UCGV14) | ❌ | ✅ câu giao cho mình | ❌ | ❌ (Admin không sửa nội dung) |
 | Xác nhận / Loại bỏ từng câu; xác nhận tất cả câu còn lại (UCGV15) | ❌ | ❌ | ✅ câu giao cho mình | ❌ |
 | Tạo kỳ thi, import danh sách thi, theo dõi dự thi (UCADM15–17) | ❌ | ❌ | ❌ | ✅ |
-| Báo cáo lớp (UCGV07/08), tra cứu hồ sơ SV (UCGV09) | ✅ | ✅ | ✅ | ✅ |
+| Báo cáo thống kê (UCGV07/08), tra cứu hồ sơ SV (UCGV09) | ✅ | ✅ | ✅ | ✅ |
 | Import tài khoản SV/GV (UCADM08) | ❌ | ❌ | ❌ | ✅ |
 | Tạo từng tài khoản SV/GV; quản lý tài khoản SV và GV; nâng/thu hồi Admin (UCADM09) | ❌ | ❌ | ❌ | ✅ |
 | Tổng quan hệ thống, cấu hình (UCADM05) | ❌ | ❌ | ❌ | ✅ |
@@ -945,10 +945,10 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 | BR-10 | Bắt đầu phiên chỉ hợp lệ khi: SV thuộc danh sách của kỳ được chọn; kỳ ở trạng thái hiệu lực OPEN tại thời điểm hiện tại; SV chưa có phiên IN_PROGRESS (409 theo #58); SV chưa có phiên COMPLETED trong kỳ đó. |
 | BR-11 | expires_at tính một lần lúc bắt đầu phiên theo DC-20. Quá expires_at ⇒ luật K5/#77 (≥ 8 câu ⇒ COMPLETED + TIMEOUT; ít hơn ⇒ ABANDONED). |
 | BR-12 | Admin đóng thủ công kỳ khi còn phiên đang chạy: phiên đang chạy tiếp tục tới expires_at đã cấp, chỉ chặn phiên mới (người dùng chốt 27/11/2026). |
-| BR-13 | Báo cáo lớp (UCGV07/08, UCADM05) lọc được theo kỳ; mặc định hiển thị toàn hệ thống. |
+| BR-13 | Báo cáo thống kê (UCGV07/08, UCADM05) lọc được theo kỳ; mặc định hiển thị toàn hệ thống. |
 | BR-14 | Quên mật khẩu: phản hồi luôn như nhau dù email có tồn tại hay không; rate limit (quên mật khẩu theo email, đặt lại mật khẩu theo IP); vẫn phản hồi 202 khi Redis hoặc SMTP lỗi; OTP dùng một lần, hiệu lực 10 phút, tối đa 5 lần nhập sai (DC-21). |
 | BR-15 | Mọi import ghi nhật ký kiểm toán tối thiểu: ai, khi nào, số dòng, kết quả (không ghi mật khẩu). |
-| BR-16 | Phân quyền theo role và theo phân công: TEACHER xem báo cáo lớp và hồ sơ SV, và chỉ xử lý câu được giao cho mình (vai A hoặc B); ADMIN làm mọi chức năng quản trị (không sửa nội dung câu) và chức năng xem của Teacher; STUDENT chỉ dữ liệu của mình. Không đủ quyền ⇒ 403 (NOT_ASSIGNED với việc không được giao). |
+| BR-16 | Phân quyền theo role và theo phân công: TEACHER xem báo cáo thống kê và hồ sơ SV, và chỉ xử lý câu được giao cho mình (vai A hoặc B); ADMIN làm mọi chức năng quản trị (không sửa nội dung câu) và chức năng xem của Teacher; STUDENT chỉ dữ liệu của mình. Không đủ quyền ⇒ 403 (NOT_ASSIGNED với việc không được giao). |
 | BR-17 | Admin quản lý tài khoản giảng viên: tạo, sửa, khóa/mở khóa; nâng TEACHER → ADMIN và thu hồi ADMIN → TEACHER. Danh sách giảng viên (`GET /teachers`) gồm cả tài khoản Admin và trả thêm `role` để giao diện hiện huy hiệu Admin và cho thu hồi quyền. Admin không tự thu hồi quyền của chính mình và không tự khóa chính mình; không khóa được tài khoản Admin khác (thu hồi quyền trước rồi mới khóa); chỉ đổi role giữa TEACHER và ADMIN, không áp dụng cho sinh viên (chốt 14/11/2026). |
 | BR-18 | Nâng/thu hồi Admin: không thu hồi nếu đó là Admin cuối cùng (đã chốt 28/11); token cũ của người bị đổi quyền mất hiệu lực quyền cũ ngay vì `JwtStrategy` tra tài khoản (role, isActive) từ CSDL ở mỗi request. Giữ quyết định #136 hoãn bảng `audit_logs` DB sang Khóa luận; thao tác quản trị ghi log có cấu trúc Pino (cấm ghi mật khẩu/OTP). |
 | BR-19 | Quản lý tài khoản (SV và GV): khóa tài khoản ⇒ không đăng nhập được và mọi request đang có token bị trả 401; phiên IN_PROGRESS không xử lý riêng, quá `expires_at` thì áp dụng K5, mở khóa khi phiên còn hạn thì làm tiếp được; Admin không tự khóa chính mình và không khóa tài khoản Admin; "Gửi lại mật khẩu tạm" áp dụng cho SV và GV kể cả khi đã đổi mật khẩu (mật khẩu mới thay thế, token cũ mất hiệu lực), không áp dụng cho Admin; không xóa cứng tài khoản đã có phiên/hồ sơ (chỉ khóa). Gửi lại mật khẩu tạm ⇒ sinh mật khẩu mới, mustChangePassword = true. |
@@ -1468,7 +1468,7 @@ Hợp đồng route `item-generation` phía Admin đã đối chiếu theo nhán
 | **Role** | **Quyền** | **Ghi chú** |
 | --- | --- | --- |
 | STUDENT | Chỉ xem Profile của chính mình (student_id phải khớp JWT sub) | Không xem được Profile của SV khác |
-| TEACHER | Xem Profile của bất kỳ SV nào; xem báo cáo lớp (lọc theo kỳ); với lô được giao: vai A sửa/duyệt/từ chối câu của mình, vai B xác nhận/loại câu được giao cho mình; không import, không tạo lô, không ghi ngoài phạm vi được giao | GV thường chỉ xem kết quả (DC-18) ngoài việc được giao (DC-40); API câu hỏi kiểm phân công (NOT_ASSIGNED, 403); hệ thống đơn trường nên không còn phạm vi theo trường |
+| TEACHER | Xem Profile của bất kỳ SV nào; xem báo cáo thống kê (lọc theo kỳ); với lô được giao: vai A sửa/duyệt/từ chối câu của mình, vai B xác nhận/loại câu được giao cho mình; không import, không tạo lô, không ghi ngoài phạm vi được giao | GV thường chỉ xem kết quả (DC-18) ngoài việc được giao (DC-40); API câu hỏi kiểm phân công (NOT_ASSIGNED, 403); hệ thống đơn trường nên không còn phạm vi theo trường |
 | ADMIN | Siêu tập của TEACHER + toàn bộ chức năng quản trị: lô câu hỏi (tạo, import, giao việc, kiểm tra, import cuối), kỳ thi, import, tài khoản SV/GV, nâng/thu hồi Admin; không sửa và không duyệt nội dung câu (DC-29) | Không thu hồi được Admin cuối cùng (BR-18); Admin đầu tiên tạo bằng seed |
 | EduZ System (M2M) | Service Account với API Key riêng (không phải JWT) | Chỉ GET, không POST/DELETE |
 

@@ -75,7 +75,7 @@ Chuẩn hóa hoàn toàn theo code thực tế của module `item-generation`:
 ## III. Phân công & Danh sách Điểm nợ / Cần hoàn tất thủ công
 
 - **Phân vai phát triển BE/FE (theo `20261016_MoHinhHoaYeuCau.docx`):**
-  - **Đăng:** Toàn bộ `UCSV*` (thi CAT, hồ sơ năng lực, kết quả, đổi/quên mật khẩu) và `UCGV*` (duyệt A/B, báo cáo lớp, tra cứu SV, xem ngân hàng câu).
+  - **Đăng:** Toàn bộ `UCSV*` (thi CAT, hồ sơ năng lực, kết quả, đổi/quên mật khẩu) và `UCGV*` (duyệt A/B, báo cáo thống kê, tra cứu SV, xem ngân hàng câu).
   - **Phương:** Toàn bộ `UCADM*` (`item-generation`, `exam-round`, `user-admin`, `user-import`, dashboard tổng quan Admin).
 - **Điểm nợ chưa khóa schema trong đợt này:**
   - Bảng **nhật ký lần lưu roster** (`DECISIONS_LOG.md:196–198`) sẽ được bổ sung từ nhánh `feat/admin-exam-rounds` của Phương trước khi mở Wave 1 cho module `exam-round`.
