@@ -1,0 +1,92 @@
+# Nhóm Test Case M2M EduZ Export (F-07)
+# Phụ trách: Phương & Đăng (làm chung, review chéo)
+# Hợp đồng thực tế: GET /api/v1/placement-profiles/:studentCode/eduz-export (header X-Eduz-API-Key)
+
+- id: M2M_001
+  module: M2M EduZ Export
+  srs_ref: "F-07, SRS Mục 15.3"
+  ac_ref: "AC-F07-01"
+  case_type: "negative"
+  description: "Từ chối truy cập (401 Unauthorized) khi gọi API xuất LanguageProfile cho EduZ nhưng thiếu header X-Eduz-API-Key"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "api"
+  automation: "manual"
+  spec_ref: ""
+  test_name: ""
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Backend đang chạy với biến môi trường EDUZ_API_KEY đã cấu hình hợp lệ."
+    - "Trong cơ sở dữ liệu có ít nhất 1 sinh viên mã SV2026001 đã hoàn thành phiên thi CAT."
+  test_data:
+    - "Endpoint: GET /api/v1/placement-profiles/SV2026001/eduz-export"
+    - "Header: không gửi X-Eduz-API-Key"
+  steps:
+    - step: 1
+      detail: "Gửi yêu cầu HTTP GET tới /api/v1/placement-profiles/SV2026001/eduz-export không kèm header X-Eduz-API-Key."
+      expected: "Hệ thống trả mã HTTP 401 Unauthorized và không trả dữ liệu hồ sơ sinh viên."
+      actual: ""
+      result: "Not executed"
+
+- id: M2M_002
+  module: M2M EduZ Export
+  srs_ref: "F-07, SRS Mục 15.3"
+  ac_ref: "AC-F07-02"
+  case_type: "negative"
+  description: "Từ chối truy cập (401 Unauthorized) khi gửi sai giá trị header X-Eduz-API-Key"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "api"
+  automation: "manual"
+  spec_ref: ""
+  test_name: ""
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Backend đang chạy với biến môi trường EDUZ_API_KEY đã cấu hình hợp lệ."
+  test_data:
+    - "Endpoint: GET /api/v1/placement-profiles/SV2026001/eduz-export"
+    - "Header X-Eduz-API-Key chứa giá trị không khớp cấu hình"
+  steps:
+    - step: 1
+      detail: "Gửi yêu cầu HTTP GET tới /api/v1/placement-profiles/SV2026001/eduz-export kèm header X-Eduz-API-Key sai."
+      expected: "Hệ thống trả mã HTTP 401 Unauthorized (theo EduzApiKeyGuard) và từ chối xuất dữ liệu."
+      actual: ""
+      result: "Not executed"
+
+- id: M2M_003
+  module: M2M EduZ Export
+  srs_ref: "F-07"
+  ac_ref: "AC-F07-03"
+  case_type: "positive"
+  description: "Trả về JSON LanguageProfile đúng hợp đồng (200 OK) khi gửi đúng header X-Eduz-API-Key"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "api"
+  automation: "manual"
+  spec_ref: ""
+  test_name: ""
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Backend đang chạy với biến môi trường EDUZ_API_KEY đã cấu hình hợp lệ."
+    - "Sinh viên SV2026001 đã hoàn thành ít nhất 1 phiên thi CAT có LanguageProfile."
+  test_data:
+    - "Endpoint: GET /api/v1/placement-profiles/SV2026001/eduz-export"
+    - "Header X-Eduz-API-Key chứa giá trị hợp lệ từ biến môi trường"
+  steps:
+    - step: 1
+      detail: "Gửi yêu cầu HTTP GET tới /api/v1/placement-profiles/SV2026001/eduz-export kèm X-Eduz-API-Key hợp lệ."
+      expected: "Hệ thống trả HTTP 200 OK cùng JSON chứa studentCode, overallCefr, thetaOverall, seOverall và thông tin kỹ năng đúng cấu trúc."
+      actual: ""
+      result: "Not executed"

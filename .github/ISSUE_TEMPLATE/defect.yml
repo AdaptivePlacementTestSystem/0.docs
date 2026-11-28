@@ -1,0 +1,143 @@
+name: "Báo cáo lỗi (Defect — Bảng 6.2)"
+description: "Ghi nhận lỗi phát hiện trong quá trình kiểm thử (TC2.5), tự động tổng hợp vào DEFECT_LOG.md"
+title: "[DEFECT][TC_ID] Mô tả ngắn lỗi"
+labels: ["type:defect", "status:open"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > **Quy ước TC2.5:** Mọi lỗi phát hiện từ 28/11/2026 mở tập trung tại repo `AdaptivePlacementTestSystem/0.docs`.
+        > - Gắn thêm đúng 1 label `severity:*`, 1 label `priority:*` và 1 label `module:be|fe|docs`.
+        > - Khi sửa lỗi trên nhánh `develop` của `backend`/`frontend`, PR ghi `Refs AdaptivePlacementTestSystem/0.docs#<id>`.
+        > - Trước khi đóng lỗi, bắt buộc bình luận block `### Resolution & Regression` (`Fix PR / Commit`, `Root Cause`, `Regression Test Ref`, `Verified By & Date`, `CI Run Link`).
+
+  - type: input
+    id: testcase_id
+    attributes:
+      label: "TestCase ID"
+      description: "Mã Test Case bị Fail trong bộ YAML/Excel (ví dụ: ADM_012, STU_004, M2M_002)"
+      placeholder: "ADM_012"
+    validations:
+      required: true
+
+  - type: input
+    id: summary
+    attributes:
+      label: "Summary"
+      description: "Tóm tắt lỗi trong 1 câu ngắn gọn"
+      placeholder: "Guard M2M dùng fallback secret hardcode khi thiếu EDUZ_API_KEY"
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: "URL / Endpoint"
+      description: "Route giao diện hoặc API endpoint phát sinh lỗi"
+      placeholder: "GET /api/v1/placement-profiles/:studentCode/eduz-export"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: "Platform"
+      options:
+        - Web (Frontend)
+        - API (Backend)
+        - Fullstack (FE + BE)
+        - CI / Infrastructure
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: "Operating System"
+      placeholder: "Windows 11 / Ubuntu 24.04 (GitHub Actions)"
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: "Browser"
+      description: "Trình duyệt hoặc ghi N/A nếu lỗi API/Backend"
+      placeholder: "Chrome 131 / Edge 131 / N/A"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "Severity"
+      options:
+        - Blocker
+        - Critical
+        - Major
+        - Minor
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: "Mô tả chi tiết bối cảnh và tác động nghiệp vụ của lỗi"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to Reproduce"
+      description: "Các bước tái hiện lỗi theo thứ tự"
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected Result"
+      description: "Kết quả mong đợi theo SRS / Acceptance Criteria"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Actual Result"
+      description: "Kết quả thực tế quan sát được (kèm HTTP status / thông báo lỗi)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: "Screenshot / Log"
+      description: "Kéo thả ảnh chụp màn hình hoặc dán log lỗi rút gọn (không dán secret/.env)"
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: "Notes"
+      description: "Ghi chú thêm (commit phát hiện, môi trường test, liên quan BR/F-ID...)"
+    validations:
+      required: false

@@ -1,0 +1,114 @@
+# Nhóm Test Case Phi chức năng, Health Check & Pilot Smoke Test (SRS Mục 15.1–15.3)
+# Phụ trách: Phương & Đăng (làm chung, review chéo)
+
+- id: NFR_001
+  module: NFR Performance
+  srs_ref: "SRS Mục 15.1"
+  ac_ref: "AC-F03-04"
+  case_type: "boundary"
+  description: "Độ trễ API thi CAT (submit + next-item) đạt p95 < 300ms và computeEAP < 50ms"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "non-functional"
+  automation: "manual"
+  spec_ref: ""
+  test_name: ""
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Môi trường backend + PostgreSQL + Redis chạy ở chế độ production build với Item Bank đầy đủ."
+  test_data:
+    - "Chạy script benchmark tối thiểu 100 lượt POST /sessions/:id/responses + lấy câu tiếp theo."
+  steps:
+    - step: 1
+      detail: "Chạy script đo p95 cho submit+next-item, computeEAP, Profile API và Item Bank query."
+      expected: "submit+next-item p95 < 300ms, computeEAP < 50ms, Profile API p95 < 500ms, Item Bank query < 20ms."
+      actual: ""
+      result: "Not executed"
+
+- id: NFR_002
+  module: NFR Security
+  srs_ref: "F-09, F-20, SRS Mục 15.3"
+  ac_ref: "AC-F09-03"
+  case_type: "negative"
+  description: "Xuất CSV danh sách dự thi và báo cáo lớp đúng dữ liệu thực và vô hiệu hóa công thức chống CSV Injection"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/integration/participants-postgres.e2e-spec.ts"
+  test_name: "exports filtered CSV and XLSX using actual participant records"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Kỳ thi có danh sách thí sinh trong PostgreSQL."
+  test_data:
+    - "GET /api/v1/exam-rounds/:id/participants/export?format=csv (kèm kiểm tra ô bắt đầu bằng =, +, -, @)."
+  steps:
+    - step: 1
+      detail: "Xuất file CSV/XLSX danh sách dự thi có bộ lọc."
+      expected: "Trả đúng dữ liệu đã lọc và escape an toàn các ký tự công thức (=, +, -, @)."
+      actual: ""
+      result: "Not executed"
+
+- id: NFR_003
+  module: Operations & Health
+  srs_ref: "TC2.6, SRS Mục XI"
+  ac_ref: "AC-F29-01"
+  case_type: "positive"
+  description: "Endpoint /health kiểm tra sẵn sàng PostgreSQL và Redis (liveness + readiness probe)"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/health/health.controller.spec.ts"
+  test_name: "should return ready status when database and redis are healthy"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "PostgreSQL và Redis đang hoạt động bình thường."
+  test_data:
+    - "GET /api/v1/health và GET /api/v1/health/ready."
+  steps:
+    - step: 1
+      detail: "Gọi endpoint kiểm tra sức khỏe hệ thống."
+      expected: "Trả HTTP 200 kèm trạng thái ready cho cả DB và Redis; trả 503 degraded khi dịch vụ phụ thuộc lỗi."
+      actual: ""
+      result: "Not executed"
+
+- id: NFR_004
+  module: Pilot Smoke Test
+  srs_ref: "F-10, F-24, SRS Mục 9b.8 (Q-9)"
+  ac_ref: "AC-F24-04"
+  case_type: "positive"
+  description: "Pilot Smoke Test có kiểm soát ngân sách với Gemini API (generate + embedding) và Brevo SMTP thật"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "non-functional"
+  automation: "manual"
+  spec_ref: ""
+  test_name: ""
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Biến môi trường GEMINI_API_KEY và cấu hình SMTP Brevo (SPF/DKIM) đã nạp ngoài repo."
+  test_data:
+    - "Tạo 1 lô pilot nhỏ (count = 3) và gửi 1 email mật khẩu tạm/OTP thật tới hộp thư kiểm thử."
+  steps:
+    - step: 1
+      detail: "Chạy sinh lô pilot 3 câu qua Gemini + kiểm C1/embedding và gửi 1 email thật qua Brevo."
+      expected: "Lô chuyển READY_TO_ASSIGN có đủ topicTag và lời giải; email đến đúng hộp thư không bị lỗi 5xx; lưu log không lộ key."
+      actual: ""
+      result: "Not executed"

@@ -1,0 +1,787 @@
+# Nhóm Test Case Quản trị viên — Dashboard, Tài khoản, Kỳ thi, Roster, AI + F-10, Import đề, Giao việc & C3
+# (F-10, F-18..F-20, F-22..F-25, F-28, F-29, Q1–Q8)
+# Phụ trách: Phương viết — Đăng review
+
+- id: ADM_001
+  module: Admin Dashboard
+  srs_ref: "F-29"
+  ac_ref: "AC-F29-01"
+  case_type: "positive"
+  description: "Dashboard tổng quan trả đủ 6 mức CEFR, 6 trạng thái câu, đếm SV distinct COMPLETED và lọc theo examRoundId"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/reporting/application/use-cases/get-system-overview.use-case.spec.ts"
+  test_name: "SV đã thi: đếm SV khác nhau có phiên COMPLETED (không tính ABANDONED/IN_PROGRESS)"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "DB có các phiên thi COMPLETED, IN_PROGRESS và ABANDONED."
+  test_data:
+    - "Gọi GET /api/v1/reports/overview (có và không có examRoundId)."
+  steps:
+    - step: 1
+      detail: "Admin mở màn hình Tổng quan và lọc theo kỳ thi."
+      expected: "Đếm đúng SV distinct có phiên COMPLETED, hiển thị đủ 6 mức CEFR và 6 trạng thái câu."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_002
+  module: Admin Dashboard
+  srs_ref: "F-29"
+  ac_ref: "AC-F29-02"
+  case_type: "boundary"
+  description: "Thống kê lô cần xử lý chỉ tính đúng 4 trạng thái READY_TO_ASSIGN, READY_TO_FINALIZE, FAILED, PARTIAL"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/reporting/application/use-cases/get-system-overview.use-case.spec.ts"
+  test_name: "lô cần xử lý: chỉ READY_TO_ASSIGN, READY_TO_FINALIZE, FAILED, PARTIAL (không có IN_REVIEW)"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "DB có lô ở đủ các trạng thái IN_REVIEW, READY_TO_ASSIGN, READY_TO_FINALIZE, FAILED, PARTIAL, DONE."
+  test_data:
+    - "Gọi GetSystemOverviewUseCase."
+  steps:
+    - step: 1
+      detail: "Kiểm tra số đếm pendingBatches trong phản hồi tổng quan."
+      expected: "Chỉ tính các lô cần Admin hành động, không tính IN_REVIEW và DONE."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_003
+  module: User Admin
+  srs_ref: "F-18, BR-05"
+  ac_ref: "AC-F18-01"
+  case_type: "positive"
+  description: "Tạo tài khoản SV đơn lẻ sinh MK tạm 12 ký tự băm argon2, mustChangePassword = true và gửi email"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/user-admin/application/use-cases/create-account.use-case.spec.ts"
+  test_name: "tạo sinh viên: role STUDENT, mustChangePassword, LOCAL, mật khẩu băm argon2"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Admin đăng nhập hợp lệ."
+  test_data:
+    - "POST /api/v1/students với MSSV, họ tên, email chưa tồn tại."
+  steps:
+    - step: 1
+      detail: "Admin tạo tài khoản sinh viên mới qua form."
+      expected: "Lưu tài khoản role STUDENT, mustChangePassword = true, không trả passwordHash, gửi email MK tạm."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_004
+  module: User Admin
+  srs_ref: "F-18"
+  ac_ref: "AC-F18-02"
+  case_type: "negative"
+  description: "Tạo tài khoản trùng email hoặc trùng MSSV trả 409 CONFLICT kèm details.field, không lưu và không gửi mail"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/user-admin/application/use-cases/create-account.use-case.spec.ts"
+  test_name: "email trùng: 409 CONFLICT, trường email, không lưu và không gửi mail"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Email đã tồn tại trong hệ thống."
+  test_data:
+    - "Payload tạo tài khoản có email trùng."
+  steps:
+    - step: 1
+      detail: "Gửi POST /api/v1/students với email đã tồn tại."
+      expected: "Trả HTTP 409 Conflict kèm trường email, không ghi DB và không gửi email."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_005
+  module: User Admin
+  srs_ref: "F-22, BR-17, BR-19"
+  ac_ref: "AC-F22-01"
+  case_type: "negative"
+  description: "Không cho phép tự thu hồi quyền Admin, không khóa/thu hồi Admin cuối kể cả khi 2 Admin thao tác đồng thời"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/integration/admin-role-postgres.e2e-spec.ts"
+  test_name: "prevents two admins concurrently revoking each other"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "PostgreSQL test có đúng 2 tài khoản ADMIN."
+  test_data:
+    - "2 request đổi role ADMIN → TEACHER của nhau gửi đồng thời."
+  steps:
+    - step: 1
+      detail: "Gửi song song 2 lệnh thu hồi quyền Admin lẫn nhau."
+      expected: "Thao tác nguyên tử bảo đảm luôn còn ít nhất 1 Admin hoạt động, lệnh thứ hai bị chặn 409."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_006
+  module: User Admin
+  srs_ref: "F-22"
+  ac_ref: "AC-F22-03"
+  case_type: "negative"
+  description: "Gửi lại mật khẩu tạm không áp dụng cho tài khoản Admin (trả 403, không đổi mật khẩu)"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/user-admin/application/use-cases/resend-temporary-password.use-case.spec.ts"
+  test_name: "không áp dụng cho tài khoản Admin: 403, không đổi mật khẩu"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Tài khoản đích có role ADMIN."
+  test_data:
+    - "POST /api/v1/users/:adminId/resend-temporary-password."
+  steps:
+    - step: 1
+      detail: "Gọi API gửi lại mật khẩu tạm cho tài khoản Admin."
+      expected: "Trả HTTP 403 Forbidden và giữ nguyên mật khẩu hiện tại."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_007
+  module: User Import
+  srs_ref: "F-23"
+  ac_ref: "AC-F23-01"
+  case_type: "positive"
+  description: "Upload file Excel tài khoản phân tách dòng hợp lệ/lỗi/trùng DB vào lưới tạm Redis, chưa ghi PostgreSQL"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/user-import/application/use-cases/upload-import-file.use-case.spec.ts"
+  test_name: "dòng hợp lệ vào lưới: có rowKey, email chữ thường; chưa ghi DB"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "File .xlsx đúng mẫu gồm cả dòng hợp lệ, dòng lỗi và dòng trùng."
+  test_data:
+    - "Multipart upload file .xlsx loại STUDENT."
+  steps:
+    - step: 1
+      detail: "Admin upload file vào lưới tạm import tài khoản."
+      expected: "Dòng hợp lệ vào lưới Redis có rowKey, email chữ thường; dòng lỗi không chặn dòng tốt; chưa ghi DB."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_008
+  module: User Import
+  srs_ref: "F-23"
+  ac_ref: "AC-F23-02"
+  case_type: "boundary"
+  description: "Bấm Lưu khi lưới tạm Redis đã hết TTL trả 410 IMPORT_GRID_EXPIRED; lưới rỗng trả 422"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/user-import/application/save-import.spec.ts"
+  test_name: "lưới hết hạn (không còn khóa Redis): 410 IMPORT_GRID_EXPIRED"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Khóa lưới tạm Redis của Admin đã hết hạn TTL."
+  test_data:
+    - "POST /api/v1/users/import/save khi không còn key Redis."
+  steps:
+    - step: 1
+      detail: "Gọi API Lưu lưới tạm đã hết TTL."
+      expected: "Trả HTTP 410 với mã IMPORT_GRID_EXPIRED."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_009
+  module: User Import
+  srs_ref: "F-23"
+  ac_ref: "AC-F23-03"
+  case_type: "boundary"
+  description: "Chặn gọi Lưu đồng thời lần 2 cho cùng (admin, kind) với 409 Conflict trong khi job trước đang PROCESSING"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/user-import/application/save-import.spec.ts"
+  test_name: "đang có tác vụ Lưu cho cùng (admin, loại): 409, không chạy hai lần"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Đang có job import ở trạng thái PROCESSING cho (admin1, STUDENT)."
+  test_data:
+    - "Gửi tiếp POST /api/v1/users/import/save cho (admin1, STUDENT)."
+  steps:
+    - step: 1
+      detail: "Admin bấm Lưu lần 2 trong lúc tác vụ đầu chưa xong."
+      expected: "Trả HTTP 409, không sinh job trùng lặp."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_010
+  module: Exam Round
+  srs_ref: "F-19"
+  ac_ref: "AC-F19-01"
+  case_type: "negative"
+  description: "Từ chối tạo kỳ thi khi khung giờ không hợp lệ hoặc durationMinutes vượt quá khoảng mở–đóng"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/exam-round/application/use-cases/admin-exam-rounds.use-case.spec.ts"
+  test_name: "rejects invalid time windows and durations longer than the window"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Admin đăng nhập hợp lệ."
+  test_data:
+    - "closesAt <= opensAt hoặc durationMinutes > (closesAt - opensAt)."
+  steps:
+    - step: 1
+      detail: "Gửi POST /api/v1/exam-rounds với khung giờ hoặc thời lượng không hợp lệ."
+      expected: "Trả HTTP 400 Bad Request, không tạo bản ghi."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_011
+  module: Exam Round
+  srs_ref: "F-19, BR-08"
+  ac_ref: "AC-F19-02"
+  case_type: "negative"
+  description: "Chỉ cho công bố kỳ DRAFT khi có >= 1 thí sinh và opensAt ở tương lai; serialize công bố đồng thời"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/integration/exam-round-postgres.e2e-spec.ts"
+  test_name: "enforces publication conditions against PostgreSQL and persists updates"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "PostgreSQL test có kỳ DRAFT 0 SV và kỳ DRAFT đủ SV."
+  test_data:
+    - "POST /api/v1/exam-rounds/:id/publish."
+  steps:
+    - step: 1
+      detail: "Thử công bố kỳ 0 SV / opensAt quá khứ, sau đó thêm SV và công bố hợp lệ."
+      expected: "Từ chối khi thiếu điều kiện BR-08; chuyển sang SCHEDULED khi đủ điều kiện."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_012
+  module: Exam Round
+  srs_ref: "F-19"
+  ac_ref: "AC-F19-03"
+  case_type: "boundary"
+  description: "Chuyển trạng thái hiệu lực lazy: SCHEDULED → OPEN đúng opensAt, → CLOSED đúng closesAt"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/exam-round/domain/effective-status.spec.ts"
+  test_name: "SCHEDULED tới giờ mở chuyển thành OPEN (lazy, cột status chưa được ghi lại)"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Kỳ thi có status = SCHEDULED và mốc opensAt <= now < closesAt."
+  test_data:
+    - "Tính effectiveStatus tại các mốc trước opensAt, đúng opensAt và đúng closesAt."
+  steps:
+    - step: 1
+      detail: "Gọi hàm tính effectiveStatus qua các mốc thời gian."
+      expected: "Trả chính xác SCHEDULED → OPEN → CLOSED; kỳ đóng thủ công CLOSED không tự mở lại."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_013
+  module: Exam Round
+  srs_ref: "F-19"
+  ac_ref: "AC-F19-04"
+  case_type: "negative"
+  description: "Kỳ đã công bố không cho sửa tên và thời lượng; kỳ đang mở chỉ cho kéo dài giờ đóng"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/exam-round/application/use-cases/admin-exam-round-edit.use-case.spec.ts"
+  test_name: "kỳ đang mở chỉ kéo dài giờ đóng, không sửa kỳ đã đóng"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Kỳ thi ở trạng thái SCHEDULED, OPEN và CLOSED."
+  test_data:
+    - "PATCH /api/v1/exam-rounds/:id thử sửa tên hoặc rút ngắn giờ đóng."
+  steps:
+    - step: 1
+      detail: "Gửi yêu cầu sửa trường bị khóa ở kỳ đã công bố/đang mở/đã đóng."
+      expected: "Chặn sửa tên/thời lượng sau công bố, chặn rút ngắn giờ đóng khi OPEN và chặn mọi sửa đổi khi CLOSED."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_014
+  module: Exam Round
+  srs_ref: "F-19, BR-12"
+  ac_ref: "AC-F19-05"
+  case_type: "boundary"
+  description: "Đóng kỳ thủ công giữ nguyên phiên đang chạy tới expiresAt và chặn bắt đầu phiên mới kể cả khi race"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/integration/exam-round-postgres.e2e-spec.ts"
+  test_name: "close keeps an active session unchanged and blocks starts even when requests race"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Kỳ đang OPEN có 1 SV đang thi IN_PROGRESS và 1 SV khác gọi startSession."
+  test_data:
+    - "Gọi đồng thời POST /exam-rounds/:id/close và POST /sessions."
+  steps:
+    - step: 1
+      detail: "Admin đóng kỳ thủ công song song với yêu cầu bắt đầu phiên mới."
+      expected: "Phiên đang chạy vẫn giữ nguyên expiresAt; không cho bắt đầu phiên mới sau khi đóng."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_015
+  module: Exam Round Roster
+  srs_ref: "F-20"
+  ac_ref: "AC-F20-01"
+  case_type: "negative"
+  description: "Parser Excel danh sách thi từ chối file sai định dạng, vượt 2MB nén, vượt 20MB giải nén hoặc chứa công thức tiêu đề"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/exam-round/infrastructure/excel-roster.parser.spec.ts"
+  test_name: "từ chối vượt giới hạn file nén, số dòng và kích thước giải nén"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "ExcelRosterParser bật giới hạn nén 2MB, giải nén 20MB, 1000 dòng."
+  test_data:
+    - "File vượt giới hạn giải nén / sai đuôi / công thức trong tiêu đề."
+  steps:
+    - step: 1
+      detail: "Đưa file không hợp lệ qua parser roster."
+      expected: "Từ chối ngay với lỗi rõ ràng, không nạp vào lưới Redis."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_016
+  module: Exam Round Roster
+  srs_ref: "F-20"
+  ac_ref: "AC-F20-03"
+  case_type: "boundary"
+  description: "Lưu danh sách thi idempotent bằng operationId (RosterImportEvent) và retry an toàn khi xóa Redis lỗi"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/integration/roster-upload.e2e-spec.ts"
+  test_name: "saves once, records audit, and safely retries after Redis cleanup fails"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "PostgreSQL + Redis test có lưới roster hợp lệ của Admin."
+  test_data:
+    - "POST /exam-rounds/:id/participants/import/save gọi lại với cùng operationId."
+  steps:
+    - step: 1
+      detail: "Giả lập lỗi cleanup Redis sau khi transaction DB đã commit, rồi retry cùng operationId."
+      expected: "Chỉ ghi participant 1 lần, ghi nhận RosterImportEvent và trả kết quả an toàn không nhân đôi."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_017
+  module: Exam Round Roster
+  srs_ref: "F-19, F-20"
+  ac_ref: "AC-F20-04"
+  case_type: "positive"
+  description: "Luồng E2E thực tế: Admin tạo kỳ, lưu roster, công bố, theo dõi và sửa lịch với API thật"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "e2e"
+  automation: "auto"
+  spec_ref: "frontend/tests/e2e/admin-exam-real.spec.ts"
+  test_name: "Admin tạo kỳ, lưu roster, công bố, theo dõi và sửa lịch với API thật"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Backend + Frontend + PostgreSQL + Redis chạy thật với fixture ADMIN_E2E_FIXTURE_DIR."
+  test_data:
+    - "Tài khoản Admin thật và file Excel roster hợp lệ."
+  steps:
+    - step: 1
+      detail: "Chạy kịch bản Playwright admin-exam-real.spec.ts."
+      expected: "Tạo kỳ, upload & lưu roster, công bố kỳ, theo dõi danh sách và sửa lịch thành công 100%."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_018
+  module: Item Generation
+  srs_ref: "F-24"
+  ac_ref: "AC-F24-01"
+  case_type: "positive"
+  description: "Tạo lô sinh AI nguyên tử (batch + job), idempotent theo operationId và kiểm tra cấu hình provider"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/create-ai-batch.use-case.spec.ts"
+  test_name: "creates batch and job atomically"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Biến môi trường LLM provider hợp lệ."
+  test_data:
+    - "POST /api/v1/admin/item-batches/generate với skill, cefrTarget, count, operationId."
+  steps:
+    - step: 1
+      detail: "Admin tạo lô câu hỏi AI mới."
+      expected: "Tạo ItemBatch trạng thái GENERATING và ItemBatchJob trong cùng transaction."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_019
+  module: AI Question Tagging
+  srs_ref: "F-10, F-24"
+  ac_ref: "AC-F10-01"
+  case_type: "positive"
+  description: "F-10: Khi tạo lô AI bỏ trống topicTag, prompt yêu cầu AI trả topicTag và hệ thống lưu đúng xuống items.topic_tag"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/process-ai-batch.use-case.spec.ts"
+  test_name: "lưu topicTag do AI tự gán khi lô không truyền topicTag và yêu cầu topicTag trong prompt"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô AI_GENERATED có batch.topicTag = null và >= 3 câu mẫu FINAL_APPROVED."
+  test_data:
+    - "AI trả JSON candidate kèm topicTag: 'past_simple'."
+  steps:
+    - step: 1
+      detail: "Chạy ProcessAiBatchUseCase cho lô không chỉ định topicTag."
+      expected: "Prompt gửi lên LLM yêu cầu trường topicTag; bản ghi Item tạo trong DB lưu topicTag = 'past_simple'."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_020
+  module: AI Question Tagging
+  srs_ref: "F-10, F-24"
+  ac_ref: "AC-F10-02"
+  case_type: "boundary"
+  description: "F-10: Khi Admin chỉ định sẵn batch.topicTag, hệ thống ưu tiên giữ đúng batch.topicTag cho toàn bộ câu sinh"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/process-ai-batch.use-case.spec.ts"
+  test_name: "ưu tiên giữ batch.topicTag khi Admin đã chỉ định chủ đề cố định cho lô"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô AI_GENERATED có batch.topicTag = 'conditionals'."
+  test_data:
+    - "AI trả candidate với topicTag khác ('other_topic')."
+  steps:
+    - step: 1
+      detail: "Chạy ProcessAiBatchUseCase cho lô đã có topicTag cố định."
+      expected: "Item lưu trong DB giữ đúng topicTag = 'conditionals'."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_021
+  module: Item Generation
+  srs_ref: "F-24, Quyết định 27/11"
+  ac_ref: "AC-F24-02"
+  case_type: "boundary"
+  description: "Trần 250 lượt gọi AI/lô được cấp nguyên tử trong PostgreSQL — chỉ 1 request cuối cùng được qua khi chạm trần"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/ai-budget-postgres.e2e-spec.ts"
+  test_name: "allows only one of several concurrent calls at the limit"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "PostgreSQL test có lô đã dùng 249/250 lượt AI."
+  test_data:
+    - "Nhiều lời gọi reserveAiCall chạy song song."
+  steps:
+    - step: 1
+      detail: "Gửi song song nhiều yêu cầu cấp lượt AI tại mốc 249/250."
+      expected: "Đúng 1 yêu cầu thành công (250/250), các yêu cầu còn lại bị chặn AI_BUDGET_EXCEEDED."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_022
+  module: Item Generation
+  srs_ref: "F-24"
+  ac_ref: "AC-F24-03"
+  case_type: "negative"
+  description: "Kiểm đáp án độc lập G5 không gửi đáp án gốc cho mô hình và gắn cờ khi kết quả khác"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/check-independent-answer.use-case.spec.ts"
+  test_name: "không gửi đáp án gốc cho mô hình và ghi cờ khi kết quả khác"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Câu hỏi ứng viên có đáp án gốc A, mô hình giải độc lập chọn B."
+  test_data:
+    - "Chạy CheckIndependentAnswerUseCase."
+  steps:
+    - step: 1
+      detail: "Kiểm tra prompt lượt 1 và kết quả gắn cờ."
+      expected: "Prompt lượt 1 không chứa đáp án/lời giải gốc; ghi cờ cảnh báo khi đáp án lệch."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_023
+  module: Question Import
+  srs_ref: "F-25, Quyết định 27/11"
+  ac_ref: "AC-F25-02"
+  case_type: "boundary"
+  description: "Lưu lưới import > 50 câu tự động tách thành nhiều lô tối đa 50 câu/lô trong cùng transaction"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/question-import-save.e2e-spec.ts"
+  test_name: "splits 51 questions into two recoverable batches with one job each"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lưới tạm Redis có 51 câu hỏi hợp lệ."
+  test_data:
+    - "Gọi API Lưu lưới import câu hỏi với 51 dòng."
+  steps:
+    - step: 1
+      detail: "Admin bấm Lưu danh sách 51 câu hỏi."
+      expected: "Tách thành 2 lô (50 câu + 1 câu) cùng 2 job kiểm tra trong 1 transaction và có thể khôi phục khi retry."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_024
+  module: Batch Assignment
+  srs_ref: "F-28, BR-23"
+  ac_ref: "AC-F28-01"
+  case_type: "negative"
+  description: "Giao việc chặn chọn GV B thuộc nhóm GV A và chặn batchRevision cũ khi phân bổ đã thay đổi"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/assign-batch.use-case.spec.ts"
+  test_name: "chặn revision cũ khi thông tin phân bổ thay đổi"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô READY_TO_ASSIGN đã có sự thay đổi sau lần preview trước."
+  test_data:
+    - "POST /assign với batchRevision cũ và ca chọn confirmer trùng reviewer."
+  steps:
+    - step: 1
+      detail: "Gửi yêu cầu giao việc với batchRevision cũ."
+      expected: "Từ chối với lỗi xung đột revision; không giao việc khi B nằm trong nhóm A."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_025
+  module: Batch Assignment
+  srs_ref: "F-28, BR-22"
+  ac_ref: "AC-F28-02"
+  case_type: "positive"
+  description: "Giao lại (reassign) chỉ đổi GV A cho câu DRAFT kèm lý do bắt buộc, giữ nguyên GV B và hạn"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/reassign-batch.use-case.spec.ts"
+  test_name: "đổi GV A, giữ GV B và hạn; ghi audit mỗi câu"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô đang IN_REVIEW có câu DRAFT cần đổi GV A."
+  test_data:
+    - "POST /reassign kèm reason hợp lệ và danh sách câu DRAFT."
+  steps:
+    - step: 1
+      detail: "Admin giao lại các câu DRAFT sang GV A mới kèm lý do."
+      expected: "Đổi reviewerId cho câu DRAFT, giữ nguyên confirmerId cấp lô & hạn, ghi audit cho từng câu."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_026
+  module: Batch Assignment
+  srs_ref: "F-28, BR-24"
+  ac_ref: "AC-F28-04"
+  case_type: "negative"
+  description: "Đổi hạn duyệt (PATCH /deadlines) từ chối lý do trống và từ chối hạn B trước hạn A"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/update-batch-deadlines.use-case.spec.ts"
+  test_name: "từ chối lý do trống"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô đang trong vòng duyệt IN_REVIEW."
+  test_data:
+    - "PATCH /deadlines với reason = '' hoặc reviewDueAt > confirmDueAt."
+  steps:
+    - step: 1
+      detail: "Gửi yêu cầu đổi hạn thiếu lý do."
+      expected: "Từ chối 400 Bad Request, không cập nhật hạn và không đặt lại cờ nhắc."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_027
+  module: Batch Assignment
+  srs_ref: "F-28, BR-29"
+  ac_ref: "AC-F28-05"
+  case_type: "boundary"
+  description: "Hủy câu tồn đọng (cancel-pending) ghi 1 sự kiện audit, bảo toàn câu đã duyệt và chuyển DONE khi hết câu mở"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "integration"
+  automation: "auto"
+  spec_ref: "backend/test/cancel-pending-postgres.e2e-spec.ts"
+  test_name: "marks a nonempty batch DONE when all items are terminal"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô không rỗng có các câu tồn đọng DRAFT/FIRST_APPROVED."
+  test_data:
+    - "POST /cancel-pending kèm reason hợp lệ."
+  steps:
+    - step: 1
+      detail: "Admin hủy các câu tồn đọng của lô."
+      expected: "Ghi 1 sự kiện CANCEL_PENDING cấp lô, bảo toàn câu đã duyệt, và chuyển lô sang DONE nếu tất cả câu đã kết thúc."
+      actual: ""
+      result: "Not executed"
+
+- id: ADM_028
+  module: Batch Finalization
+  srs_ref: "F-28, Q4"
+  ac_ref: "AC-F28-06"
+  case_type: "boundary"
+  description: "Import cuối: chỉ nhập câu đủ điều kiện sang FINAL_APPROVED, giữ PARTIALLY_IMPORTED khi còn cờ mềm và chặn khi C3 stale"
+  created_by: "Phương"
+  reviewed_by: "Đăng"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/item-generation/application/import-batch.use-case.spec.ts"
+  test_name: "chỉ nhập câu đủ điều kiện, giữ lô nhập một phần khi còn cờ mềm"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Lô đã kiểm C3, có câu PASS và câu còn cờ mềm chưa quyết định."
+  test_data:
+    - "POST /import trên lô có cờ mềm mở."
+  steps:
+    - step: 1
+      detail: "Admin thực hiện import lô khi còn cờ mềm chưa xử lý."
+      expected: "Câu sạch chuyển FINAL_APPROVED, lô chuyển PARTIALLY_IMPORTED cho đến khi xử lý hết cờ mềm; chặn nếu ngân hàng phát sinh câu trùng."
+      actual: ""
+      result: "Not executed"

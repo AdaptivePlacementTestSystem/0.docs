@@ -1,0 +1,58 @@
+# Schema chuẩn cho các file Test Case YAML trong `0.docs/testing/cases/*.yaml`
+# Được kiểm chứng tự động bởi `0.docs/testing/scripts/build_testcases_xlsx.py`
+
+schema_version: "1.0"
+
+enums:
+  case_type:
+    - positive     # Luồng chuẩn (happy path)
+    - negative     # Ca lỗi / dữ liệu không hợp lệ / chặn quyền (4xx)
+    - boundary     # Ca biên (ngưỡng SE, irt_b, kích thước file, timeout, concurrency)
+  test_level:
+    - unit
+    - integration
+    - api
+    - e2e
+    - non-functional
+  automation:
+    - auto         # Bắt buộc khai báo spec_ref + test_name hợp lệ
+    - manual       # Chạy thủ công trên UI/staging
+  status:
+    - Not executed
+    - Pass
+    - Fail
+    - Suspended
+    - Crashed
+
+path_prefixes:
+  # Dùng prefix thống nhất theo tên repo GitHub (không dùng đường dẫn máy cá nhân)
+  - "0.docs/"
+  - "backend/"
+  - "frontend/"
+
+required_fields:
+  - id             # Mã duy nhất (VD: AUTH_001, STU_001, TCH_001, ADM_001, M2M_001, NFR_001)
+  - module         # Tên module nghiệp vụ (VD: Auth, CAT Engine, Exam Round, Item Generation, M2M EduZ)
+  - srs_ref        # Tham chiếu F-ID / BR-ID / Mục SRS (VD: "F-07, SRS Mục 9")
+  - ac_ref         # Mã Acceptance Criteria truy vết 1-1 tới bảng AC trong Test Plan/SRS (VD: "AC-F07-01")
+  - case_type      # positive | negative | boundary
+  - description    # Mô tả mục tiêu kiểm thử ngắn gọn, rõ ràng
+  - created_by     # "Phương" hoặc "Đăng"
+  - reviewed_by    # "Đăng" hoặc "Phương" (khác created_by)
+  - version        # Phiên bản TC (VD: "1.0")
+  - test_level     # unit | integration | api | e2e | non-functional
+  - automation     # auto | manual
+  - spec_ref       # Đường dẫn file test (bắt buộc nếu automation=auto; để "" nếu manual)
+  - test_name      # Tên block it(...)/test(...) trong spec_ref (bắt buộc nếu automation=auto)
+  - qa_log:
+      tester: ""
+      date_tested: ""      # Định dạng YYYY-MM-DD khi đã thực thi
+      status: "Not executed"
+  - prerequisites  # Danh sách chuỗi điều kiện tiên quyết (>= 1 mục)
+  - test_data      # Danh sách chuỗi dữ liệu đầu vào (>= 1 mục)
+  - steps          # Danh sách bước kiểm thử (>= 1 bước):
+                   #   - step: int (1, 2, 3...)
+                   #     detail: str
+                   #     expected: str
+                   #     actual: str ("" nếu chưa chạy)
+                   #     result: "Not executed" | "Pass" | "Fail" | "Suspended" | "Crashed"

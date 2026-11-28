@@ -1,0 +1,450 @@
+# Nhóm Test Case Sinh viên & CAT Engine (F-03, F-04, F-05, F-06, F-08)
+# Phụ trách: Đăng viết — Phương review
+
+- id: STU_001
+  module: CAT Engine
+  srs_ref: "F-03, SRS Mục 4.3"
+  ac_ref: "AC-F03-03"
+  case_type: "positive"
+  description: "Ca bắt buộc 1 (SRS 4.3): Toàn đúng liên tiếp làm năng lực θ̂ tăng dương rõ rệt"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/cat-engine/application/services/cat-engine.service.spec.ts"
+  test_name: "1. Toàn đúng: theta phải tăng dương rõ rệt"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "CATEngine dùng lưới EAP 41 điểm [-4, +4] bước 0.2, Prior N(0,1), θ0 = -0.5."
+  test_data:
+    - "Chuỗi câu hỏi tăng độ khó với tất cả câu trả lời ĐÚNG."
+  steps:
+    - step: 1
+      detail: "Chạy computeEAP() với chuỗi phản hồi toàn đúng."
+      expected: "θ̂ tăng dương rõ rệt (> 0.5), nằm trong [-4, +4] và SE giảm dần."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_002
+  module: CAT Engine
+  srs_ref: "F-03, SRS Mục 4.3"
+  ac_ref: "AC-F03-03"
+  case_type: "negative"
+  description: "Ca bắt buộc 2 (SRS 4.3): Toàn sai liên tiếp làm năng lực θ̂ giảm âm rõ rệt"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/cat-engine/application/services/cat-engine.service.spec.ts"
+  test_name: "2. Toàn sai: theta phải giảm âm rõ rệt"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "CATEngine dùng lưới EAP 41 điểm [-4, +4] bước 0.2, Prior N(0,1)."
+  test_data:
+    - "Chuỗi câu hỏi với tất cả câu trả lời SAI."
+  steps:
+    - step: 1
+      detail: "Chạy computeEAP() với chuỗi phản hồi toàn sai."
+      expected: "θ̂ giảm âm rõ rệt (< -0.5) và bị chặn gọn trong [-4, +4]."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_003
+  module: CAT Engine
+  srs_ref: "F-03, SRS Mục 4.3"
+  ac_ref: "AC-F03-03"
+  case_type: "boundary"
+  description: "Ca bắt buộc 3 (SRS 4.3): Trả lời xen kẽ đúng/sai quanh b = 0 làm θ̂ hội tụ quanh 0"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/cat-engine/application/services/cat-engine.service.spec.ts"
+  test_name: "3. Xen kẽ đúng sai quanh b = 0: theta dao động quanh 0"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "CATEngine khởi tạo mặc định theo SRS Mục IV."
+  test_data:
+    - "Chuỗi câu hỏi quanh độ khó b = 0 trả lời xen kẽ đúng/sai."
+  steps:
+    - step: 1
+      detail: "Chạy computeEAP() với chuỗi phản hồi xen kẽ."
+      expected: "θ̂ hội tụ ổn định quanh 0 và SE giảm về dưới ngưỡng dừng."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_004
+  module: CAT Engine
+  srs_ref: "F-03, SRS Mục 4.2"
+  ac_ref: "AC-F03-01"
+  case_type: "positive"
+  description: "pickNextSkill() luân phiên cố định giữa VOCABULARY và GRAMMAR từ câu thứ 2"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/cat-engine/application/services/cat-engine.service.spec.ts"
+  test_name: "chọn xen kẽ giữa VOCABULARY và GRAMMAR"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Phiên thi có lastSkillPicked đã xác định."
+  test_data:
+    - "lastSkillPicked = VOCABULARY và lastSkillPicked = GRAMMAR."
+  steps:
+    - step: 1
+      detail: "Gọi pickNextSkill() liên tiếp với kỹ năng trước đó."
+      expected: "Luân phiên chặt VOCABULARY → GRAMMAR → VOCABULARY."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_005
+  module: CAT Engine
+  srs_ref: "F-03, SRS Mục 4.5"
+  ac_ref: "AC-F03-04"
+  case_type: "boundary"
+  description: "Dừng bài thi khi sai số chuẩn SE < 0.35"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/cat-engine/application/services/cat-engine.service.spec.ts"
+  test_name: "dừng khi SE < 0.35"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Cấu hình ngưỡng dừng SE = 0.35, minItems = 8, maxItems = 25."
+  test_data:
+    - "Trạng thái phiên có SE = 0.34 (< 0.35)."
+  steps:
+    - step: 1
+      detail: "Gọi checkStoppingCriterion() khi SE < 0.35."
+      expected: "Trả shouldStop = true với lý do SE_CONVERGED."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_006
+  module: CAT Engine
+  srs_ref: "F-03, SRS Mục 4.5"
+  ac_ref: "AC-F03-05"
+  case_type: "boundary"
+  description: "Outlier Early Stop chỉ dừng khi đã làm >= 8 câu, θ > 1.5 hoặc θ < -2.5 VÀ ΔSE < 0.01 trong 3 câu liên tiếp"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "manual"
+  spec_ref: ""
+  test_name: ""
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Đã cập nhật check-stopping-criterion.use-case.ts ở B4 bổ sung điều kiện ΔSE < 0.01 trong 3 câu liên tiếp."
+  test_data:
+    - "Ca A: itemCount = 8, θ = 1.8, ΔSE 3 câu = [0.008, 0.006, 0.005]; Ca B: itemCount = 8, θ = 1.8, ΔSE = [0.05, 0.03, 0.02]."
+  steps:
+    - step: 1
+      detail: "Kiểm tra checkStoppingCriterion() cho Ca A và Ca B."
+      expected: "Ca A trả shouldStop = true (OUTLIER_EARLY_STOP); Ca B trả shouldStop = false vì SE chưa hội tụ ΔSE < 0.01."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_007
+  module: Test Session
+  srs_ref: "F-04"
+  ac_ref: "AC-F04-02"
+  case_type: "negative"
+  description: "Sinh viên không thuộc danh sách thí sinh của kỳ thi bị chặn 403 Forbidden"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/test-session/application/use-cases/get-current-round-session.use-case.spec.ts"
+  test_name: "quăng ForbiddenException nếu sinh viên không thuộc danh sách thí sinh"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Kỳ thi tồn tại nhưng không có bản ghi ExamRoundParticipant cho sinh viên đang gọi."
+  test_data:
+    - "JWT của sinh viên ngoài danh sách kỳ thi."
+  steps:
+    - step: 1
+      detail: "Gọi GET /api/v1/exam-rounds/:id/session/current với sinh viên không nằm trong roster."
+      expected: "Hệ thống ném ForbiddenException (HTTP 403)."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_008
+  module: Test Session
+  srs_ref: "F-04, SRS Mục 15.3"
+  ac_ref: "AC-F04-02"
+  case_type: "negative"
+  description: "API resume phiên thi tuyệt đối không lộ đáp án đúng (correctAnswer) hay tham số irtB"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/test-session/presentation/resume-security.spec.ts"
+  test_name: "does not disclose the answer or IRT parameters of the current item"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Sinh viên có phiên thi đang IN_PROGRESS."
+  test_data:
+    - "Gọi GET /api/v1/sessions/:id/resume."
+  steps:
+    - step: 1
+      detail: "Kiểm tra payload JSON trả về của câu hỏi hiện tại."
+      expected: "Không chứa correctAnswer, explanation, irtB hay cefrTarget."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_009
+  module: Test Session
+  srs_ref: "F-04, SRS Mục 15.3"
+  ac_ref: "AC-F04-03"
+  case_type: "negative"
+  description: "Chống IDOR: Sinh viên A không thể khôi phục, nộp bài hay xem kết quả phiên của Sinh viên B (403)"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/test-session/presentation/session-idor.spec.ts"
+  test_name: "quăng ForbiddenException (403) khi Sinh viên A cố nộp bài cho phiên của Sinh viên B"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Tồn tại phiên thi của Sinh viên B."
+  test_data:
+    - "JWT của Sinh viên A gọi POST /api/v1/sessions/:sessionBId/responses."
+  steps:
+    - step: 1
+      detail: "Sinh viên A gửi đáp án vào sessionId của Sinh viên B."
+      expected: "Hệ thống chặn và trả HTTP 403 Forbidden."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_010
+  module: Test Session
+  srs_ref: "F-04, SRS Mục 4.5"
+  ac_ref: "AC-F04-04"
+  case_type: "boundary"
+  description: "Quá hạn phiên thi khi đã làm >= 8 câu chuyển COMPLETED + TIMEOUT và tính kết quả"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/test-session/application/services/session-cleanup.service.spec.ts"
+  test_name: "khi quá hạn và đã làm >= 8 câu (đủ boundaryMinItems): tính kết quả COMPLETED với TIMEOUT"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Phiên IN_PROGRESS đã vượt expiresAt và có >= 8 phản hồi."
+  test_data:
+    - "itemCount = 8, expiresAt < now."
+  steps:
+    - step: 1
+      detail: "Kích hoạt kiểm tra quá hạn phiên thi (Lazy Cleanup / SessionCleanupService)."
+      expected: "Cập nhật status = COMPLETED, stopReason = TIMEOUT và tạo LanguageProfile."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_011
+  module: Test Session
+  srs_ref: "F-04, SRS Mục 4.5"
+  ac_ref: "AC-F04-04"
+  case_type: "boundary"
+  description: "Quá hạn phiên thi khi mới làm < 8 câu chuyển ABANDONED + TIMEOUT và xóa cache"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/test-session/application/services/session-cleanup.service.spec.ts"
+  test_name: "khi quá hạn và đã làm < 8 câu: cập nhật ABANDONED với TIMEOUT và xóa cache"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Phiên IN_PROGRESS đã vượt expiresAt và mới có < 8 phản hồi."
+  test_data:
+    - "itemCount = 5, expiresAt < now."
+  steps:
+    - step: 1
+      detail: "Kích hoạt kiểm tra quá hạn phiên thi."
+      expected: "Cập nhật status = ABANDONED, stopReason = TIMEOUT và dọn cache Redis."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_012
+  module: Test Session
+  srs_ref: "F-04, SRS Mục VIII"
+  ac_ref: "AC-F04-05"
+  case_type: "boundary"
+  description: "Khi Redis mất state giữa chừng, hệ thống khôi phục phiên từ PostgreSQL (reconstructFromDB) và tiếp tục thi"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "integration"
+  automation: "manual"
+  spec_ref: ""
+  test_name: ""
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Sinh viên đang làm dở 3 câu trong phiên IN_PROGRESS."
+  test_data:
+    - "Xóa khóa session trong Redis (FLUSHDB / DEL key) rồi gọi GET /resume hoặc POST /responses."
+  steps:
+    - step: 1
+      detail: "Xóa state phiên trong Redis và gửi tiếp câu trả lời kế tiếp."
+      expected: "Hệ thống tự tái dựng state (θ, SE, lastSkillPicked, danh sách câu đã làm) từ DB và trả câu hỏi tiếp theo không lỗi."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_013
+  module: Language Profile
+  srs_ref: "F-06, Q-D"
+  ac_ref: "AC-F06-01"
+  case_type: "positive"
+  description: "Tính toán chính xác skillProfiles và errorPatterns sau khi hoàn thành phiên thi"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "backend/src/modules/test-session/application/use-cases/compute-result.use-case.spec.ts"
+  test_name: "tính toán chính xác skillProfiles và errorPatterns theo Phương án 1 (Q-D)"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Phiên thi có đủ phản hồi hai kỹ năng Vocabulary và Grammar."
+  test_data:
+    - "Danh sách phản hồi kèm đúng/sai và topicTag."
+  steps:
+    - step: 1
+      detail: "Gọi ComputeResultUseCase cho phiên đã đạt điều kiện dừng."
+      expected: "Sinh LanguageProfile với skillProfiles (số đúng/tổng theo kỹ năng) và errorPatterns chính xác."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_014
+  module: Student Dashboard
+  srs_ref: "F-08"
+  ac_ref: "AC-F08-01"
+  case_type: "positive"
+  description: "Màn hình kết quả hiển thị đầy đủ huy hiệu CEFR, chỉ số Rasch θ/SE/CI 95%, kỹ năng và gợi ý cải thiện"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "frontend/tests/unit/result-card.test.tsx"
+  test_name: "hiển thị các chỉ số Rasch θ, SE và khoảng tin cậy 95%"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Sinh viên đã hoàn thành phiên thi và có SessionResult."
+  test_data:
+    - "SessionResult mẫu mức B1 kèm θ, SE, ci95 và weakTopics."
+  steps:
+    - step: 1
+      detail: "Render màn ResultCard với dữ liệu kết quả phiên thi."
+      expected: "Hiển thị rõ huy hiệu CEFR, θ, SE, CI 95%, số câu đúng/tổng từng kỹ năng và gợi ý học."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_015
+  module: AI Explainer
+  srs_ref: "F-05"
+  ac_ref: "AC-F05-01"
+  case_type: "positive"
+  description: "Màn hình xem lại bài làm hiển thị đáp án đã chọn, đáp án đúng và giải thích AI dùng chung của từng câu"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "frontend/tests/unit/review-view.test.tsx"
+  test_name: "hiển thị danh sách câu hỏi, đánh dấu 'Bạn đã chọn' và 'Đáp án đúng', cùng giải thích AI"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Phiên thi đã COMPLETED và cho phép xem lại."
+  test_data:
+    - "Danh sách ReviewEntry kèm selectedAnswer, correctAnswer, explanation."
+  steps:
+    - step: 1
+      detail: "Mở màn ReviewView của phiên thi đã hoàn thành."
+      expected: "Hiển thị đầy đủ câu hỏi, đánh dấu 'Bạn đã chọn', 'Đáp án đúng' và phần giải thích AI."
+      actual: ""
+      result: "Not executed"
+
+- id: STU_016
+  module: Language Profile
+  srs_ref: "F-06"
+  ac_ref: "AC-F06-02"
+  case_type: "positive"
+  description: "Màn lịch sử bài thi hiển thị đủ các trạng thái Hoàn thành, Hết giờ, Bỏ dở theo thứ tự mới nhất"
+  created_by: "Đăng"
+  reviewed_by: "Phương"
+  version: "1.0"
+  test_level: "unit"
+  automation: "auto"
+  spec_ref: "frontend/tests/unit/history-view.test.tsx"
+  test_name: "hiển thị bảng lịch sử bài thi với đầy đủ các trạng thái Hoàn thành, Hết giờ, Bỏ dở"
+  qa_log:
+    tester: ""
+    date_tested: ""
+    status: "Not executed"
+  prerequisites:
+    - "Sinh viên đã tham gia nhiều phiên thi với các trạng thái khác nhau."
+  test_data:
+    - "Danh sách lịch sử gồm phiên COMPLETED, TIMEOUT và ABANDONED."
+  steps:
+    - step: 1
+      detail: "Mở trang Lịch sử thi của sinh viên."
+      expected: "Hiển thị bảng đầy đủ trạng thái Hoàn thành, Hết giờ, Bỏ dở sắp xếp mới nhất trước."
+      actual: ""
+      result: "Not executed"
