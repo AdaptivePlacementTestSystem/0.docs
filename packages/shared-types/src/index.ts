@@ -12,6 +12,8 @@ export * from './enums/check-level.enum';
 export * from './enums/review-action.enum';
 export * from './enums/check-point.enum';
 export * from './enums/cefr-confidence.enum';
+export * from './enums/item-check-reason-code.enum';
+export * from './enums/candidate-rejection-reason.enum';
 export * from './errors/error-code';
 export * from './errors/api-error';
 export * from './values';

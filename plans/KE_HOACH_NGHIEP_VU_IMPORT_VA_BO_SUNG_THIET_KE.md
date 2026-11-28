@@ -211,20 +211,20 @@ Chỉ chạy song song các task có ký hiệu `∥` cùng nhóm và **không c
 | BR-02 | Email duy nhất toàn hệ thống (không phân biệt hoa thường); MSSV (`student_code`) duy nhất toàn hệ thống (đã `@unique`). |
 | BR-03 | Dòng import tài khoản hợp lệ khi: MSSV, Họ tên, Email không rỗng; email đúng định dạng; không trùng trong grid hiện có; không trùng trong DB. Dòng không hợp lệ bị loại khỏi grid và báo qua popup (DC-22). |
 | BR-04 | **Lưu theo grid (DC-22):** nút Lưu ghi **mọi dòng đang có trong grid** (đã lọc lỗi) trong một transaction; dòng lỗi/đã tồn tại không bao giờ vào grid nên không chặn Lưu; Lưu khi grid rỗng bị từ chối. (Thay BR-04 cũ.) |
-| BR-05 | Tài khoản mới: `role=STUDENT`, `authProvider=LOCAL`, `mustChangePassword=true`. Email chỉ gửi sau khi bấm Lưu; gửi thất bại sau retry ⇒ ghi trạng thái "chưa gửi" để Admin xem được, không rollback tài khoản. |
-| BR-06 | Đổi mật khẩu: mật khẩu mới ≠ mật khẩu hiện tại; độ dài tối thiểu (đề xuất 8, chốt ở W1.3 theo SRS 15.3); sau thành công `mustChangePassword=false`, cấp lại token. |
+| BR-05 | Tài khoản mới: `role=STUDENT` hoặc `TEACHER`, `authProvider=LOCAL`, `mustChangePassword=true`. Email chỉ gửi sau khi bấm Lưu; gửi thất bại sau retry ⇒ ghi log `ERROR` ứng dụng/Better Stack, không rollback tài khoản; không lưu trạng thái gửi thư trên bảng `users` (#120), Admin xử lý bằng "Gửi lại mật khẩu tạm" trên S24. |
+| BR-06 | Đổi mật khẩu: mật khẩu mới ≠ mật khẩu hiện tại; độ dài tối thiểu 8 ký tự gồm chữ thường, chữ hoa, chữ số và ký tự đặc biệt (chốt 09/11/2026, #134 D4); sau thành công `mustChangePassword=false`, cấp lại token. |
 | BR-07 | **Chỉ Admin** tạo/sửa/công bố/đóng kỳ và import danh sách thi (DC-18, DC-19); GV thường chỉ xem kết quả. |
-| BR-08 | `opensAt < closesAt`; kỳ `DRAFT` sửa tự do; sau `SCHEDULED` chỉ cho sửa tên và `closesAt` kéo dài (đề xuất, chốt ở W1.5); không sửa kỳ `CLOSED`. |
+| BR-08 | Chốt 27/11/2026: `opensAt < closesAt`; DRAFT sửa tự do; chỉ công bố khi `opensAt` ở tương lai; sau công bố chỉ sửa giờ. SCHEDULED được sửa giờ mở/đóng với giờ mở mới ở tương lai và cửa sổ đủ `durationMinutes`; OPEN chỉ kéo dài giờ đóng; CLOSED không sửa. `expiresAt` của phiên đã bắt đầu giữ nguyên. |
 | BR-09 | Danh sách thi của một kỳ chỉ gồm tài khoản `role=STUDENT` đã tồn tại. |
 | BR-10 | Bắt đầu phiên chỉ hợp lệ khi: SV thuộc danh sách của kỳ được chọn; kỳ ở trạng thái hiệu lực `OPEN` tại thời điểm hiện tại; SV chưa có phiên `IN_PROGRESS` (409 theo #58); SV chưa có phiên `COMPLETED` trong kỳ đó (DC-08). |
 | BR-11 | `expires_at` của phiên tính theo D-T một lần lúc bắt đầu. Quá `expires_at` ⇒ luật K5/#77 (≥8 câu ⇒ `COMPLETED`+`TIMEOUT`; ít hơn ⇒ `ABANDONED`). |
-| BR-12 | Kỳ `CLOSED` thủ công (GV bấm đóng): phiên đang chạy **không bị cắt ngay** hay **bị cắt**? **Chưa chốt** ⇒ câu hỏi mở Q-2; đề xuất: phiên đang chạy vẫn theo `expires_at`, chỉ chặn phiên mới (nhất quán DC-09 chỉ cắt theo `closes_at`). |
+| BR-12 | Chốt 27/11/2026 (Q-2): Admin đóng thủ công thì phiên đang chạy tiếp tục đến `expires_at` đã cấp, không bắt đầu phiên mới. |
 | BR-13 | Báo cáo lớp (UCGV07/08, UCADM05) lọc được theo kỳ; mặc định hiển thị toàn hệ thống. |
 | BR-14 | Quên mật khẩu (DC-21, OTP): phản hồi luôn như nhau dù email có tồn tại hay không; rate limit; OTP 6 số dùng 1 lần, TTL 10', tối đa 5 lần nhập sai (đề xuất AI). |
 | BR-15 | Mọi import ghi nhật ký kiểm toán tối thiểu: ai, khi nào, số dòng, kết quả (không ghi mật khẩu). |
 | BR-16 | **Phân quyền chỉ theo `role` (DC-19):** `TEACHER` ⇒ chỉ xem báo cáo lớp và hồ sơ SV; `ADMIN` ⇒ mọi chức năng quản trị và chức năng Teacher; `STUDENT` ⇒ chỉ dữ liệu của mình. Không đủ quyền ⇒ `403`. |
 | BR-17 | **Admin quản lý tài khoản giảng viên:** tạo, sửa, khóa/mở khóa; nâng `TEACHER`→`ADMIN` và thu hồi `ADMIN`→`TEACHER`. Admin không tự thu hồi quyền của chính mình. |
-| BR-18 | **Nâng/thu hồi Admin:** ghi nhật ký kiểm toán (BR-15); **không thu hồi nếu đó là Admin cuối cùng** (đề xuất, vì không còn QTV hệ thống để cứu); token cũ của người bị đổi quyền phải mất hiệu lực quyền cũ (chốt ở W1.4). |
+| BR-18 | **Nâng/thu hồi Admin:** giữ quyết định `#136` hoãn bảng `audit_logs` DB sang Khóa luận, ghi log có cấu trúc Pino (cấm mật khẩu/OTP); **không thu hồi nếu đó là Admin cuối cùng**; token cũ của người bị đổi quyền mất hiệu lực ngay (`JwtStrategy` tra DB mỗi request). |
 | BR-19 | **Quản lý tài khoản (Admin):** với SV và GV; khóa tài khoản ⇒ không đăng nhập được, phiên `IN_PROGRESS` xử lý theo K5; không xóa cứng tài khoản đã có phiên/hồ sơ (chỉ khóa). Gửi lại mật khẩu tạm ⇒ sinh mật khẩu mới, đặt lại `mustChangePassword=true`. |
 
 ### 3.5. Luồng chính (cơ sở cho Sequence Diagram và Use Case)
@@ -237,7 +237,7 @@ Chỉ chạy song song các task có ký hiệu `∥` cùng nhóm và **không c
 **L5 — Quên mật khẩu (UCSV09, DC-21):** SV nhập email ⇒ `POST /auth/forgot-password` ⇒ luôn `202` ⇒ nếu tồn tại, sinh OTP 6 số (hash lưu Redis TTL 10'), đẩy email ⇒ SV nhập email + OTP + mật khẩu mới ⇒ `POST /auth/reset-password {email, otp, newPassword}` ⇒ `mustChangePassword=false`, hủy mã (sai quá 5 lần ⇒ hủy mã).
 
 ### 3.6. Máy trạng thái kỳ thi (`ExamRoundStatus`)
-`DRAFT` —(GV công bố, cần ≥1 SV trong danh sách và `opensAt` > bây giờ hoặc theo BR-08)→ `SCHEDULED` —(tới `opensAt`)→ `OPEN` —(tới `closesAt` hoặc GV đóng thủ công)→ `CLOSED`.
+`DRAFT` —(Admin công bố, cần ≥1 SV và `opensAt` ở tương lai)→ `SCHEDULED` —(tới `opensAt`)→ `OPEN` —(tới `closesAt` hoặc Admin đóng thủ công)→ `CLOSED`.
 `DRAFT → CLOSED` (hủy) được phép. Không quay lui. **Hàm `effectiveStatus(round, now)`** là nguồn duy nhất cho mọi quyết định (BR-10); cột `status` chỉ được ghi lại khi chạm tới (lazy).
 
 ### 3.7. Mã lỗi nghiệp vụ đề xuất (cho SRS Mục X và hợp đồng API)

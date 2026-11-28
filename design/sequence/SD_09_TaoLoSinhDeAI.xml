@@ -340,7 +340,7 @@
 												<UML:TaggedValue tag="mt" value="Chon skill, CEFR, topic_tag (tuy chon), so cau N va Click Tao lo()"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
-										<UML:Message name="createBatch(skill, cefr, topic, N) - POST /item-batches" xmi.id="EAID_D6E87737_83D8_46C0_BA65_6EAFCE120C09" visibility="public" sender="EAID_79FA1912_CF7D_4C70_B577_FA7DBB278CA7" receiver="EAID_D73825FB_43E0_494B_AD6E_CD876A95CDD5">
+										<UML:Message name="createBatch(skill, cefr, topic, N) - POST /item-batches/generate" xmi.id="EAID_D6E87737_83D8_46C0_BA65_6EAFCE120C09" visibility="public" sender="EAID_79FA1912_CF7D_4C70_B577_FA7DBB278CA7" receiver="EAID_D73825FB_43E0_494B_AD6E_CD876A95CDD5">
 											<UML:ModelElement.taggedValue>
 												<UML:TaggedValue tag="style" value="1"/>
 												<UML:TaggedValue tag="ea_type" value="Sequence"/>
@@ -381,7 +381,7 @@
 												<UML:TaggedValue tag="sequence_points" value="PtStartX=0;PtStartY=-150;PtEndX=0;PtEndY=-150;"/>
 												<UML:TaggedValue tag="virtualInheritance" value="0"/>
 												<UML:TaggedValue tag="diagram" value="EAID_7F702116_E493_4CAB_9068_EE13D47261C2"/>
-												<UML:TaggedValue tag="mt" value="createBatch(skill, cefr, topic, N) - POST /item-batches"/>
+												<UML:TaggedValue tag="mt" value="createBatch(skill, cefr, topic, N) - POST /item-batches/generate"/>
 											</UML:ModelElement.taggedValue>
 										</UML:Message>
 										<UML:Message name="Guard RBAC: chi ADMIN; kiem tra N va tran so loi goi / token moi lo (BATCH_BUDGET_EXCEEDED)()" xmi.id="EAID_9FD0241B_241F_4E15_BC7B_8E806BA9CFFD" visibility="public" sender="EAID_D73825FB_43E0_494B_AD6E_CD876A95CDD5" receiver="EAID_D73825FB_43E0_494B_AD6E_CD876A95CDD5">

@@ -1,5 +1,7 @@
 # @apt/shared-types
 
+> **Lưu ý nguồn chính thức (28/11/2026):** Thư mục này trong `0.docs` chỉ là **bản tham chiếu đồng bộ** (đã cập nhật tới `v3.1.0`). Nguồn mã nguồn độc lập chính thức dùng để build và phát hành cho BE/FE nằm tại repo `AdaptivePlacementTestSystem/shared-types`.
+
 Enum, mã lỗi (`ErrorCode`) và kiểu nền (`ApiError`) dùng chung BE/FE — mô hình C, Quyết định #122. DTO request/response sinh từ OpenAPI, không đặt ở đây.
 
 ## Dùng

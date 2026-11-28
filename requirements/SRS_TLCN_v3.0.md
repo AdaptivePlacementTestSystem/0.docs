@@ -1,5 +1,9 @@
 # BẢN ĐẶC TẢ KỸ THUẬT & THIẾT KẾ HỆ THỐNG (SRS v3.0)
 
+> **Ghi nhận bổ sung 27/11/2026 — đồng bộ tài liệu trên nhánh `docs/complete-q1-q8-sync`:** [Quyết định bổ sung Q1–Q8/vòng đời lô/API](../decisions/20261127_BO_SUNG_Q1_Q8_VONG_DOI_LO_VA_API.md) ghi nhận chỉ thị mới về thay GV B, hủy câu tồn đọng, xử lý lô rỗng do lỗi, C3 stale, `batchRevision`, quyền xem của B cũ và outbox. Các tài liệu SRS (MD/DOCX), đặc tả Use Case (DOCX), sơ đồ lớp/schema, sequence diagram (+ PNG) và mô tả UI đã được đối chiếu đồng bộ theo bản ghi này; phần mã nguồn BE/FE, migration, kiểm thử runtime và xác nhận độc lập của nhóm vẫn là phạm vi cần hoàn tất tiếp.
+
+> **Bổ sung Q1–Q8, cập nhật 27/11/2026:** Mỗi lô có một GV B chung tại `ItemBatch.confirmerId` và B không trùng bất kỳ GV A nào được phân công. B thấy câu ngay sau khi A duyệt câu đó; xác nhận tất cả chỉ áp dụng câu `FIRST_APPROVED` đủ điều kiện trong lô. Admin có thể giao lại GV A cho câu `DRAFT` (kèm `reason`), hoặc đổi GV B chung bằng thao tác riêng có `reason` và audit cấp lô; đổi hạn cũng bắt buộc `reason` và audit `UPDATE_DUE_DATE` cấp lô. Quá hạn chỉ cảnh báo để Admin xử lý thủ công (hoặc chủ động gọi `cancel-pending`), không tự loại, import hoặc giao lại. Email nhắc lúc 08:00 giờ Việt Nam ngày trước hạn; thông báo đổi B dùng transactional outbox. Được import một phần (`PARTIALLY_IMPORTED` sau khi đã import ≥ 1 câu và còn `SECOND_APPROVED`), lô chỉ `DONE` khi có ≥ 1 câu và mọi câu đã kết thúc (lô rỗng do lỗi sinh/import là `FAILED`). C3 stale phải chạy lại trên các câu `SECOND_APPROVED` còn lại và Admin quyết lại mọi cờ mềm. T3 hoặc G5 lỗi/chưa cấu hình thì dừng kiểm tra, thông báo và cho thử lại. Tạm dùng ngưỡng cấu hình T2 mềm 0,65/cứng 0,85, T3 mềm 0,90 và LiteLLM theo cấu hình môi trường. Mô tả này không chứng minh đã triển khai production.
+
 **Tên đề tài:** Kiến trúc hệ thống chẩn đoán năng lực ngôn ngữ toàn diện (Placement Test) tích hợp AI tự thích ứng
 
 **Định vị:** Microservice độc lập, tích hợp Plug-and-Play vào Hệ sinh thái Giáo dục số EduZ
@@ -16,7 +20,7 @@
 
 **[NOTE]** Changelog v3.0 vòng 3 (14/10/2026, DC-27 đến DC-45, Quyết định #110 đến #113): (1) luồng câu hỏi mới: Admin tạo lô bằng AI hoặc tự import file (lưới tạm) ⇒ AI check ⇒ Admin xem kết quả và Giao việc ⇒ GV vai A sửa/duyệt/từ chối ⇒ A gửi một gói cho GV vai B ⇒ B xác nhận hoặc loại từng câu ⇒ Admin Kiểm tra (C3) ⇒ Admin Import ⇒ FINAL_APPROVED; (2) trạng thái Item mới DRAFT → FIRST_APPROVED → SECOND_APPROVED → FINAL_APPROVED, thêm AI_REJECTED, bỏ trạng thái chờ duyệt cũ và đổi tên trạng thái đã duyệt cũ thành FINAL_APPROVED (CAT chỉ chọn FINAL_APPROVED); ItemSource được lược bỏ hoàn toàn khỏi Item (nguồn gốc xác định qua Lô ItemBatch); (3) GV không import, không có form thêm từng câu, Admin không sửa nội dung câu; (4) giải thích AI được sinh cùng lúc với câu hỏi (không sinh lazy), lưu bảng explanations; (5) khoảng irt_b hợp lệ [−4, +4] (cấu hình) khác CLAUDE.md; (6) phạm vi tăng: ai-question-generator (F-11) kéo từ Khóa luận vào Tiểu luận (F-23 đến F-28). Các đề xuất mặc định của kế hoạch sinh/duyệt đề AI bản 5 (Q-1 chọn O2, Q-3, Q-4, Q-5, Q-6) được coi là đã chấp nhận; Q-7 đến Q-10 (ngưỡng, bản quyền, mô hình embedding, pg_trgm) còn chờ chốt. Mọi tên bảng, endpoint, mã UC, màn hình và ngưỡng của phần này là đề xuất. Chi tiết: Mục IXb (9b.9 đến 9b.18) và Phụ lục A.
 
-**[NOTE]** Cập nhật sau họp GVHD 03/11/2026 (chưa phát hành số phiên bản mới): bỏ gói duyệt (ItemPackage, PackageStatus, "Gửi gói", ép gửi gói, FORCE_SEND, EXTEND, DC-42); Admin giao việc và duyệt theo TỪNG CÂU: items có reviewer_id (GV A), confirmer_id (GV B) là cột khóa ngoại, first_review và second_review là cột JSON (FirstReviewDetail, SecondReviewDetail), cờ nhắc hạn first_reminder_sent, second_reminder_sent; bỏ bảng item_batch_assignments, item_review_assignments, item_packages và cột items.package_id, items.original_snapshot (originalSnapshot nay nằm trong first_review); ReviewAction thêm ASSIGN; ExamRound sở hữu TestSession (Composition, DB Restrict). Các chỗ quyết định chưa nói rõ được đánh dấu "⚠ chờ xác nhận" tại chỗ. Căn cứ: 20261103_QUYET_DINH_THAY_DOI_THIET_KE_CLASS_DIAGRAM.md.
+**[NOTE — lịch sử, đã được Q1–Q8 cập nhật]** Họp GVHD 03/11/2026 bỏ gói duyệt và chuyển sang giao việc theo câu; khi đó mô hình còn đặt cả reviewer_id và confirmer_id trên items. Quyết định Q1–Q8 thay thế vị trí GV B: mô hình chuẩn dùng `item_batches.confirmer_id`, còn `items.reviewer_id` là GV A. Bản schema backend hiện vẫn giữ cột confirmer legacy để tương thích dữ liệu; không suy ra cột đã được xóa ở môi trường triển khai. Chi tiết lịch sử: `20261103_QUYET_DINH_THAY_DOI_THIET_KE_CLASS_DIAGRAM.md`.
 
 ---
 
@@ -126,12 +130,14 @@ src/modules/
 | ItemGenerationService | Điều phối lô: nhận yêu cầu (skill, CEFR, topic, N), chạy nền qua BullMQ các bước G1 đến G7, tạo lô, ghi tên/phiên bản mô hình và token mỗi lời gọi | UCADM11, UCADM12 |
 | ItemCheckService (3 checkpoint) | Một dịch vụ, ba điểm kiểm: C1 sau khi AI sinh, C2 khi import file, C3 trước FINAL_APPROVED; tầng rẻ (luật cứng, băm, pg_trgm) chạy trước, embedding và AI chỉ chạy cho câu còn sống; kết quả gắn content_hash và được tái sử dụng | Mục 9b.12 |
 | ItemDuplicateChecker (+ DuplicateStrategy) | Lọc trùng ba tầng dùng chung mọi điểm kiểm: T1 băm chuẩn hóa, T2 pg_trgm, T3 embedding (cosine tính trong ứng dụng); mỗi tầng là một strategy | DC-30, DC-35 |
-| ReviewDistributionService | Chia đều câu cho nhóm A (sắp theo skill, CEFR rồi chia vòng tròn); giao lại (⚠ chờ xác nhận: còn dùng cách chia đều sau khi giao theo từng câu không) | Mục 9b.13 |
-| DeadlineReminderService | Tính due_at (cuối ngày), đặt job trễ BullMQ nhắc trước hạn 24 giờ, đối chiếu lazy khi mở hộp việc phòng mất job | Mục 9b.14 |
+| ReviewDistributionService | Chia đều câu DRAFT cho nhóm A theo thứ tự (skill, cefrTarget, createdAt, id), chia vòng tròn; giao lại A chỉ DRAFT, thay B riêng có audit | Mục 9b.13 |
+| DeadlineReminderService | Nhắc lúc 08:00 giờ Việt Nam ngày trước hạn; đổi hạn cập nhật lịch nhắc tương ứng. Mã hiện hành quét định kỳ, không dùng BullMQ delayed job | Mục 9b.14; cần xác minh ở môi trường triển khai |
 | LLM Gateway | Cổng gọi LLM có dự phòng nhà cung cấp, cache theo hash prompt, trần lời gọi/token mỗi lô; dùng cho sinh câu, giải thích, kiểm đáp án độc lập (G5) và embedding | Mô hình embedding chờ chốt (Q-9) |
 | Thực thể mới | ItemBatch, ItemCheckResult (cùng ItemReviewEvent tùy chọn); kiểu giá trị FirstReviewDetail, SecondReviewDetail của Item (cột JSON) | Mục 6.2, 6.2b |
 
-**[NOTE]** Tên lớp, tên module và tên bảng ở trên là đề xuất theo kế hoạch sinh/duyệt đề AI bản 5 (Mục 11); Class Diagram và Sequence sẽ cập nhật ở tài liệu riêng. Sơ đồ ASCII ở đầu Mục III chưa vẽ LLM Gateway.
+**[NOTE]** Bảng thành phần và phần mô tả lộ trình dưới đây là đặc tả thiết kế; không khẳng định các dịch vụ đã chạy production. Q1–Q8 thay mô hình package cũ: không còn gói A→B hay `ItemPackage`/`ItemReviewAssignment` trong quy trình chuẩn. Các thuật ngữ đó còn xuất hiện ở lịch sử và quyết định cũ, được giữ làm lịch sử và đã bị thay thế.
+
+**[NOTE]** Q1–Q8 cập nhật mô hình duyệt theo từng câu, thay nội dung thiết kế cũ về gói A→B. Các tên lớp, module và endpoint thuộc phần item-generation vẫn là đặc tả/đề xuất cho tới khi được xác nhận từ mã và hợp đồng API tích hợp.
 
 ---
 
@@ -187,7 +193,15 @@ $$
 \mathrm{SE}(\hat{\theta}) = \sqrt{\frac{\sum_{k = 1}^{41} (\theta_k-\hat{\theta})^2 \cdot L(\mathbf{u}|\theta_k) \cdot \pi(\theta_k)}{\sum_{k = 1}^{41} L(\mathbf{u}|\theta_k) \cdot \pi(\theta_k)}}
 $$
 
-**[NOTE]** **Phân biệt θ₀ và Prior (hai vai trò tách biệt):**  | | θ₀ = −0.5 | Prior N(0,1) | |---|---|---| | **Vai trò** | Điểm khởi tạo để chọn **câu hỏi đầu tiên** | Phân phối Bayes để ước lượng θ **sau mỗi response** | | **Ảnh hưởng** | Chỉ ảnh hưởng item selection round 1 | Ảnh hưởng EAP estimation suốt bài thi | | **Sau câu 1** | Không còn dùng nữa, bị thay bởi EAP | Tiếp tục đóng vai trò prior |  Hiệu ứng **shrinkage** của prior N(0,1) (kéo θ về 0 trong 20-25 câu đầu) là hành vi đúng và mong muốn của Bayesian estimation — ngăn θ bị ước lượng quá cực đoan khi còn ít data. Prior N(-0.5, 1) là lựa chọn hợp lệ hơn về mặt lý thuyết nếu biết chắc dân số có mean = -0.5, nhưng N(0,1) là chuẩn học thuật được áp dụng rộng rãi (weakly informative).  **Sau khi có calibration data thực tế (Tuần 9-10):** Có thể cập nhật prior mean thành mean(θ) thực tế của cohort để giảm shrinkage bias.
+**[NOTE]** **Phân biệt θ₀ và Prior (hai vai trò tách biệt):**
+
+| | θ₀ = −0.5 | Prior N(0,1) |
+|---|---|---|
+| **Vai trò** | Điểm khởi tạo để chọn **câu hỏi đầu tiên** | Phân phối Bayes để ước lượng θ **sau mỗi response** |
+| **Ảnh hưởng** | Chỉ ảnh hưởng item selection round 1 | Ảnh hưởng EAP estimation suốt bài thi |
+| **Sau câu 1** | Không còn dùng nữa, bị thay bởi EAP | Tiếp tục đóng vai trò prior |
+
+Hiệu ứng **shrinkage** của prior N(0,1) (kéo θ về 0 trong 20-25 câu đầu) là hành vi đúng và mong muốn của Bayesian estimation — ngăn θ bị ước lượng quá cực đoan khi còn ít data. Prior N(-0.5, 1) là lựa chọn hợp lệ hơn về mặt lý thuyết nếu biết chắc dân số có mean = -0.5, nhưng N(0,1) là chuẩn học thuật được áp dụng rộng rãi (weakly informative).  **Sau khi có calibration data thực tế (Tuần 9-10):** Có thể cập nhật prior mean thành mean(θ) thực tế của cohort để giảm shrinkage bias.
 
 **[WARNING]** **MLE Fallback Guard (nếu EAP bị bug):** MLE trong Rasch model **không hội tụ** khi sinh viên trả lời đúng hết hoặc sai hết — θ → ±∞, hệ thống crash hoặc trả về `NaN`. Trường hợp này xảy ra thường xuyên (SV Pre-A1 sai 5-10 câu đầu liên tiếp).  **Guard condition bắt buộc khi dùng MLE fallback:** 1. Chỉ invoke MLE khi có ≥ 1 câu đúng VÀ ≥ 1 câu sai trong session. 2. Nếu chưa đủ điều kiện (toàn đúng hoặc toàn sai): dùng EAP với prior mạnh hơn N(0, 0.5) tạm thời. 3. Clip θ kết quả về [-4, +4] trong MỌI trường hợp — không để θ vượt ra ngoài lưới 41 điểm.
 
@@ -223,7 +237,19 @@ Nếu chọn câu có $b_i$ gần $\hat{\theta}$ nhất theo kiểu tất địn
 
 **[NOTE]** Randomized Top-5 không giải quyết hoàn toàn bài toán exposure (vùng A2-B1 còn 20-35 câu, 500 SV vẫn sẽ thấy lại câu cũ sau 25-50 lượt). Tuy nhiên, đây là biện pháp **phòng thủ theo chiều sâu** phù hợp với quy mô Tiểu luận: không phức tạp, không tốn thêm câu hỏi, giảm đáng kể tính tất định so với b-match tuyệt đối. **Khóa luận sẽ implement Sympson-Hetter** với exposure cap cứng ≤ 0.3 như đặc tả Mục 4.8.
 
-**[IMPORTANT]** **Guard condition bắt buộc:** Query item selection **PHẢI** filter `WHERE status = 'FINAL_APPROVED'`. Item có status khác FINAL_APPROVED (DRAFT, FIRST_APPROVED, SECOND_APPROVED, REJECTED, AI_REJECTED) tuyệt đối không được đưa vào bài thi. Đây phải được đặt ở tầng Repository, không phải business logic. ```typescript // ItemRepository.findForCAT() — Randomized Top-5 return this.db.query( `WITH TopMatches AS ( SELECT * FROM items WHERE status = 'FINAL_APPROVED' AND skill = $1 AND id != ALL($2) ORDER BY ABS(irt_b - $3) LIMIT 5 ) SELECT * FROM TopMatches ORDER BY RANDOM() LIMIT 1;`, [skill, usedIds, currentTheta] ); ```
+**[IMPORTANT]** **Guard condition bắt buộc:** Query item selection **PHẢI** filter `WHERE status = 'FINAL_APPROVED'`. Item có status khác FINAL_APPROVED (DRAFT, FIRST_APPROVED, SECOND_APPROVED, REJECTED, AI_REJECTED) tuyệt đối không được đưa vào bài thi. Đây phải được đặt ở tầng Repository, không phải business logic.
+
+```typescript
+// ItemRepository.findForCAT() — Randomized Top-5
+return this.db.query(
+  `WITH TopMatches AS (
+    SELECT * FROM items
+    WHERE status = 'FINAL_APPROVED' AND skill = $1 AND id != ALL($2)
+    ORDER BY ABS(irt_b - $3) LIMIT 5
+  ) SELECT * FROM TopMatches ORDER BY RANDOM() LIMIT 1;`,
+  [skill, usedIds, currentTheta],
+);
+```
 
 **[NOTE]** Vòng 3 (DC-39): trạng thái đã duyệt cũ được đổi tên thành FINAL_APPROVED; FIRST_APPROVED và SECOND_APPROVED là hai mức duyệt trung gian (GV vai A, GV vai B) và chưa được CAT chọn. Điều kiện lọc ở tầng Repository, Partial Index (Mục 6.2) và R9 đều đổi theo; công thức và các bước chọn câu Top-5 không đổi. Mã BE và seed hiện có còn dùng tên cũ — nợ đồng bộ, chưa sửa ở tài liệu này.
 
@@ -414,13 +440,15 @@ CREATE TABLE items (
     approved_by     UUID REFERENCES users(id),    -- Admin bấm Import; NULL tới khi FINAL_APPROVED
     approved_at     TIMESTAMPTZ,                  -- NULL tới khi FINAL_APPROVED
     content_hash    VARCHAR(64),                  -- v3.0 vòng 3: SHA-256 (hex) của nội dung + đáp án + giải thích đã chuẩn hóa (T1)
+    generated_from_ref_ids UUID[] NOT NULL DEFAULT ARRAY[]::UUID[], -- ID các câu mẫu trong DB dùng làm few-shot khi sinh AI
     batch_id        UUID NOT NULL REFERENCES item_batches(id),   -- lô sinh/import; bắt buộc (quyết định 16/10/2026), câu seed thuộc lô seed
-    reviewer_id     UUID REFERENCES users(id),     -- GV vai A được giao (họp GVHD 03/11/2026); cột khóa ngoại, ON DELETE RESTRICT; NULL tới khi Admin giao việc
-    confirmer_id    UUID REFERENCES users(id),     -- GV vai B được giao; cột khóa ngoại, ON DELETE RESTRICT; NULL tới khi giao việc
-    first_review    JSONB,                         -- FirstReviewDetail { dueAt, action (APPROVE | REJECT | null), reviewedAt, comment, originalSnapshot }; originalSnapshot = bản gốc (content, options, correct_answer, giải thích) trước khi GV A sửa lần đầu, ghi một lần, để GV B/Admin xem diff (UCGV15, C3)
+    reviewer_id     UUID REFERENCES users(id),     -- GV vai A được giao; NULL tới khi Admin giao việc
+    first_review    JSONB,                         -- FirstReviewDetail { dueAt, action (APPROVE | REJECT | null), reviewedAt, comment, originalSnapshot }
     second_review   JSONB,                         -- SecondReviewDetail { dueAt, action (CONFIRM | REMOVE | null), confirmedAt, comment }
     first_reminder_sent  BOOLEAN NOT NULL DEFAULT false,   -- cờ kỹ thuật của job nhắc hạn vòng 1; cột riêng để job không ghi đè JSON kết quả duyệt
     second_reminder_sent BOOLEAN NOT NULL DEFAULT false,   -- tương tự cho vòng 2
+    first_assignment_notice_sent BOOLEAN NOT NULL DEFAULT false, -- email báo giao việc cho A
+    second_assignment_notice_sent BOOLEAN NOT NULL DEFAULT false, -- email báo giao việc cho B
     -- Audit: chỉ item có status='FINAL_APPROVED' được CAT engine dùng (xem Mục 4.4)
 
     calibrated      BOOLEAN DEFAULT FALSE,   -- Đã calibrate thực tế chưa?
@@ -434,47 +462,86 @@ CREATE TABLE items (
 
 -- Index cho CAT query performance
 CREATE INDEX idx_items_cat ON items(status, skill, irt_b) WHERE status = 'FINAL_APPROVED';
--- Hộp việc của GV A / GV B (03/11/2026)
-CREATE INDEX idx_items_reviewer  ON items (reviewer_id, status);
-CREATE INDEX idx_items_confirmer ON items (confirmer_id, status);
+-- Hộp việc GV B được truy vấn theo item_batches.confirmer_id kết hợp status của Item.
 -- Chỉ mục lọc trùng (v3.0 vòng 3, đề xuất)
 CREATE INDEX idx_items_content_hash ON items (content_hash);                      -- T1: băm chuẩn hóa
-CREATE INDEX idx_items_content_trgm ON items USING GIN (content gin_trgm_ops);    -- T2: cần CREATE EXTENSION pg_trgm (chờ chốt Q-10)
+CREATE INDEX idx_items_content_trgm ON items USING GIN (content gin_trgm_ops);    -- T2: extension được bật trong migration 20261126120400_enable_pg_trgm; quyền CREATE EXTENSION cần có ở môi trường áp dụng
 ```
 
-**[NOTE]** v3.0 (vòng 3): approved_by / approved_at ghi Admin bấm Import (chuyển câu sang FINAL_APPROVED); nội dung câu được duyệt bởi GV vai A (FIRST_APPROVED) và GV vai B (SECOND_APPROVED), truy vết ở item_review_events. Nội dung này thay quy tắc DC-18 "Admin tự duyệt câu hỏi do mình soạn": Admin không soạn và không sửa nội dung câu (DC-29); câu FINAL_APPROVED cấm sửa (#64). Rủi ro chất lượng xem R12, R17, R18. Điều kiện guard của CAT đổi thành WHERE status = 'FINAL_APPROVED' (Mục 4.4). Vì items tham chiếu item_batches, khi viết migration phải tạo bảng này trước (hoặc thêm khóa ngoại sau bằng ALTER). Giao việc theo từng câu (03/11/2026): người duyệt và hạn nằm ngay trên items, không còn bảng giao việc hay bảng gói.
+**[NOTE]** DDL items: `approved_by` / `approved_at` ghi Admin bấm Import (chuyển câu sang FINAL_APPROVED); hai vòng duyệt được lưu trong `first_review` / `second_review`, audit ở `item_review_events`. Mô hình chuẩn Q1–Q8 dùng `item_batches.confirmer_id` làm nguồn GV B duy nhất, không có `items.confirmer_id`; backend có thể còn cột legacy để tương thích dữ liệu. Bảng audit có `batch_id NOT NULL`, `actor_id NOT NULL`, `item_id` nullable cho sự kiện cấp batch. Trạng thái lô gồm `PARTIALLY_IMPORTED`.
 
 **[NOTE]** Lô seed (quyết định 16/10/2026): mọi câu thuộc một lô, kể cả câu seed. Script cài đặt phải tạo tài khoản Admin hệ thống trước (ví dụ admin@apt.edu.vn), sau đó lấy id Admin điền vào created_by của các lô seed. Mỗi lô seed ghi source = IMPORTED, status = DONE, requested_count = NULL, name = tên bộ nguồn (một lô cho mỗi bộ: CEFR-J, CLOTH, đề GV tự soạn); câu nạp vào gán batch_id đúng lô. Migration cho dữ liệu cũ: gán batch_id của các câu chưa có lô vào lô seed tương ứng rồi mới đặt NOT NULL. Lô seed không chạy C1/C2/C3 và không có giao việc.
 
 ### 6.2b. Bảng bổ sung cho lô, giao việc và kiểm tra (v3.0 vòng 3 — đề xuất)
 
 ```
-CREATE EXTENSION IF NOT EXISTS pg_trgm;   -- chờ chốt Q-10 (image Postgres staging chưa kiểm)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;   -- cần quyền CREATE EXTENSION; migration đã có, kiểm tra quyền môi trường triển khai
 
 -- Enum (mô tả): ItemStatus = DRAFT | FIRST_APPROVED | SECOND_APPROVED | FINAL_APPROVED | REJECTED | AI_REJECTED
 --              (Item không còn trường source: nguồn gốc lưu tại item_batches.source, enum ItemBatchSource = AI_GENERATED | IMPORTED; quyết định 16/10/2026)
 
 CREATE TABLE item_batches (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    source          VARCHAR(20) NOT NULL,          -- ItemBatchSource: AI_GENERATED | IMPORTED
-    name            VARCHAR(100),                  -- nhãn tùy chọn; lô seed ghi tên bộ nguồn (CEFR-J, CLOTH, GV tự soạn)
-    created_by      UUID NOT NULL REFERENCES users(id),   -- Admin
-    skill           VARCHAR(20),                   -- lô AI: bắt buộc; lô import: NULL (mỗi dòng có Skill/CEFR riêng) — đề xuất
-    cefr_target     VARCHAR(3),
-    topic_tag       VARCHAR(50),
-    requested_count INT,                           -- N (lô AI)
-    status          VARCHAR(20) NOT NULL,          -- GENERATING | IMPORTING | CHECKING | READY_TO_ASSIGN | IN_REVIEW |
-                                                   -- READY_TO_FINALIZE | FINAL_CHECKED | DONE | FAILED | PARTIAL
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    source              VARCHAR(20) NOT NULL,          -- ItemBatchSource: AI_GENERATED | IMPORTED
+    name                VARCHAR(100),                  -- nhãn tùy chọn; lô seed ghi tên bộ nguồn (CEFR-J, CLOTH, GV tự soạn)
+    created_by          UUID NOT NULL REFERENCES users(id),   -- Admin
+    import_operation_id UUID UNIQUE,                   -- khóa idempotency khi lưu lô (28/11)
+    import_group_id     UUID,                          -- gom nhóm các lô con tách từ 1 lần import (tối đa 50 câu/lô)
+    import_part         INT,                           -- số thứ tự lô con trong import_group_id (>= 1)
+    skill               VARCHAR(20),                   -- lô AI: bắt buộc; lô import: NULL (mỗi dòng có Skill/CEFR riêng)
+    cefr_target         VARCHAR(3),
+    topic_tag           VARCHAR(50),
+    requested_count     INT,                           -- N (lô AI, tối đa 50 câu/lô)
+    ai_call_count       INT NOT NULL DEFAULT 0,        -- bộ đếm nguyên tử số lượt gọi AI thực tế
+    ai_call_limit       INT NOT NULL DEFAULT 250,      -- trần 250 lượt gọi AI mỗi lô
+    confirmer_id        UUID REFERENCES users(id),     -- một GV B chung toàn bộ lô; NULL trước khi giao việc
+    status              VARCHAR(24) NOT NULL,          -- GENERATING | IMPORTING | CHECKING | READY_TO_ASSIGN | IN_REVIEW |
+                                                       -- READY_TO_FINALIZE | FINAL_CHECKED | PARTIALLY_IMPORTED | DONE | FAILED | PARTIAL
+    failure_reason      VARCHAR(100),                  -- mã lý do khi lô FAILED (VD: NO_VALID_ITEMS_GENERATED, BATCH_BUDGET_EXCEEDED)
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Giao việc và duyệt theo TỪNG CÂU (họp GVHD 03/11/2026): KHÔNG còn item_batch_assignments, item_review_assignments, item_packages.
--- Người được giao (reviewer_id, confirmer_id), hạn và kết quả hai vòng duyệt (first_review, second_review) nằm trên bảng items (Mục 6.2).
+CREATE TABLE item_batch_jobs (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    batch_id        UUID NOT NULL REFERENCES item_batches(id) ON DELETE CASCADE,
+    kind            VARCHAR(16) NOT NULL,              -- GENERATE | CHECK
+    status          VARCHAR(16) NOT NULL DEFAULT 'PENDING', -- PENDING | RUNNING | DONE | FAILED
+    attempts        INT NOT NULL DEFAULT 0,
+    available_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    lease_token     UUID,
+    lease_until     TIMESTAMPTZ,
+    last_error      VARCHAR(100),                      -- VD: AI_BUDGET_EXCEEDED
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE review_notice_outbox (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    batch_id        UUID NOT NULL REFERENCES item_batches(id) ON DELETE CASCADE,
+    recipient_id    UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    status          VARCHAR(16) NOT NULL DEFAULT 'PENDING', -- PENDING | PROCESSING | SENT | CANCELLED | DEAD
+    attempts        INT NOT NULL DEFAULT 0,
+    available_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    lease_token     UUID,
+    lease_until     TIMESTAMPTZ,
+    last_error      VARCHAR(200),
+    sent_at         TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Mô hình duyệt theo từng câu (03/11/2026); package/assignment tables không thuộc schema chuẩn.
+-- GV B chung lấy từ item_batches.confirmer_id; items.confirmer_id legacy (nếu có trong backend) không phải nguồn sự thật.
+-- audit cấp batch: batch_id và actor_id bắt buộc; item_id nullable.
+-- Trạng thái lô chuẩn có PARTIALLY_IMPORTED; PARTIAL vẫn là trạng thái sinh thiếu riêng biệt.
+-- Outbox Đợt 1 (review_notice_outbox) chỉ áp dụng cho thông báo đổi GV B; giữ 18 migration trong nhánh chore/sync-prisma-schema-q1-q8.
 
 CREATE TABLE item_embeddings (
     item_id         UUID PRIMARY KEY REFERENCES items(id),
     vector          FLOAT8[] NOT NULL,              -- Float[]; cosine tính trong ứng dụng
-    model           VARCHAR(100) NOT NULL,          -- ghi mô hình thật (mô hình chờ chốt Q-9)
+    model           VARCHAR(100) NOT NULL,          -- mặc định pilot gemini-embedding-001@768 (chưa kiểm chứng runtime)
+    content_hash    VARCHAR(64) NOT NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -484,23 +551,24 @@ CREATE TABLE item_check_results (
     checkpoint      VARCHAR(2) NOT NULL,            -- C1 | C2 | C3
     content_hash    VARCHAR(64) NOT NULL,           -- kết quả gắn với hash: hash không đổi thì tái sử dụng
     level           VARCHAR(4) NOT NULL,            -- PASS | SOFT | HARD
-    reason_codes    TEXT[],
+    reason_codes    TEXT[],                         -- ItemCheckReasonCode (6 mã chuẩn hóa tại @apt/shared-types v3.1.0)
     checked_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Tùy chọn, phục vụ truy vết
 CREATE TABLE item_review_events (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    batch_id        UUID REFERENCES item_batches(id),
+    batch_id        UUID NOT NULL REFERENCES item_batches(id),
     item_id         UUID REFERENCES items(id),
-    actor_id        UUID REFERENCES users(id),
-    event_type      VARCHAR(20) NOT NULL,           -- APPROVE | REJECT | CONFIRM | REMOVE | CONFIRM_ALL | IMPORT |
-                                                    -- ASSIGN | REASSIGN | ACCEPT_FLAG (ASSIGN, REASSIGN: một dòng cho mỗi câu, actor = Admin)
+    actor_id        UUID NOT NULL REFERENCES users(id),
+    action          VARCHAR(24) NOT NULL,           -- APPROVE | REJECT | CONFIRM | REMOVE | CONFIRM_ALL | IMPORT |
+                                                    -- ASSIGN | REASSIGN | REASSIGN_CONFIRMER | UPDATE_DUE_DATE | ACCEPT_FLAG | CANCEL_PENDING
+                                                    -- (cấp lô item_id = NULL: CONFIRM_ALL, UPDATE_DUE_DATE, CANCEL_PENDING, REASSIGN_CONFIRMER)
+    details         JSONB,                          -- audit cấp batch: itemIds/count, old/new dueAt, reason
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ```
 
-**[NOTE]** Toàn bộ DDL ở Mục 6.2b là mô tả theo Mục 10 của kế hoạch sinh/duyệt đề AI bản 5: tên bảng, tên cột, kiểu dữ liệu và giá trị enum là đề xuất, chưa có trong schema.prisma và custom_migrations.sql. Nguồn chân lý thực thi vẫn là schema.prisma + custom_migrations.sql sau khi đồng bộ. Bảng explanations (giải thích gắn Item, sinh cùng lúc sinh câu hỏi) đã tồn tại theo #63 và không nằm trong danh sách trên. Kiểm tra "A khác B" cho từng câu thực hiện ở tầng ứng dụng (⚠ chờ xác nhận: ràng buộc cũ "B không thuộc nhóm A của lô" còn hay không).
+Kiểm tra vai trò ở tầng ứng dụng: B chung của lô không được đồng thời là GV A của bất kỳ câu nào trong lô; request giao việc phải bị từ chối nếu vi phạm.
 
 ### 6.3. Phân bổ Item Bank
 
@@ -719,10 +787,10 @@ import:accounts:{adminId}:{kind} →  lưới tạm import tài khoản, kind = 
 import:roster:{adminId}:{roundId} →  lưới tạm import danh sách thi của một kỳ (tên khóa: đề xuất)
 pwreset:otp:{email}              →  { otpHash, attempts }  TTL 10 phút (tên khóa: đề xuất)
 import:items:{adminId}          →  lưới tạm import đề (TTL ~30 phút; chỉ khi bấm Lưu mới tạo item_batches + items; tên khóa: đề xuất)
-bull:{mail|item-generation|item-check|review-reminder}  →  hàng đợi BullMQ (gửi email, sinh lô, kiểm lô, nhắc hạn; tên hàng đợi: đề xuất)
+bull:{mail|item-generation|item-check}  →  hàng đợi BullMQ (gửi email, sinh lô, kiểm lô; tên hàng đợi: đề xuất)
 ```
 
-Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tương ứng (không thêm bảng import_batches hay bảng token). Hết TTL ⇒ lỗi IMPORT_GRID_EXPIRED (410) hoặc INVALID_RESET_OTP (400). Vòng 3: lưới tạm import đề cũng chỉ nằm trong Redis; bảng item_batches (Mục 6.2b) là bảng của lô câu hỏi và chỉ được tạo khi bấm Lưu, không phải nơi lưu lưới. Hết TTL lưới import đề ⇒ IMPORT_GRID_EXPIRED (410).
+Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tương ứng (không thêm bảng import_batches hay bảng token). Hết TTL ⇒ lỗi IMPORT_GRID_EXPIRED (410) hoặc INVALID_RESET_OTP (400). Vòng 3: lưới tạm import đề cũng chỉ nằm trong Redis; bảng item_batches (Mục 6.2b) là bảng của lô câu hỏi và chỉ được tạo khi bấm Lưu, không phải nơi lưu lưới. Hết TTL lưới import đề ⇒ IMPORT_GRID_EXPIRED (410). Nhắc hạn duyệt theo quyết định Q1–Q8 không dùng hàng đợi BullMQ: dịch vụ hiện hành quét định kỳ mỗi phút và gửi khi tới mốc 08:00 giờ Việt Nam ngày trước hạn; đây là mô tả mã trong workspace, chưa xác nhận hành vi ở production.
 
 ---
 
@@ -749,9 +817,9 @@ Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tư�
 | F-22 | Quản lý tài khoản SV & GV | Admin tạo từng tài khoản SV/GV, xem/sửa/khóa/mở khóa, gửi lại mật khẩu tạm; nâng/thu hồi quyền Admin (UCADM09) | P1 (đề xuất) |
 | F-23 | Tạo lô câu hỏi bằng AI | Admin nhập skill, CEFR, topic (tùy chọn), N; chạy nền BullMQ: lấy câu mẫu few-shot, sinh dư kèm giải thích trong cùng lời gọi, AI check C1, bù phần thiếu; qua LLM Gateway, có trần chi phí mỗi lô (UCADM11; DC-27, DC-31, DC-45) | P0 (đề xuất) |
 | F-24 | Import đề từ file (lưới tạm) | Chỉ Admin; tải một hoặc nhiều file .xlsx vào lưới tạm, dòng lỗi/trùng bị loại kèm popup, bấm Lưu mới tạo lô source IMPORTED; AI check C2; dòng thiếu giải thích được AI sinh bổ sung (UCADM12; DC-22, DC-28, DC-32) | P0 (đề xuất) |
-| F-25 | Giao việc, hạn và nhắc | Admin giao từng câu cho GV A (reviewerId) và GV B (confirmerId), A khác B; mỗi vòng có hạn riêng (dueAt), cuối ngày; nhắc trước 24 giờ; chỉnh hạn, giao lại (UCADM13; DC-37, DC-38, DC-40, DC-41; sửa theo họp GVHD 03/11/2026, đã bỏ ép gửi gói). ⚠ chờ xác nhận: cách Admin chọn GV (chọn tay từng câu, nhóm A + B rồi chia đều) và cách nhập hạn | P0 (đề xuất) |
-| F-26 | GV vai A: duyệt câu được giao | Hộp việc chỉ chứa câu giao cho mình; sửa nội dung/đáp án/giải thích, Duyệt (FIRST_APPROVED) hoặc Từ chối (REJECTED, không lý do); sau mỗi lần sửa kiểm lại luật cứng + T1–T2; quyết định ghi vào first_review, không còn bước Gửi gói (UCGV14; DC-33, DC-43) | P0 (đề xuất) |
-| F-27 | GV vai B: confirm câu được giao | Chỉ đọc; Xác nhận (SECOND_APPROVED) hoặc Loại bỏ (REJECTED) từng câu, hoặc "Xác nhận tất cả câu còn lại" (⚠ chờ xác nhận phạm vi sau khi bỏ gói); quyết định ghi vào second_review; không sửa, không trả về A (UCGV15; DC-33, DC-40) | P0 (đề xuất) |
+| F-25 | Giao việc, hạn và nhắc | Admin giao từng câu cho GV A (`reviewerId`) và chọn **một GV B chung ở `ItemBatch.confirmerId`**; A khác B; mỗi vòng có hạn riêng tính từ thời điểm giao; nhắc lúc 08:00 ngày trước hạn; đổi hạn ghi audit cấp batch `UPDATE_DUE_DATE`; câu bị loại không giao lại | P0 |
+| F-26 | GV vai A: duyệt câu được giao | Hộp việc chỉ chứa câu giao cho mình; chỉ sửa khi câu còn `DRAFT`; Duyệt (`FIRST_APPROVED`) hoặc Từ chối (`REJECTED`, comment bắt buộc); B thấy ngay câu được A duyệt; không còn bước Gửi gói | P0 |
+| F-27 | GV vai B: confirm câu được giao | Chỉ đọc; Xác nhận (`SECOND_APPROVED`) hoặc Loại bỏ (`REJECTED`, comment bắt buộc) từng câu, hoặc `CONFIRM_ALL` trong batch đang mở cho các câu `FIRST_APPROVED` của B; ghi một audit cấp batch cho bulk; không sửa, không trả về A | P0 |
 | F-28 | Kiểm tra cuối (C3) và Import vào ngân hàng | Khi lô READY_TO_FINALIZE, Admin bấm Kiểm tra (C3 chạy theo delta), xử lý lỗi cứng/mềm, rồi Import ⇒ FINAL_APPROVED; Import bị khóa khi chưa có báo cáo C3 còn hiệu lực (UCADM14; DC-44, DC-45) | P0 (đề xuất) |
 | F-29 | Tổng quan hệ thống (Admin) | Trang trang chủ Admin (S36): 4 số (SV đã thi, câu vào ngân hàng, lô cần xử lý, kỳ đang mở), phân phối CEFR, thống kê 6 trạng thái câu, bảng kỳ thi đang mở; lọc theo kỳ thi (BR-13); API `GET /reports/overview` (UCADM05) | P1 (đề xuất, số F-ID chờ xác nhận) |
 
@@ -776,6 +844,8 @@ Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tư�
 **[NOTE]** Mục này đặc tả nghiệp vụ mới của v3.0. Đánh số "IXb" để giữ nguyên số các mục X đến XVII của v2.6 (các tham chiếu chéo không bị lệch); có thể đánh số lại khi xuất bản chính thức. Tên endpoint, module, class và khóa Redis là đề xuất theo kế hoạch Tuần 5; các điểm chưa chốt ghi "chờ chốt" ở Mục 9b.8. Từ vòng 3, mục này còn chứa nghiệp vụ sinh và duyệt câu hỏi (9b.9 đến 9b.18).
 
 ### 9b.1. Phạm vi và nguyên tắc
+
+**[NOTE]** Các quy tắc duyệt câu từ 9b.9 trở đi đã được cập nhật theo quyết định Q1–Q8. Endpoint và module item-generation còn phụ thuộc đồng bộ API/OpenAPI; mô tả thiết kế không khẳng định đã triển khai hoàn chỉnh.
 
 - Hệ thống đơn trường (DC-19). Tài khoản SV và GV chỉ do Admin tạo (từng người trên giao diện hoặc import file), không tự đăng ký (BR-01, DC-24). Đăng nhập chỉ bằng email + mật khẩu (DC-02).
 
@@ -806,7 +876,7 @@ Lưới tạm và OTP chỉ nằm trong Redis, không có bảng PostgreSQL tư�
 | Tổng quan hệ thống, cấu hình (UCADM05) | ❌ | ❌ | ❌ | ✅ |
 | Đổi / quên mật khẩu (UCSV08/09) | ✅ | ✅ | ✅ | ✅ |
 
-STUDENT chỉ truy cập dữ liệu của chính mình, thi, đổi/quên mật khẩu. Admin là siêu tập của Teacher về xem kết quả; riêng nghiệp vụ câu hỏi, Admin chỉ tạo lô, giao việc, kiểm tra và import, không sửa và không duyệt nội dung (DC-29). Tài khoản Admin đầu tiên tạo bằng seed; không thu hồi Admin cuối cùng (BR-18). Không đủ quyền ⇒ HTTP 403 (BR-16). Vai A và vai B do Admin gán cho GV (DC-40), từ 03/11/2026 theo từng câu; ràng buộc cũ "trong cùng một lô B không thuộc nhóm A" ⚠ chờ xác nhận có còn hay đổi thành "A khác B trên từng câu" (việc chỉ gán cho tài khoản role TEACHER và việc một GV làm A ở lô này, B ở lô khác là diễn giải của AI, chờ xác nhận). Mã UC: UCADM15–17 và UCADM08–09 tác nhân Admin như trên. Phần câu hỏi vòng 3 (đề xuất): UCADM11 Tạo lô AI, UCADM12 Import đề (lưới tạm), UCADM13 Giao việc và theo dõi, UCADM14 Kiểm tra và import cuối; UCGV14 Duyệt câu (GV vai A), UCGV15 Confirm câu (GV vai B); bỏ UCGV03 (không còn form thêm từng câu) và thay UCGV05 cũ (duyệt do Admin); UCGV02, UCGV04, UCGV06 sửa theo quyền mới (Mục 9b.16).
+STUDENT chỉ truy cập dữ liệu của chính mình và là role duy nhất bắt đầu, tiếp tục hoặc thao tác phiên thi. Admin được xem báo cáo/hồ sơ theo quyền nghiệp vụ, không bypass quyền sở hữu phiên để làm bài. Với câu hỏi, Admin tạo lô, giao việc, kiểm tra và import, không sửa hay duyệt nội dung. GV A được phân công theo câu; một GV B chung toàn lô và không thuộc nhóm A. Tài khoản Admin đầu tiên tạo bằng seed; không thu hồi Admin cuối cùng (BR-18). Không đủ quyền ⇒ HTTP 403 (BR-16). UCADM11–14 mô tả tạo/import lô, giao việc và kiểm tra cuối; UCGV14–15 mô tả duyệt và xác nhận câu.
 
 ### 9b.3. Luồng nghiệp vụ chính
 
@@ -821,6 +891,8 @@ STUDENT chỉ truy cập dữ liệu của chính mình, thi, đổi/quên mật
 **L3 — Admin tạo kỳ và danh sách thi (UCADM15, UCADM16):** Admin tạo kỳ (DRAFT) ⇒ import danh sách thi bằng cùng cơ chế lưới tạm (MSSV lạ hoặc đã có trong kỳ bị loại kèm popup; bấm Lưu mới ghi) ⇒ Công bố (SCHEDULED) ⇒ tới opensAt trạng thái hiệu lực là OPEN (lazy) ⇒ tới closesAt là CLOSED.
 
 **L4 — SV vào thi (UCSV02/03):** Trang chủ liệt kê kỳ của SV (GET /exam-rounds/mine) ⇒ chọn kỳ đang mở ⇒ POST /sessions {examRoundId} ⇒ BE kiểm BR-10 và tính expires_at ⇒ phiên bắt đầu. Sai điều kiện ⇒ 403 NOT_IN_ROUND / 409 ROUND_NOT_OPEN / 409 ROUND_ALREADY_COMPLETED / 409 SESSION_IN_PROGRESS (kèm sessionId, theo #58).
+
+- Sinh viên (`STUDENT`) chỉ được sử dụng session của chính mình thuộc kỳ được đăng ký; ADMIN hay sinh viên khác không thể bắt đầu, tiếp tục hoặc thao tác thay chủ sở hữu. Giao diện đích dùng `/student/exams/[roundId]/take`, `/student/results/[sessionId]` và `/student/results/[sessionId]/review` (chuyển hướng tạm URL cũ theo kế hoạch FE), lấy current session qua `GET /api/v1/exam-rounds/:roundId/session/current`. **Ẩn `sessionId` trên URL làm bài không thay thế kiểm tra authorization chủ sở hữu ở server.** Backend có endpoint start chỉ STUDENT; frontend hiện còn route tương thích và luồng runner dùng sessionId, nên route đích chưa được hiện thực đồng bộ hoàn toàn.
 
 **L5 — Quên mật khẩu (UCSV09):** SV nhập email ⇒ POST /auth/forgot-password ⇒ luôn trả 202 ⇒ nếu email tồn tại, sinh OTP 6 số (băm, lưu Redis TTL 10 phút) và đẩy email ⇒ SV nhập email + OTP + mật khẩu mới ⇒ POST /auth/reset-password ⇒ mustChangePassword = false, hủy mã; sai quá 5 lần ⇒ hủy mã. Không tự đăng nhập sau khi đặt lại.
 
@@ -850,7 +922,7 @@ Mật khẩu tạm (MD-10, áp dụng cho SV lẫn GV, cả tạo từng ngườ
 
 | **Từ** | **Sang** | **Điều kiện** |
 | --- | --- | --- |
-| DRAFT | SCHEDULED | Admin công bố; cần ít nhất 1 SV trong danh sách (điều kiện về opensAt chờ chốt theo BR-08) |
+| DRAFT | SCHEDULED | Admin công bố; cần ít nhất 1 SV trong danh sách và opensAt còn ở tương lai. |
 | SCHEDULED | OPEN | Tới opensAt (chuyển kiểu lazy) |
 | OPEN | CLOSED | Tới closesAt, hoặc Admin đóng thủ công |
 | DRAFT | CLOSED | Hủy kỳ |
@@ -865,31 +937,31 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 | BR-02 | Email duy nhất toàn hệ thống (không phân biệt hoa thường); MSSV (student_code) và Mã GV (teacher_code) duy nhất toàn hệ thống. |
 | BR-03 | Dòng import tài khoản hợp lệ khi MSSV (file SV) hoặc Mã GV (file GV), Họ tên, Email không rỗng; email đúng định dạng; không trùng trong lưới hiện có; không trùng trong cơ sở dữ liệu. Dòng không hợp lệ bị loại khỏi lưới và báo qua popup. |
 | BR-04 | Lưu theo lưới: nút Lưu ghi mọi dòng đang có trong lưới trong một transaction; dòng lỗi/đã tồn tại không vào lưới nên không chặn Lưu; Lưu khi lưới rỗng bị từ chối. |
-| BR-05 | Tài khoản mới: role = STUDENT (file/form SV) hoặc TEACHER (file/form GV), authProvider = LOCAL, mustChangePassword = true. Email chỉ gửi sau khi bấm Lưu (import) hoặc sau khi tạo thành công (tạo từng người); gửi thất bại sau retry ⇒ ghi log ứng dụng, không rollback tài khoản; hệ thống **không lưu** trạng thái gửi thư trên tài khoản (Quyết định #120, chốt lại 14/11/2026), Admin xử lý bằng "Gửi lại mật khẩu tạm" từng tài khoản. |
+| BR-05 | Tài khoản mới: role = STUDENT (file/form SV) hoặc TEACHER (file/form GV), authProvider = LOCAL, mustChangePassword = true. Email chỉ gửi sau khi bấm Lưu (import) hoặc sau khi tạo thành công (tạo từng người); gửi thất bại sau retry ⇒ ghi log ERROR ứng dụng/Better Stack (cấm ghi mật khẩu/OTP), không rollback tài khoản; hệ thống **không lưu** trạng thái gửi thư trên tài khoản (Quyết định #120, chốt lại 14/11/2026 & 28/11/2026), Admin xử lý bằng "Gửi lại mật khẩu tạm" từng tài khoản trên S24. |
 | BR-06 | Đổi mật khẩu: mật khẩu mới khác mật khẩu hiện tại; mật khẩu mới tối thiểu 8 ký tự, gồm chữ thường, chữ hoa, chữ số và ký tự đặc biệt (chốt 09/11/2026, Quyết định #134 D4; áp dụng cả khi đặt lại mật khẩu); sau thành công mustChangePassword = false và cấp lại token. |
 | BR-07 | Chỉ Admin tạo/sửa/công bố/đóng kỳ và import danh sách thi; GV thường chỉ xem kết quả (và xử lý các câu hỏi được giao, BR-21 đến BR-30). |
-| BR-08 | opensAt < closesAt; kỳ DRAFT sửa tự do; sau SCHEDULED chỉ cho sửa tên và kéo dài closesAt (đề xuất — chờ chốt); không sửa kỳ CLOSED. |
+| BR-08 | `opensAt < closesAt`; DRAFT sửa tự do. Chỉ công bố khi opensAt ở tương lai. Sau công bố chỉ sửa giờ: khi hiệu lực SCHEDULED và chưa mở, được sửa giờ mở/đóng, giờ mở mới phải ở tương lai và khoảng mở–đóng đủ durationMinutes; khi OPEN, giữ opensAt và chỉ kéo dài closesAt; CLOSED không sửa. expiresAt của phiên đã bắt đầu giữ nguyên. |
 | BR-09 | Danh sách thi của một kỳ chỉ gồm tài khoản role = STUDENT đã tồn tại. |
 | BR-10 | Bắt đầu phiên chỉ hợp lệ khi: SV thuộc danh sách của kỳ được chọn; kỳ ở trạng thái hiệu lực OPEN tại thời điểm hiện tại; SV chưa có phiên IN_PROGRESS (409 theo #58); SV chưa có phiên COMPLETED trong kỳ đó. |
 | BR-11 | expires_at tính một lần lúc bắt đầu phiên theo DC-20. Quá expires_at ⇒ luật K5/#77 (≥ 8 câu ⇒ COMPLETED + TIMEOUT; ít hơn ⇒ ABANDONED). |
-| BR-12 | Admin đóng thủ công kỳ khi còn phiên đang chạy: phiên đang chạy vẫn theo expires_at, chỉ chặn phiên mới (đề xuất — chờ chốt Q-2). |
+| BR-12 | Admin đóng thủ công kỳ khi còn phiên đang chạy: phiên đang chạy tiếp tục tới expires_at đã cấp, chỉ chặn phiên mới (người dùng chốt 27/11/2026). |
 | BR-13 | Báo cáo lớp (UCGV07/08, UCADM05) lọc được theo kỳ; mặc định hiển thị toàn hệ thống. |
 | BR-14 | Quên mật khẩu: phản hồi luôn như nhau dù email có tồn tại hay không; rate limit (quên mật khẩu theo email, đặt lại mật khẩu theo IP); vẫn phản hồi 202 khi Redis hoặc SMTP lỗi; OTP dùng một lần, hiệu lực 10 phút, tối đa 5 lần nhập sai (DC-21). |
 | BR-15 | Mọi import ghi nhật ký kiểm toán tối thiểu: ai, khi nào, số dòng, kết quả (không ghi mật khẩu). |
 | BR-16 | Phân quyền theo role và theo phân công: TEACHER xem báo cáo lớp và hồ sơ SV, và chỉ xử lý câu được giao cho mình (vai A hoặc B); ADMIN làm mọi chức năng quản trị (không sửa nội dung câu) và chức năng xem của Teacher; STUDENT chỉ dữ liệu của mình. Không đủ quyền ⇒ 403 (NOT_ASSIGNED với việc không được giao). |
 | BR-17 | Admin quản lý tài khoản giảng viên: tạo, sửa, khóa/mở khóa; nâng TEACHER → ADMIN và thu hồi ADMIN → TEACHER. Danh sách giảng viên (`GET /teachers`) gồm cả tài khoản Admin và trả thêm `role` để giao diện hiện huy hiệu Admin và cho thu hồi quyền. Admin không tự thu hồi quyền của chính mình và không tự khóa chính mình; không khóa được tài khoản Admin khác (thu hồi quyền trước rồi mới khóa); chỉ đổi role giữa TEACHER và ADMIN, không áp dụng cho sinh viên (chốt 14/11/2026). |
-| BR-18 | Nâng/thu hồi Admin ghi nhật ký kiểm toán; không thu hồi nếu đó là Admin cuối cùng (đề xuất); token cũ của người bị đổi quyền phải mất hiệu lực quyền cũ: cơ chế là `JwtStrategy` tra tài khoản (role, isActive) từ cơ sở dữ liệu ở mỗi request, không tin `role` trong token (đã có ở nhánh `feat/auth-module`). Nhật ký kiểm toán: chưa có nơi lưu, hoãn (nợ đồng bộ 14/11/2026). |
+| BR-18 | Nâng/thu hồi Admin: không thu hồi nếu đó là Admin cuối cùng (đã chốt 28/11); token cũ của người bị đổi quyền mất hiệu lực quyền cũ ngay vì `JwtStrategy` tra tài khoản (role, isActive) từ CSDL ở mỗi request. Giữ quyết định #136 hoãn bảng `audit_logs` DB sang Khóa luận; thao tác quản trị ghi log có cấu trúc Pino (cấm ghi mật khẩu/OTP). |
 | BR-19 | Quản lý tài khoản (SV và GV): khóa tài khoản ⇒ không đăng nhập được và mọi request đang có token bị trả 401; phiên IN_PROGRESS không xử lý riêng, quá `expires_at` thì áp dụng K5, mở khóa khi phiên còn hạn thì làm tiếp được; Admin không tự khóa chính mình và không khóa tài khoản Admin; "Gửi lại mật khẩu tạm" áp dụng cho SV và GV kể cả khi đã đổi mật khẩu (mật khẩu mới thay thế, token cũ mất hiệu lực), không áp dụng cho Admin; không xóa cứng tài khoản đã có phiên/hồ sơ (chỉ khóa). Gửi lại mật khẩu tạm ⇒ sinh mật khẩu mới, mustChangePassword = true. |
 | BR-20 | Tạo từng tài khoản (UCADM09, đề xuất): SV nhập MSSV, họ tên, email; GV nhập Mã GV, họ tên, email; trùng email/MSSV/Mã GV ⇒ từ chối và báo lỗi (HTTP 409; mã lỗi cụ thể chờ chốt). Sinh mật khẩu tạm 12 ký tự, argon2, mustChangePassword = true, gửi email qua MailPort/BullMQ sau khi lưu — giống import. Import không cập nhật tài khoản có sẵn. |
 | BR-21 | Câu hỏi chỉ vào ngân hàng qua lô (AI sinh hoặc Admin import file). Không có form thêm từng câu; GV không import; Admin không sửa nội dung câu (DC-28, DC-29, DC-32). |
-| BR-22 | Giao việc: Admin giao từng câu cho một GV A (reviewerId) và một GV B (confirmerId), A khác B; mỗi vòng có hạn dueAt riêng; lô phải ở READY_TO_ASSIGN (DC-40, DC-41; sửa theo họp GVHD 03/11/2026). ⚠ chờ xác nhận: nhóm A ≥ 1 GV và mã lỗi 409 CONFIRMER_IN_REVIEW_GROUP còn dùng không; reviewDays/confirmDays còn là giá trị mặc định cho dueAt hay Admin nhập hạn từng câu. |
-| BR-23 | Chia đều: sắp các câu DRAFT theo (skill, CEFR, thứ tự sinh) rồi giao vòng tròn cho từng GV A; số câu mỗi GV chênh nhau tối đa 1. ⚠ chờ xác nhận: sau khi bỏ gói, chia đều còn là cách giao mặc định không. |
-| BR-24 | Hạn: mỗi câu có hạn riêng cho từng vòng, first_review.dueAt (A) và second_review.dueAt (B), đặt lúc giao việc, cuối ngày, giờ chốt 23:59:59 giờ Việt Nam (cấu hình); Admin chỉnh được cho việc chưa xử lý. ⚠ chờ xác nhận: cách tính hạn của B (ngày giao + số ngày, hay từ lúc A duyệt câu) và hành động ghi nhật ký khi chỉnh hạn (EXTEND đã bỏ khỏi ReviewAction). Nhắc bằng job trễ BullMQ trước hạn 24 giờ, mỗi (câu, vòng) một lần, đánh dấu bằng items.first_reminder_sent / second_reminder_sent; email nhắc gộp theo (lô, bước, GV). Quá hạn chỉ cảnh báo, không tự đổi trạng thái hay tự giao lại (Q-2, Q-4 mặc định; Q-3 xem Mục điểm mở). |
-| BR-25 | Quyết định của A: A Duyệt hoặc Từ chối từng câu được giao, ghi vào first_review; không còn bước Gửi gói (họp GVHD 03/11/2026) nên bỏ mã lỗi PACKAGE_INCOMPLETE; câu đã quyết (FIRST_APPROVED hoặc REJECTED) A không sửa lại. ⚠ chờ xác nhận: thời điểm câu FIRST_APPROVED hiện cho B (ngay khi A duyệt câu đó hay chờ A quyết hết các câu được giao). |
-| BR-26 | GV vai B chỉ đọc: Xác nhận hoặc Loại bỏ từng câu, hoặc "Xác nhận tất cả câu còn lại" (chỉ ảnh hưởng câu chưa quyết được giao cho B, ghi log hành động hàng loạt; ⚠ chờ xác nhận phạm vi sau khi bỏ gói: theo lô hay toàn bộ việc của B). B không sửa nội dung và không có thao tác trả về A (DC-33). |
-| BR-27 | Sau mỗi lần A sửa, hệ thống chạy lại luật cứng và T1–T2 trên bản sửa; hỏng hoặc trùng ⇒ chặn Duyệt (422 INVALID_AFTER_EDIT / DUPLICATE_AFTER_EDIT). |
-| BR-28 | Import chỉ khi lô ở READY_TO_FINALIZE (mọi câu đã xong vòng 2: SECOND_APPROVED hoặc REJECTED, hoặc các câu còn lại đã quá hạn) và có báo cáo C3 còn hiệu lực (409 FINAL_CHECK_REQUIRED / FINAL_CHECK_STALE / BATCH_NOT_READY_TO_FINALIZE); lúc Import vẫn chạy lại T1–T2 nhanh chống tranh chấp; câu chưa xử lý không được import (DC-44). |
-| BR-29 | Câu loại: người loại ⇒ REJECTED, không lưu lý do (#56); máy loại ⇒ AI_REJECTED, lưu mã lý do, chỉ Admin xem và không đưa cho GV (DC-43). Lỗi cứng ở C3 ⇒ AI_REJECTED; lỗi mềm ⇒ Admin quyết Import (ghi ACCEPT_FLAG) hoặc Loại (REJECTED). |
+| BR-22 | Admin giao câu DRAFT của lô READY_TO_ASSIGN cho A và một B chung tại ItemBatch.confirmerId; B khác mọi A trong lô. Giao lại A chỉ đổi A của câu DRAFT, có reason; thay B là thao tác riêng có reason và audit cấp lô. |
+| BR-23 | Preview phía backend sắp DRAFT theo (skill, cefrTarget, createdAt, id), chia vòng tròn liên tục theo reviewerIds có thứ tự; Admin được chỉnh A. Preview trả batchRevision; assign kiểm revision và phủ 1-1 DRAFT trong transaction. B khác mọi A; trùng trả 409 CONFIRMER_IN_REVIEW_GROUP. |
+| BR-24 | Hạn A/B xác định khi giao; B không tính lại khi A duyệt. Nhắc 08:00 giờ Việt Nam ngày trước hạn; đổi hạn bắt buộc reason, audit UPDATE_DUE_DATE cấp lô với hạn cũ/mới và phạm vi. Quá hạn chỉ cảnh báo; Admin chủ động xử lý, không tự loại/import/giao lại. |
+| BR-25 | A Duyệt hoặc Từ chối từng câu được giao; A chỉ được sửa khi item đang `DRAFT` và được giao cho A. Sau `FIRST_APPROVED` hoặc `REJECTED`, A không được sửa; không có bước Gửi gói. B thấy câu ngay sau khi A duyệt thành `FIRST_APPROVED`. |
+| BR-26 | B chỉ đọc; Xác nhận hoặc Loại bỏ từng câu, hoặc `CONFIRM_ALL` trong đúng batch đang mở, chỉ các câu `FIRST_APPROVED` thuộc B hiện tại. `CONFIRM_ALL` chạy một transaction và ghi một audit cấp batch với `item_id = NULL`, `updatedCount` và `itemIds` trong `details`. B không sửa và không trả về A. |
+| BR-27 | Sau mỗi lần A sửa khi item còn `DRAFT`, hệ thống chạy lại luật cứng và T1–T2; hỏng hoặc trùng ⇒ chặn Duyệt. Comment khi Approve/Confirm là tùy chọn; comment khi Reject/Remove hoặc Admin soft reject là bắt buộc. |
+| BR-28 | Chỉ C3/import khi không còn DRAFT hoặc FIRST_APPROVED; chỉ SECOND_APPROVED có C3 hợp lệ hoặc được Admin chấp nhận cờ mới import. Sau ít nhất một câu import và còn SECOND_APPROVED chưa kết thúc, lô PARTIALLY_IMPORTED; C3 stale phải chạy lại và quyết lại cờ mềm. DONE khi lô có item và mọi item kết thúc; lô rỗng do lỗi là FAILED. |
+| BR-29 | REJECTED/AI_REJECTED kết thúc, không giao lại/reset. Reject/Remove/soft reject bắt buộc comment. Admin được chủ động cancel-pending với reason để hủy DRAFT/FIRST_APPROVED thành REJECTED; ghi CANCEL_PENDING cấp lô và phân biệt trong báo cáo chất lượng. |
 | BR-30 | Trạng thái Item chỉ đi một chiều, không có đường quay lại; FINAL_APPROVED không sửa (#64); irt_b hợp lệ trong [−4, +4] (cấu hình, DC-34); câu mới calibrated = false, irt_b khởi tạo theo trung bình irt_b của các câu mẫu hoặc giá trị file (nếu có). |
 
 ### 9b.7. Mã lỗi nghiệp vụ
@@ -909,37 +981,37 @@ Không quay lui trạng thái. Hàm effectiveStatus(round, now) là nguồn duy 
 
 Định dạng lỗi hiện tại ({statusCode, message, error, timestamp, path}) chưa có mã ổn định; trường code là việc của backend, SRS chỉ dùng các mã trên. Mã lỗi nghiệp vụ của phần câu hỏi (vòng 3): xem Mục 9b.18.
 
-### 9b.8. Điểm còn mở (chờ chốt)
+### 9b.8. Điểm còn mở và trạng thái chốt
 
-- Q-2: Admin đóng thủ công kỳ khi còn phiên đang chạy — cắt ngay hay để chạy tới expires_at (đề xuất: để chạy; BR-12).
+- Q-2 (đã chốt 27/11/2026): phiên đang chạy tiếp tục tới expires_at đã cấp; chặn phiên mới (BR-12).
 
 - Q-4 (đã chốt 09/11/2026, Quyết định #134 D4): mật khẩu tối thiểu 8 ký tự, bắt buộc chữ thường, chữ hoa, chữ số và ký tự đặc biệt (BR-06; Mục 15.3).
 
-- Q-5: nhà cung cấp SMTP cụ thể (hạn mức gửi email chưa kiểm chứng).
+- Q-5 (chốt pilot staging 28/11/2026): chọn **Brevo SMTP Relay** cho thử nghiệm staging/demo (giữ `MailPort` trung lập; Gmail App Password cho dev); cần xác minh thật SPF/DKIM và quota ~300 mail/ngày.
 
-- Q-3: định dạng sơ đồ thành phần/triển khai (không thuộc nội dung bản SRS này; để bổ sung sau).
+- Q-3: định dạng sơ đồ thành phần/triển khai (Component/Deployment đã bổ sung ở `design/component-deployment/`).
 
-- BR-08 (sửa kỳ sau SCHEDULED) và BR-18 (chặn thu hồi Admin cuối) là đề xuất, chưa có xác nhận riêng.
+- BR-08 (chốt 27/11) & BR-18 (chốt 28/11): BR-08 khóa sửa tên sau công bố và quy định sửa giờ theo SCHEDULED/OPEN/CLOSED; BR-18 chặn thu hồi Admin cuối và giữ quyết định #136 hoãn bảng `audit_logs` DB sang Khóa luận (ghi log Pino có cấu trúc).
 
-- Đề xuất vòng 2 (DC-24), chờ xác nhận: UCADM08 mở rộng thành "Import tài khoản (SV, GV)"; tạo từng người gộp vào UCADM09 (không thêm UC mới); tên endpoint POST /students, POST /teachers, tham số kind; mã lỗi khi trùng khi tạo từng người.
+- Đề xuất vòng 2 (DC-24) đã chốt nghiệp vụ: UCADM08 mở rộng thành "Import tài khoản (SV, GV)"; tạo từng người gộp vào UCADM09; endpoint `POST /students`, `POST /teachers`, `kind=STUDENT|TEACHER`; trùng trả `409 CONFLICT` (`BR-20`).
 
 - Lưu ý mã: các mã Q-7 đến Q-12 dưới đây thuộc kế hoạch sinh/duyệt đề AI bản 5; chúng khác với các câu hỏi Q-2 đến Q-5 phía trên (thuộc kế hoạch import/kỳ thi).
 
-- Q-7 (chờ chốt): các tham số và ngưỡng — tỷ lệ sinh dư overRate, cỡ mỗi lời gọi, ngưỡng T2 và T3 (cứng, mềm), số vòng bù R, trần lời gọi/token mỗi lô, số ngày dọn AI_REJECTED. Đặt trong cấu hình, hiệu chỉnh sau thử nghiệm nhỏ; chưa có số liệu đo.
+- Q-7 (chốt hạn mức 28/11; ngưỡng ở **trạng thái pilot / chưa kiểm chứng**): giới hạn **50 câu/lô** và **250 lượt gọi AI/lô** (`DECISIONS_LOG:213`). Các ngưỡng khởi điểm (`overRate = 0.25`, `chunkSize = 10`, `maxRefillRounds = 2`, T2 `0.65`/`0.85`, T3 `0.90` `SOFT`, lưu `AI_REJECTED` 90 ngày không auto-delete) giữ ở trạng thái pilot cho tới khi smoke test thật đạt.
 
-- Q-8 (chờ chốt): nguồn ngân hàng tham chiếu cho few-shot và điều khoản bản quyền khi phân phối lại cho SV (kiểm bộ Tuần 3: CEFR-J, CLOTH; hỏi GVHD nếu cần).
+- Q-8 (cập nhật 28/11): few-shot lấy 3–5 câu đã duyệt cùng kỹ năng/CEFR từ DB hiện tại (`items.generated_from_ref_ids`); vẫn cần rà bằng chứng bản quyền bộ nguồn trước phát hành.
 
-- Q-9 (chờ chốt): mô hình embedding, hạn mức và chi phí — chưa kiểm chứng; phải xác minh trong tài liệu nhà cung cấp, qua LLM Gateway, trước khi code.
+- Q-9 (trạng thái **pilot / chưa kiểm chứng**): gọi **Gemini trực tiếp qua endpoint tương thích OpenAI** (không có LiteLLM dự phòng ở chế độ thử; `DECISIONS_LOG:207`); embedding mặc định pilot `gemini-embedding-001@768`. Chưa coi là kiểm thử tích hợp đạt vì smoke test sinh/C1 nhận HTTP 503.
 
-- Q-10 (chờ chốt): pg_trgm có bật được trên image Postgres staging không; nếu không, T2 tính trong ứng dụng.
+- Q-10 (đã có migration `20261126120400_enable_pg_trgm`): cần chạy kiểm chứng `prisma migrate deploy` trên PostgreSQL staging ở Wave 0C.
 
-- Q-11 (chưa thực hiện): phạm vi và thời gian — sinh đề AI nay vào Tiểu luận, làm đủ T3 và G5; cập nhật COMMITMENT_BASELINE.md trước khi ký (gate G1, hết Tuần 6) và ghi rủi ro trễ (R15). Q-12 (chưa thực hiện): sửa CLAUDE.md theo khoảng irt_b [−4, +4] và kiểm tác động chọn câu CAT bằng test.
+- Q-11 (đề xuất gửi GVHD, chờ bằng chứng xác nhận cho `COMMITMENT_BASELINE.md`): ranh giới RQ1/RQ2 Tiểu luận (mô phỏng + oracle; User Study 50–100 SV giữ ở Khóa luận). Q-12: tách rõ `irt_b` `[−4, +4]` với ngưỡng Outlier Early Stop `[−2.5, +1.5]` và viết test biên CAT.
 
-- Đã chấp nhận theo mặc định của kế hoạch bản 5: Q-1 chọn O2 (lỗi cứng ở C3 tự AI_REJECTED, lỗi mềm Admin quyết); Q-2 (câu quá hạn nằm lại lô, Admin xử lý thủ công); Q-3 (hạn của B tính từ ngày gửi gói; không còn áp dụng sau họp GVHD 03/11/2026, ⚠ chờ xác nhận cách tính mới); Q-4 (23:59:59 giờ Việt Nam, nhắc ngay nếu hạn dưới 24 giờ lúc giao); Q-5 (nhóm A ≥ 1 GV, B bắt buộc); Q-6 (tên AI_REJECTED và IMPORTED). Các tên và con số này vẫn là đề xuất của AI cho tới khi nhóm xác nhận lại.
+- Theo quyết định 26/11/2026: hạn A/B tính khi giao, nhắc lúc 08:00 ngày trước hạn; quá hạn chỉ cảnh báo, Admin xử lý thủ công. Một GV B chung lô, không thuộc nhóm A. Quy tắc comment và import một phần xem BR-22–BR-30.
 
 ### 9b.9. Phạm vi và vòng đời câu hỏi (vòng 3)
 
-Từ vòng 3 (DC-27 đến DC-45), câu hỏi chỉ vào Item Bank qua một lô (batch) và đi một chiều: Admin tạo lô bằng AI hoặc tự import file ⇒ AI check ⇒ Admin xem kết quả rồi bấm Giao việc ⇒ GV vai A sửa/duyệt/từ chối từng câu được giao ⇒ GV vai B xác nhận hoặc loại từng câu đã được A duyệt ⇒ khi cả lô xong hoặc quá hạn, Admin bấm Kiểm tra (AI check lần cuối) ⇒ Admin Import ⇒ FINAL_APPROVED. Không có đường quay lại: B không trả về A, câu rớt C3 không trả về A.
+Từ vòng 3 (DC-27 đến DC-45), câu hỏi chỉ vào Item Bank qua một lô (batch) và đi một chiều: Admin tạo lô bằng AI hoặc import file ⇒ AI check ⇒ Admin giao việc ⇒ GV A sửa/duyệt/từ chối ⇒ GV B xác nhận hoặc loại từng câu đã được A duyệt ⇒ Admin kiểm tra C3 và import câu đủ điều kiện ⇒ FINAL_APPROVED. Quá hạn không tự hoàn tất câu. Không có đường quay lại: B không trả về A, câu bị loại không giao lại.
 
 Không ai thêm từng câu bằng form (bỏ UCGV03); GV không import; Admin không soạn, không sửa và không duyệt nội dung câu, chỉ quản lý lô, giao việc, kiểm tra và import.
 
@@ -958,7 +1030,7 @@ FIRST_APPROVED                    REJECTED
         ▼
 GV vai B:  Xác nhận ──► SECOND_APPROVED
            Loại bỏ  ──► REJECTED
-        │ cả lô xong hoặc quá hạn
+        │ câu đủ điều kiện kiểm tra cuối
         ▼
 Admin bấm Kiểm tra (C3)
    ├─ qua ───────► Admin Import ──► FINAL_APPROVED
@@ -974,28 +1046,28 @@ Admin bấm Kiểm tra (C3)
 | FIRST_APPROVED (mới) | A đã duyệt (ghi first_review); chờ B xác nhận | A bấm Duyệt |
 | SECOND_APPROVED (mới) | B đã xác nhận; chờ Admin kiểm tra và import | B bấm Xác nhận (từng câu hoặc "tất cả câu còn lại") |
 | FINAL_APPROVED (đổi tên từ trạng thái đã duyệt cũ) | Đã vào ngân hàng, dùng cho CAT, cấm sửa (#64); calibrated = false | Admin bấm Import (ghi approved_by, approved_at) |
-| REJECTED | Người loại: A, B hoặc Admin (khi quyết lỗi mềm). Không lưu lý do (#56) | A, B, Admin |
+| REJECTED | Người loại: A, B hoặc Admin khi quyết lỗi mềm; bắt buộc lưu comment | A, B, Admin |
 | AI_REJECTED (mới, tên là đề xuất) | Máy loại ở C1, C2 hoặc C3; lưu mã lý do (lý do của hệ thống, khác #56 vốn nói về lý do của người) | Hệ thống |
 
 Hai trạng thái cũ "chờ duyệt" và "đã duyệt" (tên cũ) bị bỏ; không còn giá trị nào ngoài sáu giá trị trên.
 
-Trạng thái của lô (item_batches.status, đề xuất): GENERATING hoặc IMPORTING ⇒ CHECKING ⇒ READY_TO_ASSIGN ⇒ IN_REVIEW ⇒ READY_TO_FINALIZE (mọi câu đã xong vòng 2 hoặc các câu còn lại đã quá hạn) ⇒ FINAL_CHECKED (sau khi Admin bấm Kiểm tra) ⇒ DONE (mọi câu ở trạng thái cuối: FINAL_APPROVED, REJECTED, AI_REJECTED). Lỗi: FAILED; hết ngân sách: PARTIAL.
+Trạng thái đích: GENERATING/IMPORTING ⇒ CHECKING ⇒ READY_TO_ASSIGN ⇒ IN_REVIEW; chỉ khi hết DRAFT/FIRST_APPROVED mới READY_TO_FINALIZE ⇒ FINAL_CHECKED ⇒ PARTIALLY_IMPORTED sau ít nhất một câu import và còn SECOND_APPROVED. Từ PARTIALLY_IMPORTED tiếp tục xử lý cờ/import; nếu C3 stale chạy lại C3 và quyết lại cờ. DONE khi lô có item và mọi item kết thúc, kể cả không có câu import; lô rỗng do lỗi FAILED. PARTIAL (sinh thiếu) khác PARTIALLY_IMPORTED. Thiết kế chưa xác nhận triển khai.
 
 ### 9b.11. Tạo lô: bằng AI và bằng import file
 
-**Bằng AI (UCADM11).** Đầu vào: skill, cefr_level, topic_tag (tùy chọn), N. Nhóm GV chưa chọn ở bước này, chỉ chọn lúc Giao việc (DC-41). Chạy nền BullMQ; Admin nhận batchId và xem tiến độ.
+**Bằng AI (UCADM11).** Đầu vào: skill, cefr_level, topic_tag (tùy chọn), N (tối đa **50 câu/lô**). Nhóm GV chưa chọn ở bước này, chỉ chọn lúc Giao việc (DC-41). Chạy nền qua hàng đợi PostgreSQL có lease (`item_batch_jobs`); Admin nhận batchId và xem tiến độ.
 
 | **Bước** | **Việc** | **Tốn API?** |
 | --- | --- | --- |
-| G1 | Lấy k = 3 đến 5 câu mẫu cùng bộ lọc từ ngân hàng tham chiếu (few-shot); k cấu hình | Không |
-| G2 | Sinh dư: số câu sinh bằng N nhân (1 + overRate), làm tròn lên, chia thành các lời gọi nhỏ; mỗi lời gọi trả một mảng JSON gồm nội dung, 4 đáp án, đáp án đúng, irt_b gợi ý và giải thích | Có (lời gọi chính) |
+| G1 | Lấy k = 3 đến 5 câu mẫu đã duyệt cùng bộ lọc từ DB hiện tại (few-shot); ghi `items.generated_from_ref_ids` | Không |
+| G2 | Sinh dư: số câu sinh bằng N nhân (1 + overRate) (pilot 0.25), làm tròn lên, chia thành các lời gọi nhỏ (pilot 10); mỗi lời gọi trả một mảng JSON gồm nội dung, 4 đáp án, đáp án đúng, irt_b gợi ý và giải thích | Có (lời gọi chính) |
 | C1 | AI check lần 1 (Mục 9b.12) | Chỉ ở tầng cuối |
-| G6 | Bù thiếu: còn ít hơn N thì sinh thêm chỉ phần thiếu, tối đa R vòng (cấu hình); hết R vòng ⇒ báo "thiếu x câu" | Có, nhỏ |
+| G6 | Bù thiếu: còn ít hơn N thì sinh thêm chỉ phần thiếu, tối đa R vòng (pilot 2); hết R vòng ⇒ báo "thiếu x câu" | Có, nhỏ |
 | G7 | Cắt về N; irt_b khởi tạo = trung bình irt_b của k câu mẫu, calibrated = false, source = AI_GENERATED; lưu Explanation | Không |
 
 - Giải thích AI sinh cùng lời gọi G2 và lưu vào bảng explanations gắn Item (DC-31; #60, #63); A xem và sửa, B chỉ xem; C1 tầng 5 và C3 kiểm giải thích khớp đáp án. Không sinh lazy.
 
-- Kiểm soát chi phí: trần số lời gọi/token mỗi lô (BATCH_BUDGET_EXCEEDED); ghi tên và phiên bản mô hình thật của từng lời gọi (TC2.3); đi qua LLM Gateway có dự phòng; cache theo hash prompt. Chưa có số liệu chi phí, độ trễ hay tỷ lệ trùng — đo ở lần chạy thử đầu (chưa đo).
+- Kiểm soát chi phí (`DECISIONS_LOG:207–215`): trần **250 lượt gọi AI mỗi lô** (`BATCH_BUDGET_EXCEEDED` / `AI_BUDGET_EXCEEDED`, cấp lượt nguyên tử trong PostgreSQL cho sinh, embedding, G5, C2/C3 và retry); ghi tên và phiên bản mô hình thật của từng lời gọi (TC2.3); chế độ thử gọi **Gemini trực tiếp qua endpoint tương thích OpenAI** (không có LiteLLM dự phòng ở chế độ thử; toàn bộ cấu hình AI ở trạng thái **pilot / chưa kiểm chứng runtime** do smoke test sinh/C1 chưa đạt).
 
 **Bằng import file (UCADM12, chỉ Admin).** Dùng lưới tạm DC-22 (tải nhiều file, dòng lỗi bị loại kèm popup, bấm Lưu mới ghi). Cột .xlsx (đề xuất): Skill, CEFR, Topic, Câu hỏi, A, B, C, D, Đáp án, Giải thích (tùy chọn), Độ khó irt_b (tùy chọn). Bấm Lưu ⇒ tạo lô source = IMPORTED, chạy C2 trên các dòng trong lưới, rồi cùng luồng sau đó. Dòng thiếu giải thích được sinh bổ sung theo nhóm một lượt (chỉ các dòng thiếu).
 
@@ -1010,8 +1082,8 @@ Nguyên tắc chung (DC-30, DC-45): (1) rẻ trước, đắt sau — luật c�
 | 1. Luật cứng | Đủ 4 đáp án khác nhau, đúng 1 đáp án đúng, độ dài hợp lệ, irt_b trong [−4, +4], đúng skill/CEFR, có giải thích | Không | Hỏng ⇒ AI_REJECTED |
 | 2. Trùng T1 | Băm chuẩn hóa so với ngân hàng, câu đang trong mọi lô khác và các câu cùng lô | Không | Trùng ⇒ AI_REJECTED |
 | 3. Trùng T2 | pg_trgm trên nội dung + đáp án | Không | ≥ ngưỡng cao: AI_REJECTED; giữa hai ngưỡng: cờ mềm |
-| 4. Trùng T3 | Embedding (chỉ câu còn lại), cosine tính trong ứng dụng | Có (embedding) | ≥ ngưỡng: cờ mềm kèm câu bị nghi trùng |
-| 5. G5 | Kiểm đáp án độc lập: đưa câu + 4 đáp án (không kèm đáp án đúng) cho AI tự chọn; cùng lời gọi hỏi giải thích có ủng hộ đáp án vừa chọn không | Có (gộp nhóm) | Lệch ⇒ cờ mềm (không loại: AI có thể sai, người sẽ xem) |
+| 4. Trùng T3 | Embedding `gemini-embedding-001@768` (pilot, chỉ câu còn lại), cosine tính trong ứng dụng | Có (embedding) | ≥ 0,90 (pilot): cờ mềm (`DUPLICATE_SEMANTIC_SUSPECT`) kèm câu bị nghi trùng |
+| 5. G5 | Kiểm đáp án độc lập (**2 lượt gọi AI riêng**): lượt 1 chọn đáp án không kèm đáp án gốc/giải thích; lượt 2 kiểm lời giải với đáp án vừa chọn | Có (2 lượt) | Khớp ⇒ `INDEPENDENT_ANSWER_CHECKED` (`PASS`); lệch ⇒ `INDEPENDENT_ANSWER_MISMATCH` (`SOFT`, không tự loại) |
 
 **C2 — khi Admin import file có sẵn** (đầu vào do người soạn): không sinh dư, không bù thiếu; luôn có kiểm trùng nội bộ file/lưới; vẫn chạy đủ tầng 1 đến 5 nhưng: tầng 1 thêm kiểm cột bắt buộc, kiểu dữ liệu, giá trị CEFR/Skill hợp lệ và lỗi hiện ngay trên lưới (dòng sai không vào lưới, có popup); tầng 2 đến 4 chạy ngay lúc tải file lên lưới để Admin thấy sớm (trùng dòng đã có trong lưới ⇒ bỏ qua, DC-22); tầng 5 (G5) chạy một lần khi bấm Lưu, không chạy mỗi lần tải thêm file; giải thích thiếu ⇒ sinh bổ sung theo nhóm.
 
@@ -1020,7 +1092,7 @@ Nguyên tắc chung (DC-30, DC-45): (1) rẻ trước, đắt sau — luật c�
 | **Kiểm** | **Chạy trên** | **Cách tiết kiệm** | **Loại lỗi** |
 | --- | --- | --- | --- |
 | Luật cứng (tầng 1) | Mọi câu SECOND_APPROVED | Không tốn API | Cứng |
-| Toàn vẹn quy trình | Mọi câu | Không tốn API: A khác B, mọi câu có reviewer_id và confirmer_id, mọi câu đã có quyết định hoặc quá hạn, trạng thái đi đúng chiều | Cứng |
+| Toàn vẹn quy trình | Câu được kiểm | A thuộc phân công, B là confirmer của lô và không thuộc nhóm A; chỉ câu đã qua hai vòng mới có thể import | Cứng |
 | Trùng T1–T2 | Mọi câu, so với ngân hàng hiện tại (có thể có câu mới từ lô khác) và các câu cùng lô | Không tốn API | Cứng (T1, T2 ≥ ngưỡng cao); mềm (giữa hai ngưỡng) |
 | Trùng T3 | Câu đã đổi hash hoặc chưa có embedding; còn lại chỉ so với các câu ngân hàng mới thêm kể từ lần check trước | Embedding đã lưu, cosine trong ứng dụng | Mềm |
 | G5 + giải thích khớp | Chỉ câu A đã sửa (hash khác hash lúc qua C1/C2) | Câu không sửa dùng lại kết quả lần trước; gộp nhóm | Mềm |
@@ -1034,33 +1106,33 @@ Kết quả C3 hiển thị cho Admin theo câu (qua / cờ mềm / lỗi cứng
 
 Điều kiện: lô ở READY_TO_ASSIGN (đã qua C1/C2); Admin xem được số câu còn lại, danh sách "AI đã loại" và cờ mềm. Các bước Admin:
 
-- Bấm Giao việc; giao từng câu cho một GV A (reviewerId) và một GV B (confirmerId), A khác B (vi phạm ⇒ 409 CONFIRMER_IN_REVIEW_GROUP, tên mã ⚠ chờ xác nhận; thiếu B ⇒ lỗi kiểm tra đầu vào, mã chưa định). ⚠ chờ xác nhận: Admin chọn GV cho từng câu hay chọn nhóm A + B rồi chia đều như bản trước 03/11/2026.
+- Bấm Giao việc; chọn nhóm GV A và một GV B chung cấp lô. Mỗi câu được giao cho một GV A; B không được trùng bất kỳ GV A nào trong nhóm phân công của lô. Nguồn phân công B là `ItemBatch.confirmerId`.
 
-- Đặt hạn: mỗi câu có hạn riêng cho từng vòng (first_review.dueAt cho A, second_review.dueAt cho B), cuối ngày. ⚠ chờ xác nhận: cách Admin đặt (nhập ngày cho từng câu/nhóm câu, hay reviewDays/confirmDays làm giá trị mặc định) và cách tính hạn của B.
+- Đặt hạn cho từng vòng: `first_review.dueAt` cho A, `second_review.dueAt` cho B; cả hai hạn được xác định khi giao, không tính lại hạn B khi A duyệt.
 
-- Hệ thống hiện xem trước phân bổ (bảng GV – số câu, theo từng kỹ năng/CEFR); Admin bấm Xác nhận giao.
+- Thiết kế đích: `POST /api/v1/item-batches/:id/assign-preview` nhận `reviewerIds` có thứ tự; backend sắp DRAFT theo `(skill, cefrTarget, createdAt, id)` và chia vòng tròn liên tục, trả gợi ý cùng `batchRevision`. Admin được chỉnh A theo câu trước khi giao; số câu tổng và trong mỗi cặp skill/CEFR chênh tối đa một, không bảo đảm mỗi GV có đủ nhóm.
 
-Cách chia đều (⚠ chờ xác nhận còn áp dụng sau khi bỏ gói không): sắp xếp các câu DRAFT theo (skill, cefr, thứ tự sinh) rồi giao vòng tròn: câu thứ i giao cho GV A thứ (i chia dư M), M là số GV A. Nhờ sắp theo skill và CEFR trước, mỗi GV nhận mức trộn đều các loại câu; số câu mỗi GV chênh nhau tối đa 1 (ví dụ 100 câu cho 5 GV là 20 câu mỗi người; 103 câu thì 3 người nhận 21 và 2 người nhận 20).
+Assign dùng `{ confirmerId, firstDueAt, secondDueAt, assignments: [{ itemId, reviewerId }], batchRevision }`; backend kiểm tra revision, phủ 1-1 DRAFT, vai trò/hoạt động và B khác mọi A trong transaction. Body mới phá tương thích body cũ; cần phối hợp FE/BE hoặc adapter/version khi có consumer. Đây là thiết kế đích, chưa xác nhận tồn tại trong mã.
 
-Sau khi giao: ghi reviewer_id, confirmer_id, first_review.dueAt, second_review.dueAt của từng câu (không còn item_review_assignments và item_packages; họp GVHD 03/11/2026) và ghi item_review_events ASSIGN, một dòng cho mỗi câu (actor = Admin); lô chuyển IN_REVIEW; A nhận email nhắc việc qua MailPort (BullMQ) "Bạn có x câu cần duyệt, hạn dd/mm" và thấy việc trong Hộp việc (Tiểu luận không làm chuông thông báo thời gian thực); đặt lịch nhắc. Giao lại: Admin chuyển các câu chưa xử lý của một A cho A khác (hoặc đổi B của câu chưa xử lý), vẫn ràng buộc A khác B; hạn tính lại từ ngày giao lại; ghi kiểm toán (REASSIGN, một dòng cho mỗi câu).
+Sau khi giao, lưu A theo câu, B trên lô, hạn hai vòng và `ASSIGN` theo câu. `reassign` đổi A của DRAFT với reason; `reassign-confirmer` đổi B chung với reason, giữ hạn và quyết định cũ, ghi một audit cấp lô. B cũ mất quyền Teacher Review lô; B mới chỉ quyết các câu FIRST_APPROVED. Thông báo đổi B: ghi outbox cùng transaction, worker gửi sau commit; cần test retry, gửi lặp và thao tác đồng thời.
 
 ### 9b.14. GV vai A, GV vai B, hạn và nhắc
 
-**GV vai A (UCGV14).** Mở "Hộp việc → Cần duyệt", chỉ thấy câu giao cho mình kèm cờ mềm, giải thích, hạn còn lại. Với mỗi câu, A được sửa nội dung/đáp án/giải thích rồi chọn Duyệt (FIRST_APPROVED) hoặc Từ chối (REJECTED, không lưu lý do). Sau mỗi lần sửa, hệ thống chạy lại luật cứng và T1–T2 trên bản sửa; hỏng hoặc trùng ⇒ chặn Duyệt. Quyết định của A ghi vào items.first_review (action, reviewedAt, comment); lần sửa đầu tiên chụp originalSnapshot (ghi một lần). Không còn bước "Gửi cho B" (bỏ gói, họp GVHD 03/11/2026); câu đã Duyệt hoặc Từ chối thì A không sửa lại. ⚠ chờ xác nhận: thời điểm câu FIRST_APPROVED hiện cho B.
+**GV vai A (UCGV14).** A chỉ sửa câu được giao khi `DRAFT` và lô `IN_REVIEW`; sau kiểm tra nội dung, A chọn Duyệt (`FIRST_APPROVED`) hoặc Từ chối (`REJECTED`). Từ chối bắt buộc comment; Duyệt không bắt buộc. Kết quả ghi vào `first_review`, lần sửa đầu lưu `originalSnapshot`. B thấy câu ngay sau khi A duyệt.
 
-**GV vai B (UCGV15).** Mở "Hộp việc → Cần confirm", thấy các câu được giao cho mình, chỉ đọc; mỗi câu hiện cờ và dấu "A đã sửa" kèm bản gốc so với bản sửa. B xử lý từng câu: Xác nhận (SECOND_APPROVED) hoặc Loại bỏ (REJECTED), hoặc bấm "Xác nhận tất cả câu còn lại" (xác nhận hết câu chưa quyết được giao cho B; ghi log hành động hàng loạt; ⚠ chờ xác nhận phạm vi sau khi bỏ gói). B không sửa, không trả về A. Quyết định của B ghi vào items.second_review (action, confirmedAt, comment).
+**GV vai B (UCGV15).** B chỉ đọc các câu `FIRST_APPROVED` của lô được giao. B xác nhận (`SECOND_APPROVED`, comment tùy chọn) hoặc loại (`REJECTED`, bắt buộc comment). `CONFIRM_ALL` chỉ áp dụng các câu `FIRST_APPROVED` trong lô `IN_REVIEW` của B, trong một transaction; ghi một event cấp lô với `item_id = NULL`, số lượng và danh sách ID đã cập nhật. B không sửa hay trả lại câu cho A.
 
-**Hạn và nhắc.** Mỗi câu có hạn riêng cho từng vòng: first_review.dueAt (A) và second_review.dueAt (B), cuối ngày, giờ chốt 23:59:59 giờ Việt Nam (cấu hình). ⚠ chờ xác nhận: cách tính hạn của B. Admin chỉnh hạn (chỉ áp dụng cho việc chưa xử lý) ⇒ tính lại dueAt, hủy và tạo lại lịch nhắc (⚠ chờ xác nhận: hành động ghi nhật ký khi chỉnh hạn, vì EXTEND đã bỏ). Nhắc: job trễ BullMQ chạy lúc dueAt trừ 24 giờ, nếu việc chưa xong và cờ first_reminder_sent / second_reminder_sent còn false thì gửi một email nhắc gộp theo (lô, bước, GV) qua MailPort rồi bật cờ (việc vẫn hiện trong Hộp việc); cờ là cột riêng của items, tách khỏi JSON kết quả duyệt nên job nhắc không ghi đè quyết định của GV; hạn còn dưới 24 giờ lúc giao/chỉnh ⇒ nhắc ngay một lần; kèm đối chiếu lazy khi mở hộp việc phòng mất job. Quá hạn: chỉ hiển thị "quá hạn" cho Admin và GV (tính lazy bằng Item.isOverdue(round, at)), không tự đổi trạng thái hay tự giao lại; Admin chọn chỉnh hạn hoặc giao lại. Đã bỏ "ép gửi gói" (FORCE_SEND) cùng với gói.
+**Hạn và nhắc.** Hai hạn xác định khi giao; email nhắc lúc 08:00 giờ Việt Nam ngày trước hạn. Admin chỉnh hạn cho việc chưa xử lý, nhập lý do bắt buộc; ghi một event `UPDATE_DUE_DATE` cấp lô với hạn cũ/mới, actor, lý do và phạm vi ảnh hưởng, đồng thời thay lịch nhắc tương ứng. Quá hạn chỉ cảnh báo để Admin xử lý thủ công, không tự loại, import hoặc giao lại.
 
-**Sau khi B confirm.** Câu SECOND_APPROVED nằm chờ trong lô, chưa vào ngân hàng. Khi mọi câu đã xong vòng 2 (SECOND_APPROVED hoặc REJECTED) hoặc các câu còn lại đã quá hạn ⇒ lô READY_TO_FINALIZE; Admin thấy thống kê (SECOND_APPROVED, REJECTED bởi A/B, AI_REJECTED, chưa xử lý). Admin bấm Kiểm tra (C3), đọc báo cáo, xử lý lỗi mềm, rồi bấm Import ⇒ câu qua (và lỗi mềm Admin chấp nhận) thành FINAL_APPROVED, ghi approved_by, approved_at, có hiệu lực cho CAT, calibrated = false. Câu chưa quyết định (còn DRAFT hoặc FIRST_APPROVED chưa tới B) không được import. Quy tắc nghiệp vụ (chốt 18/10/2026): đến hạn mọi GV phải hoàn thành việc được giao, nên không có "câu tồn đọng" cần xử lý riêng sau Import; chỉnh hạn và giao lại chỉ là biện pháp dự phòng của Admin trước khi chạy C3. Lô chuyển DONE khi mọi câu đã ở trạng thái cuối.
+**Sau khi B confirm.** Không chạy C3/import khi còn `DRAFT` hoặc `FIRST_APPROVED`. Admin có thể chủ động hủy các câu tồn đọng bằng `cancel-pending` với reason, chuyển chúng sang `REJECTED`, ghi một event `CANCEL_PENDING` cấp lô và phân biệt hủy hành chính với loại chất lượng trong báo cáo. Chỉ câu `SECOND_APPROVED` có C3 hợp lệ/đã xử lý cờ mới import thành `FINAL_APPROVED`. Sau ít nhất một câu đã import mà còn `SECOND_APPROVED`, lô `PARTIALLY_IMPORTED`; Admin xử lý cờ/import tiếp. C3 stale phải chạy lại và Admin quyết lại cờ mềm, không tự kế thừa `ACCEPT_FLAG` cũ. `DONE` khi lô có item và mọi item kết thúc, kể cả 0 câu import; lô rỗng do lỗi sinh/import là `FAILED`. Lô rỗng không do lỗi chưa được định nghĩa.
 
 ### 9b.15. Câu bị loại
 
 | **Loại bởi** | **Trạng thái** | **Lưu gì** | **Ai xem** | **Dùng lại?** |
 | --- | --- | --- | --- | --- |
 | Máy ở C1, C2, C3 | AI_REJECTED | Nội dung + mã lý do + câu bị nghi trùng (nếu có) | Chỉ Admin (tab "AI đã loại") | Không; Admin dùng để chỉnh ngưỡng; dọn sau N ngày (cấu hình, Q-7) |
-| GV vai A hoặc B | REJECTED | Nội dung; không lưu lý do (#56) | Admin (danh sách và thống kê theo GV) | Không; muốn bù thì tạo lô mới |
-| Admin (lỗi mềm ở C3) | REJECTED | Như trên | Admin | Không |
+| GV vai A hoặc B | REJECTED | Nội dung và comment bắt buộc | Admin (danh sách và thống kê theo GV) | Không; muốn bù thì tạo lô mới |
+| Admin (lỗi mềm ở C3) | REJECTED | Nội dung và comment bắt buộc | Admin | Không |
 
 Câu AI_REJECTED không được đưa cho GV. Thống kê bắt buộc: tỷ lệ loại theo tầng AI, theo A, theo B, để hiệu chỉnh.
 
@@ -1083,7 +1155,7 @@ Ký hiệu: A = GV vai A, B = GV vai B, Ad = Admin, H = hệ thống.
 
 **L-2 — Tạo lô bằng import file (UCADM12, đề xuất).** Ad tải một hoặc nhiều file vào lưới (C2 tầng 1 đến 4 chạy ngay) ⇒ xem lưới và popup ⇒ bấm Lưu ⇒ H tạo lô IMPORTED, chạy C2 tầng 5 ⇒ READY_TO_ASSIGN.
 
-**L-3 — Xem kết quả và giao việc (UCADM13, đề xuất).** Ad xem số câu qua, danh sách AI đã loại, cờ ⇒ Giao việc (giao từng câu cho A và B kèm hạn từng vòng; ⚠ chờ xác nhận cách chọn) ⇒ xem trước phân bổ ⇒ xác nhận ⇒ H ghi reviewer_id, confirmer_id, hạn của từng câu và nhật ký ASSIGN, lô IN_REVIEW, thông báo và đặt lịch nhắc.
+**L-3 — Xem kết quả và giao việc (UCADM13).** Admin chọn nhóm A và một B chung, đặt hạn hai vòng, xem trước và xác nhận. Hệ thống ghi reviewer_id từng câu, confirmer_id cấp lô, hạn và nhật ký ASSIGN; lô IN_REVIEW và đặt nhắc.
 
 **L-4 — A duyệt (UCGV14).** A sửa/duyệt/từ chối từng câu (H kiểm lại luật cứng + T1–T2 sau sửa) ⇒ quyết định ghi vào first_review; không còn bước gửi gói.
 
@@ -1100,16 +1172,19 @@ Ký hiệu: A = GV vai A, B = GV vai B, Ad = Admin, H = hệ thống.
 | **Mã lỗi** | **HTTP** | **Ngữ cảnh** |
 | --- | --- | --- |
 | NOT_ASSIGNED | 403 | GV thao tác câu không được giao cho mình (hoặc sai vai A/B) |
-| CONFIRMER_IN_REVIEW_GROUP | 409 | GV B trùng GV A của cùng câu (⚠ chờ xác nhận tên mã và phạm vi; trước 03/11/2026: B nằm trong nhóm A của cùng lô) |
+| `CONFIRMER_IN_REVIEW_GROUP` | 409 | GV B được chọn trùng với một GV A trong cùng lô (assign / reassign-confirmer) |
 | FINAL_CHECK_REQUIRED | 409 | Import khi chưa có báo cáo C3 |
 | FINAL_CHECK_STALE | 409 | Import khi báo cáo C3 hết hiệu lực (câu hoặc ngân hàng đã đổi sau lúc kiểm) |
 | BATCH_NOT_READY_TO_FINALIZE | 409 | Kiểm tra/Import khi lô chưa ở READY_TO_FINALIZE |
 | DUPLICATE_AFTER_EDIT | 422 | Bản A sửa bị trùng (T1–T2) ⇒ chặn Duyệt |
 | INVALID_AFTER_EDIT | 422 | Bản A sửa vi phạm luật cứng ⇒ chặn Duyệt |
-| BATCH_BUDGET_EXCEEDED | 409 | Vượt trần lời gọi/token mỗi lô |
+| BATCH_BUDGET_EXCEEDED | 409 | Vượt trần 250 lượt gọi AI mỗi lô |
+| `AI_BUDGET_EXCEEDED` | 409 / `lastError` | Lô đã cạn ngân sách AI, chặn retry tự động (đồng bộ `@apt/shared-types` v3.1.0) |
 | IMPORT_GRID_EXPIRED | 410 | Lưới tạm import đề hết TTL (mã dùng chung với Mục 9b.7) |
 
-**[NOTE]** Ca test bắt buộc khi code (theo kế hoạch bản 5, Mục 13): giao việc 100 câu cho 5 GV A ra 20 câu mỗi người, 103 câu chênh tối đa 1, A trùng B trên cùng một câu ⇒ 409 (⚠ chờ xác nhận có còn ca chia đều 100 câu/5 GV không); cờ nhắc hạn là cột riêng, job nhắc không ghi đè first_review/second_review; B chỉ thấy và xử lý câu được giao cho mình; B gọi API sửa hoặc "trả về" ⇒ lỗi; C3 dùng lại kết quả với câu không đổi, chạy lại G5 với câu A sửa, bắt trùng với câu mới vào ngân hàng; Import chỉ khi READY_TO_FINALIZE và C3 còn hiệu lực, hai Admin import cùng lúc không tạo trùng; chỉ FINAL_APPROVED được CAT chọn; irt_b −4 và +4 hợp lệ, ngoài biên bị loại. Chưa chạy ca test nào (chưa có mã).
+**[NOTE]** Danh sách mã trên là hợp đồng/đề xuất tài liệu, chưa đồng bộ đầy đủ OpenAPI của nhánh tích hợp. Backend hiện có một số trường hợp trả lỗi validation NestJS tổng quát; không coi mã/HTTP đề xuất là bằng chứng mọi endpoint đã được xác minh.
+
+**[NOTE]** Các ca kiểm thử cần bao gồm: chia vòng tròn, B không trùng bất kỳ A nào trong lô, B thấy câu ngay sau A duyệt, cờ nhắc không ghi đè JSON review, xác nhận hàng loạt đồng thời và audit cấp lô, giao lại chỉ DRAFT, đổi hạn có lý do, C3/import một phần, quyền phiên thi, và chỉ `FINAL_APPROVED` được CAT chọn. Kết quả thực tế và các ca chưa kiểm chứng xem feature plan và nhật ký kiểm thử; không coi danh sách yêu cầu này là bằng chứng mọi ca đã chạy.
 
 ---
 
@@ -1142,12 +1217,12 @@ AUTH
   POST   /api/v1/auth/reset-password         # {email,otp,newPassword}
 
 TEST SESSION
-  POST   /api/v1/sessions                    # Tạo phiên thi, body {examRoundId} (BR-10)
-  GET    /api/v1/sessions/:id/next-item      # CAT chọn câu tiếp
-  POST   /api/v1/sessions/:id/responses      # Ghi response (dual-write)
-  GET    /api/v1/sessions/:id/result         # Kết quả sau hoàn thành
-  GET    /api/v1/sessions/:id/resume         # Tiếp tục phiên nếu bị gián đoạn
-
+  POST   /api/v1/sessions                               # {examRoundId}; chỉ STUDENT; tạo phiên trong kỳ được phân công
+  GET    /api/v1/exam-rounds/:roundId/session/current # Lấy phiên hiện tại của SV thuộc kỳ; không expose sessionId trên URL
+  GET    /api/v1/sessions/:id/next-item              # CAT chọn câu tiếp; chỉ chủ sở hữu STUDENT
+  POST   /api/v1/sessions/:id/responses              # Ghi response; chỉ chủ sở hữu STUDENT
+  GET    /api/v1/sessions/:id/result                 # Kết quả; chỉ chủ sở hữu STUDENT
+  GET    /api/v1/sessions/:id/resume                 # Tiếp tục phiên; chỉ chủ sở hữu STUDENT
 LANGUAGE PROFILE
   GET    /api/v1/placement-profiles/:student_id
   GET    /api/v1/placement-profiles/:student_id/history
@@ -1156,37 +1231,43 @@ CÂU HỎI / ITEM BANK  (v3.0 vòng 3)  [đề xuất]
   # Bỏ POST/PUT/DELETE /items và POST /items/bulk-import của bản cũ (không còn form thêm từng câu; import chuyển sang lưới tạm)
   GET    /api/v1/items , /api/v1/items/:id                  # Admin xem mọi câu; GV chỉ câu được giao
 
-LÔ CÂU HỎI (ADMIN)  [đề xuất]
-  POST   /api/v1/item-batches                               # tạo lô AI {skill,cefr,topic,count}
-  POST   /api/v1/item-imports/upload                        # multipart "file"; gộp vào lưới tạm
-  GET    /api/v1/item-imports/grid
-  DELETE /api/v1/item-imports/grid[/:rowKey]
-  POST   /api/v1/item-imports/save                          # tạo lô IMPORTED, chạy C2
+LÔ CÂU HỎI (ADMIN — route thực tế module item-generation, đồng bộ 28/11/2026)
+  POST   /api/v1/item-batches/generate                      # tạo lô AI {name?, skill, cefrTarget, topicTag?, count, operationId}
+  GET    /api/v1/item-batches/import/template               # tải file mẫu question-import-template.xlsx
+  POST   /api/v1/item-batches/import/upload                 # multipart "file"; gộp vào lưới tạm Redis
+  GET    /api/v1/item-batches/import/grid
+  DELETE /api/v1/item-batches/import/grid[/:rowKey]
+  POST   /api/v1/item-batches/import/save                   # {name?, operationId?}; tách lô <= 50 câu IMPORTED, chạy C2
+  POST   /api/v1/item-batches/import/preview                # (legacy) xem trước file Excel không ghi lưới Redis
   GET    /api/v1/item-batches , /api/v1/item-batches/:id
-  GET    /api/v1/item-batches/:id/ai-rejected               # tab "AI đã loại"
+  GET    /api/v1/item-batches/rejected-stats                # ?dimension=batch|reviewer|reason — thống kê câu bị loại
+  POST   /api/v1/item-batches/:id/retry-generation          # thử lại job GENERATE (trừ khi AI_BUDGET_EXCEEDED)
+  POST   /api/v1/item-batches/:id/retry-checks              # thử lại kiểm tra C1/C2
+  POST   /api/v1/item-batches/:id/refresh-status            # tính lại trạng thái lô theo câu con
 
-GIAO VIỆC (ADMIN)  [đề xuất]
-  GET    /api/v1/item-batches/:id/assign-preview
-  POST   /api/v1/item-batches/:id/assign                    # giao việc theo từng câu (⚠ chờ xác nhận body: danh sách câu + reviewerId, confirmerId, hạn từng vòng; trước 03/11: {reviewerIds,confirmerId,reviewDays,confirmDays})
-  POST   /api/v1/item-batches/:id/reassign
-  PATCH  /api/v1/item-batches/:id/deadlines                 # ⚠ chờ xác nhận: chỉnh hạn theo câu (dueAt từng vòng)
+GIAO VIỆC (ADMIN)
+  POST   /api/v1/item-batches/:id/assign-preview           # reviewerIds có thứ tự; trả phân bổ và batchRevision
+  POST   /api/v1/item-batches/:id/assign                   # confirmerId, firstDueAt, secondDueAt, assignments, batchRevision
+  POST   /api/v1/item-batches/:id/reassign                 # fromAssigneeId, toAssigneeId, reason; chỉ DRAFT
+  POST   /api/v1/item-batches/:id/reassign-confirmer       # toConfirmerId, reason; audit REASSIGN_CONFIRMER + review_notice_outbox
+  POST   /api/v1/item-batches/:id/cancel-pending           # reason; hủy DRAFT/FIRST_APPROVED, audit CANCEL_PENDING cấp lô
+  PATCH  /api/v1/item-batches/:id/deadlines                # firstDueAt, secondDueAt, reason; UPDATE_DUE_DATE cấp lô
 
-KIỂM TRA VÀ IMPORT CUỐI (ADMIN)  [đề xuất]
-  POST   /api/v1/item-batches/:id/final-check               # chạy C3
-  GET    /api/v1/item-batches/:id/final-check               # xem báo cáo C3
-  POST   /api/v1/items/:id/decision                         # chấp nhận hoặc loại lỗi mềm
-  POST   /api/v1/item-batches/:id/import                    # => FINAL_APPROVED
+KIỂM TRA VÀ IMPORT CUỐI (ADMIN)
+  POST   /api/v1/item-batches/:id/final-check              # chạy C3
+  GET    /api/v1/item-batches/:id/final-check              # báo cáo C3 mới nhất và stale
+  POST   /api/v1/item-batches/:id/items/:itemId/flag-decision # decision IMPORT hoặc REJECT; REJECT cần comment
+  POST   /api/v1/item-batches/:id/import                   # import câu đủ điều kiện, hỗ trợ từng phần (PARTIALLY_IMPORTED/DONE)
 
-CHẶNG A (GV vai A)  [đề xuất]
-  GET    /api/v1/me/review-tasks
-  PATCH  /api/v1/items/:id                                  # sửa nội dung/đáp án/giải thích (câu của mình, DRAFT)
-  POST   /api/v1/items/:id/approve | reject
-
-CHẶNG B (GV vai B)  [đề xuất]
-  GET    /api/v1/me/confirm-tasks                           # ⚠ chờ xác nhận tên (cũ: confirm-packages)
-  POST   /api/v1/items/:id/confirm
-  POST   /api/v1/items/:id/remove
-  POST   /api/v1/item-batches/:id/confirm-all               # xác nhận tất cả câu còn lại của B (⚠ chờ xác nhận tên và phạm vi; cũ: /item-packages/:id/confirm-all)
+GV DUYỆT CÂU (UCGV14–15 — chỉ @Roles(TEACHER), Đăng phụ trách)
+  GET    /api/v1/teacher/tasks/reviews[/:batchId]          # danh sách việc / câu A theo lô
+  PATCH  /api/v1/teacher/items/:id                         # A sửa DRAFT (firstReview.originalSnapshot giữ bản gốc)
+  POST   /api/v1/teacher/items/:id/approve                 # comment tùy chọn
+  POST   /api/v1/teacher/items/:id/reject                  # comment bắt buộc sau trim
+  GET    /api/v1/teacher/tasks/confirms[/:batchId]         # danh sách việc / câu B theo lô
+  POST   /api/v1/teacher/items/:id/confirm                 # comment tùy chọn
+  POST   /api/v1/teacher/items/:id/remove                  # comment bắt buộc sau trim
+  POST   /api/v1/teacher/tasks/confirms/:batchId/confirm-all # một transaction, audit CONFIRM_ALL cấp lô
 
 REPORTING
   GET    /api/v1/reports/class-distribution  # ?examRoundId= (TEACHER, ADMIN)
@@ -1214,6 +1295,7 @@ KỲ THI  [đề xuất]
   POST/GET  /api/v1/exam-rounds ; GET/PATCH /api/v1/exam-rounds/:id     # ADMIN
   POST   /api/v1/exam-rounds/:id/publish | close                        # ADMIN
   POST   /api/v1/exam-rounds/:id/participants/import/upload             # ADMIN, lưới tạm
+  GET    /api/v1/exam-rounds/:id/participants/import/template           # ADMIN, tải mẫu Excel
   GET    /api/v1/exam-rounds/:id/participants/import/grid
   DELETE /api/v1/exam-rounds/:id/participants/import/grid[/:rowKey]
   POST   /api/v1/exam-rounds/:id/participants/import/save
@@ -1223,7 +1305,7 @@ KỲ THI  [đề xuất]
   GET    /api/v1/exam-rounds/mine                                       # STUDENT: kỳ tôi thuộc + trạng thái hiệu lực
 ```
 
-Ghi chú v3.0: GET /sessions/active trả thêm expiresAt và thông tin kỳ. Các endpoint nhóm "đề xuất" chưa chốt tên; mã lỗi và quy tắc xem Mục IXb (9b.6, 9b.7). Nhóm câu hỏi (vòng 3) do kế hoạch sinh/duyệt đề AI bản 5 đề xuất; mã lỗi: Mục 9b.18; phân quyền: Mục 9b.16 và 15.4. Không có endpoint nào cho phép giảng viên import đề hoặc Admin sửa nội dung câu.
+Hợp đồng route `item-generation` phía Admin đã đối chiếu theo nhánh `feat/admin-ai-review` (`9aea9e8`); khi hợp nhất nhánh BE cần giữ duy nhất một controller Teacher Review (`@Roles(TEACHER)`) trên `/teacher/tasks/...` & `/teacher/items/:id/...`, loại bỏ controller trùng và route tương thích cũ `/teacher-review`. Cập nhật `openapi.json` sau khi hợp nhất BE.
 
 ---
 
@@ -1235,13 +1317,13 @@ Ghi chú v3.0: GET /sessions/active trả thêm expiresAt và thông tin kỳ. C
 | Frontend | Next.js (React/TypeScript) | SSR |
 | Database | PostgreSQL | Source of Truth — item bank, sessions, responses |
 | Cache | Redis | L1 cache cho CAT session (không phải source of truth) |
-| AI | Gemini 1.5 Flash | Sinh câu hỏi + giải thích cùng lúc (Item Generation), Explainer, Question Tagging; gọi qua LLM Gateway có dự phòng (đề xuất) |
+| AI | Gemini trực tiếp qua endpoint tương thích OpenAI (không có LiteLLM dự phòng ở chế độ thử) | Sinh câu hỏi + giải thích cùng lúc (Item Generation), Explainer, G5 hai lượt độc lập; trạng thái pilot / chưa kiểm chứng runtime (`DECISIONS_LOG:207–215`) |
 | IRT (runtime) | TypeScript tự implement (Phương án A) | EAP trên lưới đều 41 điểm θ ∈ [−4, +4], bước 0.2 (tích phân số kiểu hình thang) |
 | IRT (calibration) | py-irt hoặc catR | Chạy offline, expose REST endpoint |
-| Infra | Docker + Docker Compose + Nginx |  |
-| Async | BullMQ (Redis-backed) | TL (v3.0): gửi email, sinh/kiểm lô câu hỏi, nhắc hạn; KL: push Profile sang EduZ |
-| Embedding (T3) | Mô hình embedding — chờ chốt (Q-9) | Chưa kiểm chứng; vector lưu item_embeddings (Float[]), cosine tính trong ứng dụng |
-| Lọc trùng T2 | PostgreSQL pg_trgm (GIN) | Chờ chốt (Q-10); nếu không bật được thì tính trong ứng dụng |
+| Infra | Docker + Docker Compose + Nginx | |
+| Async | PostgreSQL Queue (`item_batch_jobs` có lease) + Outbox (`review_notice_outbox`) + BullMQ | TL: sinh/kiểm lô dùng `item_batch_jobs`; thông báo đổi B dùng `review_notice_outbox`; nhắc hạn duyệt quét 08:00 GMT+7; chuyển mail mật khẩu tạm sang BullMQ thuộc hạng mục riêng; KL: push Profile sang EduZ |
+| Embedding (T3) | `gemini-embedding-001@768` (mặc định pilot) | Trạng thái pilot / chưa kiểm chứng runtime; vector lưu item_embeddings (Float[]), cosine tính trong ứng dụng |
+| Lọc trùng T2 | PostgreSQL pg_trgm (GIN) | Đã có migration `20261126120400_enable_pg_trgm`; kiểm chứng `migrate deploy` Wave 0C |
 
 ---
 
@@ -1306,12 +1388,12 @@ Ghi chú v3.0: GET /sessions/active trả thêm expiresAt và thông tin kỳ. C
 | R9 | Item DRAFT bị CAT chọn nhầm | 🔴 Cao | WHERE status='FINAL_APPROVED' trong ItemRepository (Mục 4.4) + Partial Index |
 | R10 | MLE không hội tụ (toàn đúng/sai) | 🟡 TB | Guard condition: chỉ MLE khi ≥1 đúng+1 sai; clip θ về [-4,+4] |
 | R11 | SRS spec vượt trước implementation | 🔴 Cao | Phân tầng rõ ràng Must-Have TL vs Spec KL (xem Bảng cuối Mục XIV). Kiểm chứng code tương ứng mỗi mục trước khi bảo vệ. |
-| R12 | Chất lượng câu hỏi khi Admin không sửa nội dung và việc duyệt phụ thuộc hai GV (thay R12 cũ "Admin tự duyệt", DC-18; nay theo DC-29, DC-40) | 🟡 TB | Duyệt hai vòng độc lập (A sửa/duyệt, B xác nhận, B không thuộc nhóm A); AI check C1/C2/C3; approved_by/approved_at ghi Admin bấm Import, item_review_events truy vết; GV Ngoại ngữ review mẫu trước khi import (Mục 6.1) |
+| R12 | Chất lượng câu hỏi khi Admin không sửa nội dung và việc duyệt phụ thuộc hai GV (thay R12 cũ "Admin tự duyệt", DC-18; nay theo DC-29, DC-40) | 🟡 TB | Duyệt hai vòng độc lập (A sửa/duyệt, B xác nhận); GV B chung của lô và không trùng GV A được phân công; AI check C1/C2/C3; `approved_by`/`approved_at` ghi Admin bấm Import, `item_review_events` truy vết; GV Ngoại ngữ review mẫu trước khi import (Mục 6.1) |
 | R13 | Hệ thống đơn trường: muốn phục vụ nhiều trường phải làm lại schema (DC-19) | 🟡 TB | Đa trường là phạm vi Khóa luận; TL không giữ cột khóa tenant; ghi rõ trong Mục XVI để hội đồng không hiểu nhầm là thiếu sót |
 | R14 | OTP 6 số quên mật khẩu dễ bị dò (brute force) (DC-21) | 🟡 TB | OTP lưu bản băm trong Redis, TTL 10 phút, dùng 1 lần, tối đa 5 lần nhập sai rồi hủy; rate limit (quên mật khẩu theo email, đặt lại mật khẩu theo IP; RATE_LIMITED); forgot-password luôn trả 202 |
 | R15 | Phạm vi tăng: ai-question-generator (F-11) kéo từ Khóa luận vào Tiểu luận — thêm lô, giao việc, ba điểm AI check, lọc trùng T1–T3, embedding, G5 (DC-27, DC-35) | 🔴 Cao | Cập nhật COMMITMENT_BASELINE.md trước khi ký (gate G1, hết Tuần 6); thử một lô nhỏ trước khi code đầy đủ; nếu trễ thì hỏi nhóm quyết định cắt phần nào, không tự cắt; xem Q-11 |
-| R16 | Chi phí và hạn mức API (sinh dư, embedding T3, G5, giải thích) chưa đo; mô hình embedding và hạn mức Gemini chưa kiểm chứng (Q-9) | 🟡 TB | Trần lời gọi/token mỗi lô (BATCH_BUDGET_EXCEEDED); cache theo hash prompt; tầng rẻ chạy trước; gộp nhiều câu mỗi lời gọi; LLM Gateway dự phòng; đo chi phí và độ trễ thật ở lần thử đầu, không ghi số khi chưa đo |
-| R17 | Admin và GV vai B là điểm tập trung: mọi lô qua Admin (giao việc, kiểm tra, import) và các GV B được giao câu; B vắng hoặc trễ làm chậm các câu được giao cho B | 🟡 TB | Hạn + nhắc trước 24 giờ; Admin chỉnh hạn, giao lại; item_review_events truy vết; Admin không sửa nội dung nên không phá tính độc lập |
+| R16 | Chi phí và hạn mức API (sinh dư, embedding T3, G5 2 lượt, giải thích) ở trạng thái pilot chưa đo ổn định (`DECISIONS_LOG:207–215`) | 🟡 TB | Giới hạn **50 câu/lô** và trần nguyên tử **250 lượt AI/lô** trong PostgreSQL (`BATCH_BUDGET_EXCEEDED`/`AI_BUDGET_EXCEEDED`); gọi Gemini trực tiếp OpenAI-compatible (chưa bật LiteLLM dự phòng ở chế độ thử); gộp lời gọi, tầng rẻ chạy trước, smoke test thật trước khi nghiệm thu AI |
+| R17 | Admin và GV B là điểm tập trung; B vắng hoặc trễ làm chậm xác nhận | 🟡 TB | Nhắc 08:00 ngày trước hạn; Admin chủ động thay B hoặc hủy tồn đọng với reason/audit, giữ lịch sử; thiết kế đích cần triển khai và kiểm thử race/thông báo |
 | R18 | Bấm "Xác nhận tất cả câu còn lại" làm B bỏ qua cờ mềm và dấu "A đã sửa" (DC-33) | 🟡 TB | Ghi log hành động hàng loạt (CONFIRM_ALL); C3 kiểm lại luật cứng, trùng và G5 cho câu A sửa trước khi import; Admin quyết lỗi mềm; hiển thị số cờ còn lại trước khi xác nhận (đề xuất giao diện) |
 | R19 | Khoảng irt_b hợp lệ [−4, +4] (DC-34) khác CLAUDE.md [−2.5, +1.5] và khác vùng phủ hiện tại của Item Bank; irt_b gợi ý của AI chưa hiệu chỉnh | 🟡 TB | Sửa CLAUDE.md (đề xuất tại DE_XUAT_SUA_CLAUDE_MD.md); kiểm test CAT (Q-12); câu mới calibrated = false; khoảng này là tham số cấu hình |
 | R20 | Lọc trùng sai: ngưỡng T2/T3 chưa hiệu chỉnh (loại nhầm hoặc lọt); pg_trgm có thể không bật được (Q-7, Q-10) | 🟡 TB | Cờ mềm giữa hai ngưỡng, loại cứng chỉ ở ngưỡng cao; thống kê tỷ lệ loại theo tầng để hiệu chỉnh; nếu không có pg_trgm thì tính T2 trong ứng dụng |
@@ -1500,10 +1582,11 @@ Hiện tại (TL): 1 trường duy nhất. Muốn đa trường ⇒ Khóa luận
 | v2.6 | 18/09/2026 | Nhóm + Nhận xét GVHD vòng 3 | Bỏ kế hoạch Pre-test tự tổ chức cho ≥60 SV (Mục 6.1 giai đoạn 2, Mục 6.4 giai đoạn 1) — GVHD nhận xét khối lượng công việc quá lớn so với quy mô Tiểu luận; chuyển sang tìm nguồn câu hỏi đã có độ khó chuẩn hóa (CEFR-graded/IRT-calibrated) để khởi tạo b_i ban đầu; cập nhật Mục 4.2, 4.4, V, VI, IX (F-12), XII, Risk Register R1/R2 tương ứng |
 | v3.0 | 13/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Hệ thống đơn trường (bỏ đa trường, 3 role); GV thường chỉ xem kết quả, Admin làm mọi chức năng quản trị; bỏ đăng nhập ngoài (EduZ SSO thuộc Khóa luận), chỉ email + mật khẩu; thêm Kỳ thi (hạn phiên theo durationMinutes, sửa Mục 4.5); import tài khoản và danh sách thi theo lưới tạm; đổi/quên mật khẩu (OTP); khóa tài khoản is_active; DDL exam_rounds / exam_round_participants / test_sessions.exam_round_id, expires_at; F-18..F-22; mục mới IXb; API Mục X; Risk R12–R14; RBAC Mục 15.3/15.4; viết lại Mục XVI. Chi tiết: Phụ lục A |
 | v3.0 (vòng 2) | 13/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Phiên 23 (DC-24..DC-26, #99..#101): Admin tạo tài khoản SV và GV từng người hoặc import file (UCADM08 mở rộng, tạo từng người gộp UCADM09; API POST /students, POST /teachers, tham số kind); exam_rounds.duration_minutes NOT NULL DEFAULT 45; sửa mô tả EAP thành lưới đều 41 điểm [−4, +4] bước 0.2 (không phải Gaussian–Hermite; không đổi thuật toán); toàn bộ công thức chuyển sang phương trình Word gốc (OMML); xuất thêm bản Markdown SRS_TLCN_v3.0.md |
-| v3.0 (vòng 3) | 14/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Phiên 25 (DC-27 đến DC-45, #110 đến #113): luồng Admin tạo lô bằng AI hoặc import ⇒ AI check C1/C2/C3 ⇒ giao việc ⇒ GV A duyệt ⇒ gói ⇒ GV B confirm ⇒ Admin kiểm tra và import cuối; ItemStatus mới (FIRST_APPROVED, SECOND_APPROVED, FINAL_APPROVED, AI_REJECTED), ItemSource AI_GENERATED/IMPORTED; GV không import, Admin không sửa nội dung; giải thích AI sinh cùng lúc; khoảng irt_b [−4, +4]; F-23 đến F-28; Mục III (item-generation, ItemCheckService, ItemDuplicateChecker, LLM Gateway, BullMQ); DDL 6.2 và 6.2b; IXb 9b.9 đến 9b.18; API Mục X; Risk R15 đến R21; Q-7 đến Q-10 còn chờ chốt |
-| v3.0 (vòng 4) | 16/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Chốt đồng bộ: Item không còn source (nguồn ở item_batches.source, enum ItemBatchSource); items.batch_id NOT NULL kèm các lô seed theo bộ nguồn; gói ItemPackage tạo lúc giao việc (OPEN → SENT → DONE); thông báo chỉ email nhắc việc + Hộp việc (không chuông thời gian thực); bổ sung nghiệp vụ ép gửi và xử lý câu chưa xử lý sau hạn; GV xem ngân hàng ở /teacher/item-bank (chỉ xem); mã UCADM15–17 cho kỳ thi |
-| v3.0 (vòng 5) | 14/11/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Admin Dashboard và quản lý tài khoản (Quyết định #136): thêm F-29 và mục 9b.19 (API `GET /reports/overview`, định nghĩa chỉ số); gộp thao tác khóa/mở khóa/gửi lại mật khẩu thành `/users/:id/...`; BR-05 bỏ "trạng thái chưa gửi" theo #120; BR-17/19 cấm Admin tự khóa mình, BR-19 làm rõ phiên đang làm, BR-18 ghi cơ chế tra DB mỗi request; ghi giá trị enum và nhãn hiển thị CEFR (mục 4.6). Chưa đồng bộ `.docx` (nợ) |
-| v3.0 (sửa theo họp GVHD 03/11/2026) | 03/11/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Chưa phát hành số phiên bản mới. Bỏ gói duyệt (ItemPackage, PackageStatus, Gửi gói, ép gửi gói, DC-42); giao việc và duyệt theo từng câu: items.reviewer_id, confirmer_id (khóa ngoại), first_review, second_review (JSON), first_reminder_sent, second_reminder_sent; bỏ items.package_id, items.original_snapshot (vào first_review), bảng item_packages, item_review_assignments, item_batch_assignments; ReviewAction bỏ EXTEND, FORCE_SEND, thêm ASSIGN; ExamRound ◆ TestSession (Composition, DB Restrict). Nhiều chi tiết còn đánh dấu "⚠ chờ xác nhận" (xem các Mục 9b.13–9b.18, BR-22…BR-26, API Mục X) |
+| v3.0 (vòng 3) | 14/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Phiên 25 (DC-27 đến DC-45, #110 đến #113): luồng Admin tạo lô bằng AI hoặc import ⇒ AI check C1/C2/C3 ⇒ giao việc ⇒ GV A duyệt ⇒ gói ⇒ GV B confirm ⇒ Admin kiểm tra và import cuối; ItemStatus mới (FIRST_APPROVED, SECOND_APPROVED, FINAL_APPROVED, AI_REJECTED), ItemSource AI_GENERATED/IMPORTED; GV không import, Admin không sửa nội dung; giải thích AI sinh cùng lúc; khoảng irt_b [−4, +4]; F-23 đến F-28; Mục III (item-generation, ItemCheckService, ItemDuplicateChecker, LLM Gateway, BullMQ); DDL 6.2 và 6.2b; IXb 9b.9 đến 9b.18; API Mục X; Risk R15 đến R21; Q-7 đến Q-10 còn chờ chốt. Phần “gói” tại dòng lịch sử này bị thay thế bởi quyết định 03/11/2026 về duyệt theo từng câu (xem dòng v3.0 vòng 6 và Quyết định Q1–Q8). |
+| v3.0 (vòng 4) | 16/10/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Chốt đồng bộ: Item không còn source (nguồn ở item_batches.source, enum ItemBatchSource); items.batch_id NOT NULL kèm các lô seed theo bộ nguồn; ItemPackage tạo lúc giao việc (OPEN → SENT → DONE) theo thiết kế tại thời điểm đó; thông báo chỉ email nhắc việc + Hộp việc (không chuông thời gian thực); bổ sung nghiệp vụ ép gửi và xử lý câu chưa xử lý sau hạn; GV xem ngân hàng ở /teacher/item-bank (chỉ xem); mã UCADM15–17 cho kỳ thi. Mô hình package và xử lý sau hạn này đã bị thay thế bởi quyết định 03/11/2026 và Q1–Q8 ngày 25–26/11/2026; giữ dòng này làm lịch sử. |
+| v3.0 (vòng 5) | 14/11/2026 | Nhóm (soạn có hỗ trợ AI — cần thành viên rà soát) | Admin Dashboard và quản lý tài khoản (Quyết định #136): thêm F-29 và mục 9b.19 (API `GET /reports/overview`, định nghĩa chỉ số); gộp thao tác khóa/mở khóa/gửi lại mật khẩu thành `/users/:id/...`; BR-05 bỏ "trạng thái chưa gửi" theo #120; BR-17/19 cấm Admin tự khóa mình, BR-19 làm rõ phiên đang làm, BR-18 ghi cơ chế tra DB mỗi request; ghi giá trị enum và nhãn hiển thị CEFR (mục 4.6). |
+| v3.0 (cập nhật Q1–Q8) | 27/11/2026 | Nhóm, với hỗ trợ AI; Phương đã xác nhận là người thực hiện | Cập nhật mô hình chuẩn: GV B chung cấp ItemBatch, B không trùng GV A; bỏ package khỏi luồng hiện hành nhưng giữ lịch sử; bổ sung `POST /api/v1/sessions`; cập nhật quyền session STUDENT, hạn/nhắc 08:00 ngày trước hạn, audit đổi hạn có reason, giao lại A chỉ cho DRAFT, import một phần và trạng thái PARTIALLY_IMPORTED. Backend/frontend đang có thay đổi chưa commit; route hiện hành có phần chưa khớp thiết kế đích, chưa xác nhận production. Chi tiết và các điểm còn mở xem Q1–Q8/feature plan. |
+| v3.0 (chốt nhóm 28/11) | 28/11/2026 | Đăng & Phương (tài liệu chốt `20261128_BAN_CHOT_QUYET_DINH_THONG_NHAT_NHOM.md`) | Đồng bộ 2 gói bàn giao của Phương: chốt `BR-08` (chỉ công bố khi `opensAt` tương lai, sau công bố chỉ sửa giờ) và `BR-12`/`Q-2` (đóng kỳ giữ phiên chạy tới `expires_at`); giữ `#136` hoãn `audit_logs` DB (`BR-18`) và `#120` (`BR-05`); cập nhật route thực tế `item-generation` (`/item-batches/generate`, `/item-batches/import/*`, `rejected-stats`, `retry-*`, `refresh-status`, `participants/import/template`); chuẩn hóa `ReviewAction` 12 giá trị (thêm `REASSIGN_CONFIRMER`, bỏ `EDIT`); bổ sung `item_batch_jobs`, `review_notice_outbox`, `ItemBatch.failure_reason`, `Item.generated_from_ref_ids`; ghi nhận AI pilot Gemini trực tiếp OpenAI-compatible + `gemini-embedding-001@768` + 50 câu/250 lượt (**chưa kiểm chứng runtime**). |
 
 *SRS v2.5 — 10/09/2026 | Bản nhận xét GVHD được tích hợp đầy đủ. Changelog v2.4: (1) Viết đầy đủ thuật toán Randomized Top-5 tại Mục 4.4 kèm bảng ước lượng exposure rate; (2) Viết đầy đủ Outlier Early Stop tại Mục 4.5 kèm pseudocode phát hiện deadlock; (3) Sửa NFR 15.2: "near-zero loss" thay vì "0% tuyệt đối", giải thích rõ điều kiện Redis AOF; (4) Bổ sung State Machine Recovery sau reconstruct từ PostgreSQL tại Mục 15.5; (5) Điều chỉnh Risk R5 về 🟡 TB (Randomized Top-5 giảm nhưng không triệt tiêu exposure); (6) Thêm R11 (SRS spec vượt trước implementation); (7) Bảng phân tầng Must-Have TL vs Spec KL.*
 
@@ -1534,15 +1617,15 @@ Hiện tại (TL): 1 trường duy nhất. Muốn đa trường ⇒ Khóa luận
 | I.3, III, IX (F-18, F-22), IXb, X | Tạo tài khoản SV và GV: từng người (form) hoặc import file (kind = STUDENT\|TEACHER; lưới tạm khóa theo adminId + kind); BR-01/02/03/05 sửa, thêm BR-20 (đề xuất); luồng L1 sửa, thêm L1b; API POST /students, POST /teachers; Mã GV lưu ở teacher_profiles.teacher_code (có sẵn) | DC-24 (#99) |
 | IV, mọi công thức | Công thức chuyển từ văn bản thô (cú pháp LaTeX trong dấu đô-la) sang phương trình Word gốc OMML (m:oMathPara / m:oMath); bản Markdown SRS_TLCN_v3.0.md giữ công thức dạng LaTeX đặt trong cặp dấu đô-la đơn (nội dòng) hoặc đôi (khối) | Yêu cầu vòng 2 (mục 15) |
 | Đầu trang, I.3 | Cập nhật 14/10/2026; changelog vòng 3; GV thường có thêm vai A/B theo lô được giao, Admin không soạn/sửa nội dung câu | DC-27, DC-29, DC-40 (#110, #111) |
-| III | Thêm module item-generation, llm-gateway (đề xuất); bảng thành phần ItemGenerationService, ItemCheckService (3 checkpoint), ItemDuplicateChecker, ReviewDistributionService, DeadlineReminderService, LLM Gateway; BullMQ dùng thêm cho sinh/kiểm lô và nhắc hạn; ai-question-generator chuyển từ KL vào TL | DC-27, DC-30, DC-35, DC-45 (#110, #105, #107, #113) |
+| III | Thêm module item-generation, llm-gateway (đề xuất); bảng thành phần ItemGenerationService, ItemCheckService (3 checkpoint), ItemDuplicateChecker, ReviewDistributionService, DeadlineReminderService, LLM Gateway; BullMQ dùng cho sinh/kiểm lô; reminder 08:00 ngày trước hạn hiện do quét định kỳ; ai-question-generator chuyển từ KL vào TL | DC-27, DC-30, DC-35, DC-45; Q1–Q8 |
 | IV.4, 6.2, XIV R9, 15.1 | Đổi tên trạng thái đã duyệt cũ thành FINAL_APPROVED (guard CAT, Partial Index, R9, NFR); bỏ trạng thái chờ duyệt cũ; công thức và thuật toán CAT không đổi | DC-39 (#109, #112) |
 | IV.5, IV.7 | NOTE khoảng irt_b [−4, +4] (cấu hình) so với mốc −2.5/+1.5 (vùng phủ hiện tại, ngưỡng Early Stop) và CLAUDE.md; việc sửa CLAUDE.md và kiểm test CAT là Q-12 | DC-34 (#107) |
-| VI (6.1, 6.2, 6.2b) | DDL items: status 6 giá trị, source AI_GENERATED/IMPORTED (bỏ giá trị thủ công), thêm content_hash, batch_id, package_id; chỉ mục băm T1 và GIN pg_trgm T2; bảng mới item_batches, item_batch_assignments, item_review_assignments, item_packages, item_embeddings, item_check_results, item_review_events; CREATE EXTENSION pg_trgm (chờ chốt Q-10) | DC-30, DC-32, DC-39 (#105, #106, #109) |
-| VIII | Khóa Redis lưới tạm import đề; hàng đợi BullMQ cho sinh/kiểm lô, nhắc hạn | DC-22, DC-27 |
+| VI (6.1, 6.2, 6.2b) | DDL items: status 6 giá trị, source AI_GENERATED/IMPORTED (bỏ giá trị thủ công), thêm content_hash, batch_id; chỉ mục băm T1 và GIN pg_trgm T2; bảng mới item_batches, item_embeddings, item_check_results, item_review_events. Các bảng `item_batch_assignments`, `item_review_assignments`, `item_packages` và cột package đã thuộc thiết kế cũ, không phải schema chuẩn hiện hành sau quyết định 03/11/2026 và Q1–Q8. | DC-30, DC-32, DC-39; quyết định 03/11/2026; Q1–Q8 |
+| VIII | Khóa Redis lưới tạm import đề; hàng đợi BullMQ cho sinh/kiểm lô; nhắc hạn theo mã hiện hành quét định kỳ, không dùng delayed job | DC-22, DC-27; Q1–Q8 |
 | IX | F-02 viết lại; F-05 giải thích sinh cùng lúc; F-11 ghi đã kéo vào TL; thêm F-23 đến F-28 (đề xuất) | DC-27 đến DC-33, DC-31 |
-| IXb | Đổi tên mục; ma trận quyền 9b.2 (thêm vai A, B); BR-07, BR-16 sửa, thêm BR-21 đến BR-30; mục mới 9b.9 đến 9b.18 (vòng đời, trạng thái, tạo lô, C1/C2/C3, giao việc và chia đều, gói/hạn/nhắc, câu bị loại, ma trận quyền, luồng L-1 đến L-8, mã lỗi); 9b.8 thêm Q-7 đến Q-12 | DC-27 đến DC-45 |
-| X | API nhóm lô câu hỏi, giao việc, kiểm tra/import cuối, chặng A, chặng B theo Mục 10 kế hoạch bản 5 (đề xuất); bỏ POST/PUT/DELETE /items và bulk-import | DC-27, DC-28, DC-32 |
-| XI, XII | Stack: AI qua LLM Gateway, embedding (chờ chốt Q-9), pg_trgm (chờ chốt Q-10), BullMQ dùng trong TL; F-11 ở lộ trình KL ghi chú đã chuyển vào TL | DC-27, DC-35 |
+| IXb | Đổi tên mục; ma trận quyền 9b.2 (thêm vai A, B); BR-07, BR-16 sửa, thêm BR-21..BR-30; 9b.9..9b.18 (vòng đời, trạng thái, tạo lô, C1/C2/C3, giao việc theo câu, hạn và nhắc, câu bị loại, ma trận quyền, luồng L-1..L-8, mã lỗi). Nội dung gói/hạn tự xử lý ở bản cũ đã bị thay thế bởi quyết định 03/11 và Q1–Q8. | DC-27..DC-45; quyết định 03/11/2026; Q1–Q8 |
+| X | API nhóm lô câu hỏi, giao việc, kiểm tra/import cuối và teacher review là hợp đồng thiết kế; phần item-generation cần đối chiếu OpenAPI tích hợp trước khi khẳng định đã triển khai; thêm POST /api/v1/sessions cho STUDENT | DC-27, DC-28, DC-32; Q1–Q8 |
+| III, VI, IX, IXb, X, XI, XIV, XVII | Q1–Q8: cập nhật một GV B chung cấp lô, duyệt theo câu, hạn/nhắc, audit đổi hạn, giao lại DRAFT, import một phần, quyền phiên STUDENT và POST /api/v1/sessions; giữ lịch sử package cũ với ghi chú đã bị thay thế; mô tả reminder theo mã hiện hành quét định kỳ. | Q1–Q8 ngày 25–26/11/2026; code workspace và feature plan; chưa xác nhận production/OpenAPI tích hợp |
 | XIV | R6 ghi chú; R12 viết lại; thêm R15 (phạm vi), R16 (chi phí API), R17 (Admin/B tập trung), R18 (xác nhận tất cả), R19 (khoảng irt_b), R20 (lọc trùng), R21 (bản quyền); bảng Must-have thêm F-23 đến F-28 | DC-27, DC-33, DC-34, DC-35 |
 | XV | 15.1 Partial Index; 15.3 thêm hàng gọi LLM và khóa API; 15.4 RBAC TEACHER/ADMIN thêm vai A/B | DC-29, DC-40 |
 | XVII | Thêm dòng v3.0 (vòng 3); chỉnh chú thích dòng v2.2 | — |

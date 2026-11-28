@@ -445,7 +445,7 @@
 								<UML:TaggedValue tag="lineStyle" value="0"/>
 								<UML:TaggedValue tag="ea_localid" value="50"/>
 								<UML:TaggedValue tag="ea_sourceName" value="Admin"/>
-								<UML:TaggedValue tag="ea_targetName" value="Modify or duplicate an item (UCGV04)"/>
+								<UML:TaggedValue tag="ea_targetName" value="Edit assigned item (UCGV04)"/>
 								<UML:TaggedValue tag="ea_sourceType" value="Actor"/>
 								<UML:TaggedValue tag="ea_targetType" value="UseCase"/>
 								<UML:TaggedValue tag="ea_sourceID" value="43"/>
@@ -1021,7 +1021,7 @@
 								<UML:TaggedValue tag="style" value="BackColor=-1;BorderColor=-1;BorderWidth=-1;FontColor=-1;VSwimLanes=1;HSwimLanes=1;BorderStyle=0;"/>
 							</UML:ModelElement.taggedValue>
 						</UML:UseCase>
-						<UML:UseCase name="Modify or duplicate an item (UCGV04)" xmi.id="EAID_UC_GV04_BBBBBBBBDE5F6" visibility="public" namespace="EAPK_A1B2C3D4_E5F6_7890_ABCD_EF1234567890" isRoot="false" isLeaf="false" isAbstract="false">
+						<UML:UseCase name="Edit assigned item (UCGV04)" xmi.id="EAID_UC_GV04_BBBBBBBBDE5F6" visibility="public" namespace="EAPK_A1B2C3D4_E5F6_7890_ABCD_EF1234567890" isRoot="false" isLeaf="false" isAbstract="false">
 							<UML:ModelElement.taggedValue>
 								<UML:TaggedValue tag="isSpecification" value="false"/>
 								<UML:TaggedValue tag="ea_stype" value="UseCase"/>
@@ -1176,7 +1176,7 @@
 								<UML:TaggedValue tag="lineStyle" value="0"/>
 								<UML:TaggedValue tag="ea_localid" value="69"/>
 								<UML:TaggedValue tag="ea_sourceName" value="Auto-tag item topic with AI (UCGV10)"/>
-								<UML:TaggedValue tag="ea_targetName" value="Modify or duplicate an item (UCGV04)"/>
+								<UML:TaggedValue tag="ea_targetName" value="Edit assigned item (UCGV04)"/>
 								<UML:TaggedValue tag="ea_sourceType" value="UseCase"/>
 								<UML:TaggedValue tag="ea_targetType" value="UseCase"/>
 								<UML:TaggedValue tag="ea_sourceID" value="57"/>
@@ -1708,7 +1708,7 @@
 								<UML:TaggedValue tag="style" value="BackColor=-1;BorderColor=-1;BorderWidth=-1;FontColor=-1;VSwimLanes=1;HSwimLanes=1;BorderStyle=0;"/>
 							</UML:ModelElement.taggedValue>
 						</UML:UseCase>
-						<UML:UseCase name="Review items and send package (UCGV14)" xmi.id="EAID_UC_GV14_AAAA6666DF6A1" visibility="public" namespace="EAPK_A1B2C3D4_E5F6_7890_ABCD_EF1234567890" isRoot="false" isLeaf="false" isAbstract="false">
+						<UML:UseCase name="Review assigned items (UCGV14)" xmi.id="EAID_UC_GV14_AAAA6666DF6A1" visibility="public" namespace="EAPK_A1B2C3D4_E5F6_7890_ABCD_EF1234567890" isRoot="false" isLeaf="false" isAbstract="false">
 							<UML:ModelElement.taggedValue>
 								<UML:TaggedValue tag="isSpecification" value="false"/>
 								<UML:TaggedValue tag="ea_stype" value="UseCase"/>
@@ -1731,7 +1731,7 @@
 								<UML:TaggedValue tag="style" value="BackColor=-1;BorderColor=-1;BorderWidth=-1;FontColor=-1;VSwimLanes=1;HSwimLanes=1;BorderStyle=0;"/>
 							</UML:ModelElement.taggedValue>
 						</UML:UseCase>
-						<UML:UseCase name="Confirm item package (UCGV15)" xmi.id="EAID_UC_GV15_BBBB7777DA1B2" visibility="public" namespace="EAPK_A1B2C3D4_E5F6_7890_ABCD_EF1234567890" isRoot="false" isLeaf="false" isAbstract="false">
+						<UML:UseCase name="Confirm assigned items (UCGV15)" xmi.id="EAID_UC_GV15_BBBB7777DA1B2" visibility="public" namespace="EAPK_A1B2C3D4_E5F6_7890_ABCD_EF1234567890" isRoot="false" isLeaf="false" isAbstract="false">
 							<UML:ModelElement.taggedValue>
 								<UML:TaggedValue tag="isSpecification" value="false"/>
 								<UML:TaggedValue tag="ea_stype" value="UseCase"/>
@@ -2192,7 +2192,7 @@
 								<UML:TaggedValue tag="lineStyle" value="0"/>
 								<UML:TaggedValue tag="ea_localid" value="95"/>
 								<UML:TaggedValue tag="ea_sourceName" value="Teacher"/>
-								<UML:TaggedValue tag="ea_targetName" value="Review items and send package (UCGV14)"/>
+								<UML:TaggedValue tag="ea_targetName" value="Review assigned items (UCGV14)"/>
 								<UML:TaggedValue tag="ea_sourceType" value="Actor"/>
 								<UML:TaggedValue tag="ea_targetType" value="UseCase"/>
 								<UML:TaggedValue tag="ea_sourceID" value="42"/>
@@ -2227,7 +2227,7 @@
 								<UML:TaggedValue tag="lineStyle" value="0"/>
 								<UML:TaggedValue tag="ea_localid" value="96"/>
 								<UML:TaggedValue tag="ea_sourceName" value="Teacher"/>
-								<UML:TaggedValue tag="ea_targetName" value="Confirm item package (UCGV15)"/>
+								<UML:TaggedValue tag="ea_targetName" value="Confirm assigned items (UCGV15)"/>
 								<UML:TaggedValue tag="ea_sourceType" value="Actor"/>
 								<UML:TaggedValue tag="ea_targetType" value="UseCase"/>
 								<UML:TaggedValue tag="ea_sourceID" value="42"/>
@@ -2266,8 +2266,8 @@
 								<UML:TaggedValue tag="headStyle" value="0"/>
 								<UML:TaggedValue tag="lineStyle" value="0"/>
 								<UML:TaggedValue tag="ea_localid" value="97"/>
-								<UML:TaggedValue tag="ea_sourceName" value="Review items and send package (UCGV14)"/>
-								<UML:TaggedValue tag="ea_targetName" value="Modify or duplicate an item (UCGV04)"/>
+								<UML:TaggedValue tag="ea_sourceName" value="Review assigned items (UCGV14)"/>
+								<UML:TaggedValue tag="ea_targetName" value="Edit assigned item (UCGV04)"/>
 								<UML:TaggedValue tag="ea_sourceType" value="UseCase"/>
 								<UML:TaggedValue tag="ea_targetType" value="UseCase"/>
 								<UML:TaggedValue tag="ea_sourceID" value="89"/>

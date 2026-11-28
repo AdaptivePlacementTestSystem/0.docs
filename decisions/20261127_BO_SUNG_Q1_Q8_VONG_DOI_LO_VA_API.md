@@ -1,0 +1,37 @@
+# Ghi nhận bổ sung Q1–Q8, vòng đời lô và hợp đồng API
+
+Ngày ghi nhận: 27/11/2026. Nguồn: bản `D:\20261127_DE_XUAT_CHOT_DONG_BO_Q1_Q8_VA_API_GUI_PHUONG (1).md`, trong đó Đăng được ghi đã chọn C1–C8; người dùng chỉ đạo “chốt hết” trong cuộc trao đổi sau đó. Ghi nhận này phản ánh chỉ đạo đó; không tự khẳng định chữ ký cá nhân hay cuộc họp của Phương đã được xác minh. Cần nhóm đối chiếu và bổ sung minh chứng xác nhận theo quy trình dự án.
+
+Biên bản 25/11 ở commit tài liệu `5742d426c936b37e46c17136cbf25a4423d41c9e` được giữ nguyên. Các mục dưới đây thay thế những phần tương ứng nếu mâu thuẫn: Q1/#56 về comment; Q3/Q8 về phạm vi audit; Q4 về quá hạn, điều kiện C3 và import từng phần; Q5 về hợp đồng hạn/nhắc; Q6 về route kết quả và quyền session; Q7 về reset sau giao lại. Không diễn giải các mục khác là bị xóa bỏ.
+
+**Cập nhật sau đánh giá ngày 27/11:** Người dùng yêu cầu bổ sung các lựa chọn đã được nhận xét đối với `D:\20261127_BAN_CHOT_QUYET_DINH_THONG_NHAT_CUOI_Q1_Q8_VA_API.md`. Các điểm điều chỉnh được ghi trực tiếp bên dưới; lịch sử được tóm tắt tại mục cuối. `batchRevision` được giữ theo phương án đã chốt trước đó để bảo vệ dữ liệu preview. Ghi nhận chỉ thị người dùng, không tự xác nhận chữ ký hay review độc lập của Đăng/Phương.
+
+## Lựa chọn nghiệp vụ và API
+
+1. Comment có nội dung sau trim bắt buộc khi A REJECT, B REMOVE hoặc Admin soft-reject; APPROVE/CONFIRM/soft-accept là tùy chọn. Trả `400 VALIDATION_FAILED` cho comment thiếu/rỗng sau khi hợp đồng lỗi được triển khai; comment lịch sử null giữ nguyên.
+2. Một B chung tại `ItemBatch.confirmerId`, khác mọi A được phân công trong lô. Ưu tiên API `/teacher/tasks/...` và `/teacher/items/:id/...` theo bảng trong đề xuất, nâng cấp logic và phối hợp FE/BE; không coi mã hiện hành đã tương thích. Chỉ TEACHER được xử lý vòng A/B; quyền xem của Admin qua API quản trị riêng.
+3. Giao lại A chỉ đổi A của câu đang `DRAFT`. Đổi B có API riêng `POST /api/v1/item-batches/:id/reassign-confirmer` body `{ toConfirmerId, reason }`; giao lại A cũng bổ sung `reason`. Reason bắt buộc sau trim. Giữ hạn và kết quả đã duyệt, ghi audit, bảo đảm B mới hợp lệ và khác mọi A. Đổi hạn vẫn là thao tác riêng.
+4. Admin được chủ động `cancel-pending` với reason để chuyển câu `DRAFT`/`FIRST_APPROVED` tồn đọng sang `REJECTED`; thêm `ReviewAction.CANCEL_PENDING`, một event cấp lô `itemId = null` có danh sách item, số lượng theo trạng thái trước và reason. Báo cáo phải phân biệt hủy hành chính với đánh giá chất lượng. Không sửa, reset hoặc xóa quyết định đã có.
+5. Không chạy C3/import khi còn `DRAFT`/`FIRST_APPROVED`. `PARTIALLY_IMPORTED` chỉ sau khi đã import ít nhất một câu và còn `SECOND_APPROVED`; xử lý cờ, kiểm tra lại khi stale và import thêm. Lô có ít nhất một item, tất cả item đã kết thúc thì `DONE`, kể cả 0 câu import, và UI hiển thị rõ số câu import. Lô rỗng **do lỗi sinh/import** là `FAILED` kèm lý do, không che lỗi bằng `DONE`. Lô rỗng không do lỗi chưa được mô tả và cần được định nghĩa riêng trước khi triển khai; không tự coi mọi lô 0 item là thành công. Chốt trạng thái trong transaction phù hợp khi câu cuối bị loại; không giữ transaction DB trong lúc gọi AI.
+6. C3 stale khi nội dung câu, ngân hàng hoặc chính sách kiểm tra liên quan thay đổi. Chạy lại C3 đối với các câu `SECOND_APPROVED` còn lại và yêu cầu Admin **quyết định lại các cờ mềm trên báo cáo mới**; không tự kế thừa `ACCEPT_FLAG` cũ. Giữ lịch sử cờ/quyết định cũ và audit; kiểm tra hiệu lực lại khi import. Đây là phương án bảo thủ thay lựa chọn kế thừa cờ trong bản ghi trước.
+7. Preview `POST /api/v1/item-batches/:id/assign-preview` nhận `reviewerIds` có thứ tự, trả phân bổ và `batchRevision`; sắp `(skill, cefrTarget, createdAt, id)` rồi chia vòng tròn liên tục. Assign mới nhận `{ confirmerId, firstDueAt, secondDueAt, assignments: [{ itemId, reviewerId }], batchRevision }`; B trùng A trả `409 CONFIRMER_IN_REVIEW_GROUP`. Body mới là breaking change: phối hợp nâng cấp FE/BE, dùng version/adapter nếu có consumer cũ; không tuyên bố đã triển khai.
+8. `batchRevision` là phiên bản/hash do server tạo, bao phủ trạng thái lô, tập item DRAFT cùng các trường ảnh hưởng thứ tự/phân bổ và phiên bản thuật toán. Assign so sánh revision với dữ liệu mới nhất trong transaction/khóa hoặc Serializable và kiểm tra lại người được giao còn hoạt động. Quy tắc hash/serialization cụ thể phải được ghi trong OpenAPI và test để hai lần tính cùng đầu vào cho cùng kết quả.
+9. `GET /api/v1/item-batches/:id/final-check` là API đọc báo cáo **mới**, chỉ ADMIN; trả lần kiểm tra, phạm vi, kết quả/cờ, quyết định, thông tin phiên bản liên quan và trạng thái/lý do stale. Mô tả rõ chưa chạy/đang chạy/lỗi và không lộ dữ liệu vượt quyền. Import vẫn phải kiểm tra hiệu lực lại khi thực hiện.
+10. Route chuẩn `/student/exams/[roundId]/take`, `/student/results/[sessionId]` và `/student/results/[sessionId]/review`; tạm chuyển hướng URL cũ theo kế hoạch FE. Chỉ STUDENT đúng chủ sở hữu được thao tác session; ẩn sessionId trên URL làm bài không thay thế authorization.
+
+## Chi tiết vận hành đã chọn
+
+- Sau khi thay B, B cũ mất quyền truy cập lô qua các API Teacher Review và không được tiếp tục ra quyết định; B mới xem các câu đã qua A cùng lịch sử cần đối chiếu, nhưng chỉ xử lý câu `FIRST_APPROVED`. Admin truy xuất đầy đủ audit qua API quản trị. Đây là thay đổi so với phương án cho B cũ xem lịch sử giới hạn; kiểm tra quyền server-side, audit và race.
+- Giao lại B ghi outbox trong transaction, worker gửi thông báo sau commit; retry bền vững theo chính sách, có khóa chống xử lý trùng và chấp nhận email có thể gửi lặp khi SMTP đã nhận nhưng worker lỗi. Sweep nhắc hạn hiện hành cần được đối chiếu và chuyển đổi có kiểm thử, không giả định nó đã là outbox. Giữ mốc nhắc 08:00 giờ Việt Nam ngày trước hạn; nếu đổi B sau mốc hoặc đã quá hạn, gửi thông báo giao việc và hiển thị cảnh báo, không hứa một lần nhắc đã qua.
+- Mọi thay đổi người, hủy, duyệt và chuyển trạng thái phải phối hợp khóa batch/Serializable và kiểm tra lại invariant để không có B cũ xác nhận sau khi quyền đã chuyển; test tranh chấp và retry trên PostgreSQL thử nghiệm.
+
+## Lịch sử điều chỉnh của bản ghi 27/11
+
+- Bản ghi ban đầu theo lựa chọn C6 ghi lô rỗng `DONE`; cập nhật này phân biệt lô rỗng do lỗi sinh/import là `FAILED`. Lô có item kết thúc hết nhưng không import câu nào vẫn có thể `DONE`.
+- Bản ghi ban đầu cho phép kế thừa `ACCEPT_FLAG` khi đủ điều kiện và cho B cũ xem phần lịch sử đã xử lý; cập nhật này chọn quyết định lại mọi cờ mềm sau C3 stale và B cũ mất quyền Teacher Review đối với lô.
+- Bản đề xuất cuối của Đăng đề nghị bỏ `batchRevision`; sau đánh giá giữ revision/hash như bản ghi ban đầu vì kiểm tra 1-1 item ID không phát hiện thay đổi `skill`, `cefrTarget` hoặc thứ tự có cùng ID. Đây là lựa chọn theo chỉ thị người dùng, cần đối chiếu khi review nhóm.
+- Thông báo đổi B dùng transactional outbox: ghi outbox trong transaction nghiệp vụ, worker xử lý sau commit; không chỉ tạo job sau commit vì có thể mất thông báo giữa hai bước. Không khẳng định gửi đúng một lần.
+
+## Phạm vi và nợ triển khai
+
+Đây là ghi nhận yêu cầu/thiết kế, **không phải bằng chứng đã sửa code, chạy migration, kiểm thử runtime, merge hoặc production**. Cần cập nhật feature plan; SRS Markdown/DOCX, đặc tả Use Case, class/schema, sequence/ảnh, UI, OpenAPI/shared-types và tracking; kiểm thử HTTP, phân quyền, đồng thời, partial import, C3 stale, thông báo và tương thích FE/BE. Shared-types hiện có thay đổi local và consumer pin `v3.0.0`; không phát hành tag, đổi dependency hoặc push nếu chưa được yêu cầu riêng.

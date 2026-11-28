@@ -1,4 +1,8 @@
-/** Hành động ghi vết của ItemReviewEvent (nhật ký kiểm toán lô/gói). */
+/**
+ * Hành động ghi vết của ItemReviewEvent (nhật ký kiểm toán lô/câu hỏi, chốt 28/11/2026).
+ * - Cấp câu (itemId NOT NULL): APPROVE, REJECT, CONFIRM, REMOVE, ASSIGN, REASSIGN (đổi GV A cho câu DRAFT), ACCEPT_FLAG, IMPORT.
+ * - Cấp lô (itemId NULL + details JSONB): CONFIRM_ALL, UPDATE_DUE_DATE, CANCEL_PENDING, REASSIGN_CONFIRMER (đổi GV B chung).
+ */
 export enum ReviewAction {
   APPROVE = 'APPROVE',
   REJECT = 'REJECT',
@@ -6,8 +10,10 @@ export enum ReviewAction {
   REMOVE = 'REMOVE',
   CONFIRM_ALL = 'CONFIRM_ALL',
   IMPORT = 'IMPORT',
+  ASSIGN = 'ASSIGN',
   REASSIGN = 'REASSIGN',
-  EXTEND = 'EXTEND',
-  FORCE_SEND = 'FORCE_SEND',
+  REASSIGN_CONFIRMER = 'REASSIGN_CONFIRMER',
+  UPDATE_DUE_DATE = 'UPDATE_DUE_DATE',
   ACCEPT_FLAG = 'ACCEPT_FLAG',
+  CANCEL_PENDING = 'CANCEL_PENDING',
 }

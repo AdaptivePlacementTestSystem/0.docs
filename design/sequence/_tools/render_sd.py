@@ -101,7 +101,8 @@ def render(path: str) -> str:
     probe = ImageDraw.Draw(Image.new('RGB', (10, 10)))
     f_lbl, f_hdr, f_title = font(12.5), font(13, True), font(16, True)
 
-    gap = 215 if n <= 6 else 195
+    # Keep long participant names inside their header boxes.
+    gap = 260
     box_w = gap - 28
     margin = 60
     last_self = any(m.sender == m.receiver == parts[-1].id for m in d.messages)
